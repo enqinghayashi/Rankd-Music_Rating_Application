@@ -6,13 +6,14 @@
     <title>Compare Scores</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="page_top.css" rel="stylesheet">
     <link href="item.css" rel="stylesheet">
   </head>
   <body class="bg-light">
     <div class="page-top container-fluid">
       <div class="row justify-content-center">
         <div class="col col-lg-9 col-xxl-7"> 
-          <ul class="nav nav-underline nav-justified fs-5">
+          <ul class="tab-nav nav nav-underline nav-justified">
             <li class="nav-item">
               <a class="nav-link active" href="compare_scores.html" aria-current="page">Scores</a>
             </li>
@@ -20,7 +21,7 @@
               <a class="nav-link" href="compare_stats.html" >Stats</a>
             </li>
           </ul>
-          <div class="friend-select-group input-group mt-3 mb-3 border rounded border-secondary-subtle">
+          <div class="friend-select-group input-group">
             <label class="input-group-text" for="friend-select">View Friend</label>
             <select class="form-select" id="friend-select">
               <option value="Friend 1">Friend 1</option>
@@ -28,19 +29,19 @@
               <option value="Friend 3">Friend 3</option>
             </select>
           </div>
-          <div class="search-bar input-group mt-3 mb-3 border rounded border-secondary-subtle">
+          <div class="search-bar input-group">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
             <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
           </div>
-          <div class="search-options d-flex flex-row mb-3">
+          <div class="search-options">
             <input type="checkbox" class="btn-check" id="tracks-filter" checked autocomplete="off">
-            <label class="btn btn-secondary me-1" for="tracks-filter">Tracks</label>
+            <label class="btn btn-secondary" for="tracks-filter">Tracks</label>
             <input type="checkbox" class="btn-check" id="albums-filter" checked autocomplete="off">
-            <label class="btn btn-secondary me-1" for="albums-filter">Albums</label>
+            <label class="btn btn-secondary" for="albums-filter">Albums</label>
             <input type="checkbox" class="btn-check" id="artists-filter" checked autocomplete="off">
-            <label class="btn btn-secondary me-1" for="artists-filter">Artists</label>
+            <label class="btn btn-secondary" for="artists-filter">Artists</label>
             <div class="col"></div>
-            <div class="dropdown me-1">
+            <div class="sort-select dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                 Sort
               </button>

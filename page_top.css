@@ -1,0 +1,31 @@
+.tab-nav {
+  font-size: 1.25rem;
+}
+
+.tab-nav .nav-item a {
+  color: black;
+}
+
+.friend-select-group {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #a0a0a0;
+  border-radius: 0.25rem;
+}
+
+.search-bar {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #a0a0a0a0;
+  border-radius: 0.25rem;
+}
+
+.search-options {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1rem;
+}
+
+.search-options label, .sort-select {
+  margin-right: 0.25rem;
+}
