@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compare Ratings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="items.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <div class="page-top container-fluid">
+      <div class="row justify-content-center">
+        <div class="col col-lg-9 col-xxl-7"> 
+          <ul class="nav nav-underline nav-justified fs-5">
+            <li class="nav-item">
+              <a class="nav-link active" href="compare_ratings.html" aria-current="page">Ratings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="compare_stats.html">Stats</a>
+            </li>
+          </ul>
+          <div class="compare-to input-group mt-3 mb-3 border rounded border-secondary-subtle">
+            <label class="input-group-text" for="friend-select">Compare to</label>
+            <select class="form-select" id="friend-select">
+              <option value="Friend 1">Friend 1</option>
+              <option value="Friend 2">Friend 2</option>
+              <option value="Friend 3">Friend 3</option>
+            </select>
+          </div>
+          <div class="search-bar input-group mb-3 border rounded border-secondary-subtle">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
+          </div>
+          <div class="search-options d-flex flex-row mb-3">
+            <input type="checkbox" class="btn-check" id="tracks-filter" checked autocomplete="off">
+            <label class="btn btn-secondary me-1" for="tracks-filter">Tracks</label>
+            <input type="checkbox" class="btn-check" id="albums-filter" checked autocomplete="off">
+            <label class="btn btn-secondary me-1" for="albums-filter">Albums</label>
+            <input type="checkbox" class="btn-check" id="artists-filter" checked autocomplete="off">
+            <label class="btn btn-secondary me-1" for="artists-filter">Artists</label>
+            <div class="col"></div>
+            <div class="dropdown me-1">
+              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Sort
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Default</a></li>
+                <li><a class="dropdown-item" href="#">Album</a></li>
+                <li><a class="dropdown-item" href="#">Artist</a></li>
+                <li><a class="dropdown-item" href="#">Date Reviewed</a></li>
+              </ul>
+            </div>
+            <button class="btn btn-secondary" id="sort-direction"><i class="bi bi-sort-down"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="curent-user-scores col-lg-6 d-none d-lg-block">
+          <p class="compare-section-title h2">Your Ratings</p>
+          <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
+            <div class="item d-flex flex-row justify-content-center w-100 border rounded-3 border-secondary-subtle mb-3 p-3">
+              <div class="item-score d-flex justify-content-center align-items-center col-2 col-lg-1 text-center border rounded-3 border-secondary-subtle me-3">10.00</div>
+              <img src="..." class="item-img border rounded-3 placeholder me-3" alt="...">
+              <div class="item-desc col d-flex flex-column align-items-start overflow-hidden me-3">
+                <p class="item-title text-nowrap mb-0">Lover, You Should've Come Over</p>
+                <p class="item-creator text-nowrap mb-0">Jeff Buckley</p>
+              </div>
+            </div>
+            <div class="item d-flex flex-row justify-content-center w-100 border rounded-3 border-secondary-subtle mb-3 p-3 placeholder-glow">
+              <input type="text" class="item-score-input placeholder disabled col-2 col-lg-1 text-center border rounded-3 border-secondary-subtle me-3" placeholder="/10" aria-disabled="true">
+              <img src="..." class="item-img border rounded-3 placeholder me-3" alt="...">
+              <div class="item-desc col d-flex flex-column align-items-start overflow-hidden me-3">
+                <span class="item-title text-nowrap mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
+                <span class="item-creator text-nowrap mb-0 placeholder col-5" aria-disabled="true"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="other-user-scores col col-lg-6">
+          <p class="compare-section-title h2"><span class="other-user-name">_____</span>'s Ratings</p>
+          <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
+            <div class="item d-flex flex-row justify-content-center w-100 border rounded-3 border-secondary-subtle mb-3 p-3">
+              <div class="item-score d-flex justify-content-center align-items-center col-2 col-lg-1 text-center border rounded-3 border-secondary-subtle me-3">10.00</div>
+              <img src="..." class="item-img border rounded-3 placeholder me-3" alt="...">
+              <div class="item-desc col d-flex flex-column align-items-start overflow-hidden me-3">
+                <p class="item-title text-nowrap mb-0">Lover, You Should've Come Over</p>
+                <p class="item-creator text-nowrap mb-0">Jeff Buckley</p>
+              </div>
+            </div>
+            <div class="item d-flex flex-row justify-content-center w-100 border rounded-3 border-secondary-subtle mb-3 p-3 placeholder-glow">
+              <input type="text" class="item-score-input placeholder disabled col-2 col-lg-1 text-center border rounded-3 border-secondary-subtle me-3" placeholder="/10" aria-disabled="true">
+              <img src="..." class="item-img border rounded-3 placeholder me-3" alt="...">
+              <div class="item-desc col d-flex flex-column align-items-start overflow-hidden me-3">
+                <span class="item-title text-nowrap mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
+                <span class="item-creator text-nowrap mb-0 placeholder col-5" aria-disabled="true"></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+  </body>
+</html>
