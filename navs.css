@@ -1,0 +1,27 @@
+#top-nav, #bottom-nav {
+  height: 80px;
+}
+
+.navbar-brand {
+  color: white;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0px;
+}
+
+.nav-link {
+  color: white;
+}
+
+#top-nav .nav-link {
+  font-size: 1.25rem;
+}
+
+#bottom-nav .nav-link i {
+  font-size: 1.75rem;
+}
+
+#bottom-nav .nav-link p {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
