@@ -1,39 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Compare Stats</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="page_top.css">
-  </head>
-  <body class="bg-light">
-    <div class="page-top container-fluid">
-      <div class="row justify-content-center">
-        <div class="col col-lg-9 col-xxl-7"> 
-          <ul class="tab-nav nav nav-underline nav-justified">
-            <li class="nav-item">
-              <a class="nav-link" href="compare_scores.html">Scores</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="compare_stats.html" aria-current="page">Stats</a>
-            </li>
-          </ul>
-          <div class="friend-select-group input-group">
-            <label class="input-group-text" for="friend-select">View Friend</label>
-            <select class="form-select" id="friend-select">
-              <option value="Friend 1">Friend 1</option>
-              <option value="Friend 2">Friend 2</option>
-              <option value="Friend 3">Friend 3</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="page-content row justify-content-center">
-        <p>Stats content goes here</p>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-top container-fluid">
+  <div class="row justify-content-center">
+    <div class="col col-lg-9 col-xxl-7"> 
+      <ul class="tab-nav nav nav-underline nav-justified">
+        <li class="nav-item">
+          <a class="nav-link" href="compare_scores.html">Scores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="compare_stats.html" aria-current="page">Stats</a>
+        </li>
+      </ul>
+      <div class="friend-select-group input-group">
+        <label class="input-group-text" for="friend-select">View Friend</label>
+        <select class="form-select" id="friend-select">
+          <option value="Friend 1">Friend 1</option>
+          <option value="Friend 2">Friend 2</option>
+          <option value="Friend 3">Friend 3</option>
+        </select>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-  </body>
-</html>
+  </div>
+  <div class="page-content row justify-content-center">
+    <p>Stats content goes here</p>
+  </div>
+</div>
+{% endblock %}
