@@ -7,9 +7,9 @@ from app import app
 def index():
   return render_template("index.html", title="Home")
 
-@app.route('/score')
-def score():
-  return render_template("score.html", title="Score")
+@app.route('/scores')
+def scores():
+  return render_template("scores.html", title="Scores")
 
 @app.route('/stats')
 def stats():
