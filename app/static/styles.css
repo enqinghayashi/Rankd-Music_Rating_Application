@@ -1,3 +1,15 @@
 @import "nav.css";
 @import "item.css";
 @import "page_top.css";
+
+body {
+  padding-top: 80px;
+}
+
+/* at the Bootstrap lg breakpoint add padding to the bottom of the body
+   to prevent the bottom-nav from overlapping the content */
+@media screen and (max-width: 992px) {
+  body {
+    padding-bottom: 80px;
+  }
+}
