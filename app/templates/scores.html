@@ -32,15 +32,19 @@
         <button class="btn btn-secondary" id="sort-direction"><i class="bi bi-sort-down"></i></button>
       </div>
       <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
-        <div class="item">
-          <input type="text" class="item-score-input col-2 col-lg-1" placeholder="/10">
-          <img src="..." class="item-img placeholder" alt="...">
+        {% for item in items %}
+        <div class="item item-type-{{ item.type }}">
+          <input type="text" class="item-score-input col-2 col-lg-1" placeholder="/10" value="{{ item.score }}">
+          <img class="item-img" src="{{ item.img_url }}" alt="...">
           <div class="item-desc col">
-            <p class="item-title">Lover, You Should've Come Over</p>
-            <p class="item-creator">Jeff Buckley</p>
+            <p class="item-title">{{ item.title }}</p>
+            {% if item.type != 'artist' %}
+            <p class="item-creator">{{ item.creator }}</p>
+            {% endif %}
           </div>
           <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary">Save</button>
         </div>
+        {% endfor %}
         <div class="item placeholder-glow">
           <input type="text" class="item-score-input placeholder disabled col-2 col-lg-1" placeholder="/10" aria-disabled="true">
           <img src="..." class="item-img placeholder" alt="...">

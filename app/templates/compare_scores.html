@@ -51,14 +51,18 @@
     <div id="user-scores" class="user-scores col-lg-6 d-none d-lg-block">
       <h2 class="compare-section-title">Your Ratings</h2>
       <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
-        <div class="item">
-          <div class="item-score col-2 col-lg-1">10.00</div>
-          <img src="..." class="item-img placeholder" alt="...">
+        {% for item in my_items %}
+        <div class="item item-type-{{ item.type }}">
+          <div class="item-score col-2 col-lg-1">{{ item.score }}</div>
+          <img class="item-img" src="{{ item.img_url }}" alt="...">
           <div class="item-desc col">
-            <p class="item-title">Lover, You Should've Come Over</p>
-            <p class="item-creator">Jeff Buckley</p>
+            <p class="item-title">{{ item.title }}</p>
+            {% if item.type != 'artist' %}
+            <p class="item-creator">{{ item.creator }}</p>
+            {% endif %}
           </div>
         </div>
+        {% endfor %}
         <div class="item placeholder-glow">
           <div class="item-score col-2 col-lg-1 placeholder"></div>
           <img src="..." class="item-img placeholder" alt="...">
@@ -72,14 +76,18 @@
     <div id="friend-scores" class="friend-scores col col-lg-6">
       <h2 class="compare-section-title"><span class="friend-name">Friend</span>'s Ratings</h2>
       <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
-        <div class="item">
-          <div class="item-score col-2 col-lg-1">10.00</div>
-          <img src="..." class="item-img placeholder" alt="...">
+        {% for item in friend_items %}
+        <div class="item item-type-{{ item.type }}">
+          <div class="item-score col-2 col-lg-1">{{ item.score }}</div>
+          <img class="item-img" src="{{ item.img_url }}" alt="...">
           <div class="item-desc col">
-            <p class="item-title">Lover, You Should've Come Over</p>
-            <p class="item-creator">Jeff Buckley</p>
+            <p class="item-title">{{ item.title }}</p>
+            {% if item.type != 'artist' %}
+            <p class="item-creator">{{ item.creator }}</p>
+            {% endif %}
           </div>
         </div>
+        {% endfor %}
         <div class="item placeholder-glow">
           <div class="item-score col-2 col-lg-1 placeholder"></div>
           <img src="..." class="item-img placeholder" alt="...">

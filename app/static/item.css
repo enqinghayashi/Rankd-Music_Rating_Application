@@ -27,13 +27,18 @@
 .item-img {
   height: 50px;
   aspect-ratio: 1/1;
-  border-radius: 0.25rem;
   margin-right: 1rem;
+  border-radius: 0.25rem;
+}
+
+.item-type-artist .item-img {
+  border-radius: 50%;
 }
 
 .item-desc {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: start;
   margin-right: 1rem;
   overflow: hidden;
