@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-content container-fluid">
+  <div class="row justify-content-center">
+    <div class="col col-lg-9 col-xxl-7"> 
+      <div class="search-bar input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
+      </div>
+      <div class="search-options d-flex flex-row mb-3">
+        <input type="checkbox" class="btn-check" id="tracks-filter" checked autocomplete="off">
+        <label class="btn btn-secondary" for="tracks-filter">Tracks</label>
+        <input type="checkbox" class="btn-check" id="albums-filter" checked autocomplete="off">
+        <label class="btn btn-secondary" for="albums-filter">Albums</label>
+        <input type="checkbox" class="btn-check" id="artists-filter" checked autocomplete="off">
+        <label class="btn btn-secondary" for="artists-filter">Artists</label>
+        <input type="checkbox" class="btn-check" id="saved-filter" checked autocomplete="off">
+        <label class="btn btn-secondary" for="saved-filter">Saved</label>
+        <div class="col"></div>
+        <div class="sort-select dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Sort
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Default</a></li>
+            <li><a class="dropdown-item" href="#">Album</a></li>
+            <li><a class="dropdown-item" href="#">Artist</a></li>
+            <li><a class="dropdown-item" href="#">Date Reviewed</a></li>
+          </ul>
+        </div>
+        <button class="btn btn-secondary" id="sort-direction"><i class="bi bi-sort-down"></i></button>
+      </div>
+      <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
+        {% for item in items %}
+        <div class="item item-type-{{ item.type }}">
+          <input type="text" class="item-score-input col-2 col-lg-1" placeholder="/10" value="{{ item.score }}">
+          <img class="item-img" src="{{ item.img_url }}" alt="...">
+          <div class="item-desc col">
+            <p class="item-title">{{ item.title }}</p>
+            {% if item.type != 'artist' %}
+            <p class="item-creator">{{ item.creator }}</p>
+            {% endif %}
+          </div>
+          <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary">Save</button>
+        </div>
+        {% endfor %}
+        <div class="item placeholder-glow">
+          <input type="text" class="item-score-input placeholder disabled col-2 col-lg-1" placeholder="/10" aria-disabled="true">
+          <img src="..." class="item-img placeholder" alt="...">
+          <div class="item-desc col">
+            <span class="item-title mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
+            <span class="item-creator mb-0 placeholder col-5" aria-disabled="true"></span>
+          </div>
+          <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary placeholder disabled" aria-disabled="true"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

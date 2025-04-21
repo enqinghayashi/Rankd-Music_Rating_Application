@@ -1,0 +1,50 @@
+/* Styling for the item component used on scoring related pages */ 
+
+.item {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  border: 1px solid #A0A0A0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.item-score, .item-score-input {
+  text-align: center;
+  border: 1px solid #A0A0A0;
+  border-radius: 0.5rem;
+  margin-right: 1rem;
+}
+
+.item-score {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.item-img {
+  height: 50px;
+  aspect-ratio: 1/1;
+  margin-right: 1rem;
+  border-radius: 0.25rem;
+}
+
+.item-type-artist .item-img {
+  border-radius: 50%;
+}
+
+.item-desc {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  margin-right: 1rem;
+  overflow: hidden;
+}
+
+.item-desc p {
+  white-space: nowrap;
+  margin-bottom: 0px;
+}

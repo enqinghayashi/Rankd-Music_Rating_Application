@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-top container-fluid">
+  <div class="row justify-content-center">
+    <div class="col col-lg-9 col-xxl-7"> 
+      <ul class="tab-nav nav nav-underline nav-justified">
+        <li class="nav-item">
+          <a class="nav-link" href="/compare_scores">Scores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/compare_stats" aria-current="page">Stats</a>
+        </li>
+      </ul>
+      <div class="friend-select-group input-group">
+        <label class="input-group-text" for="friend-select">View Friend</label>
+        <select class="form-select" id="friend-select">
+          <option value="Friend 1">Friend 1</option>
+          <option value="Friend 2">Friend 2</option>
+          <option value="Friend 3">Friend 3</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="page-content row justify-content-center">
+    <p>Stats content goes here</p>
+  </div>
+</div>
+{% endblock %}
