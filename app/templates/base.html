@@ -24,7 +24,7 @@
           </li>
         </ul>
         <div class="col"></div>
-        <button class="nav-link btn btn-outline-light" hidden>Log in</button>
+        {% if 'user' in session %}
         <div class="dropdown">
           <a class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expended="false">
             Profile
@@ -36,6 +36,9 @@
             <li><a class="dropdown-item" href="#">Log Out</a></li>
           </ul>
         </div>
+        {% else %}
+          <a class="nav-link btn btn-outline-light" href="/login">Log in</a>
+        {% endif %}
       </div>
     </nav>
     <nav id="bottom-nav" class="nav nav-justified d-flex d-lg-none bg-primary fixed-bottom">
