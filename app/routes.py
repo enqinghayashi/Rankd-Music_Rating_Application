@@ -3,6 +3,6 @@ from app import app
 
 @app.route('/')
 @app.route('/index')
+@app.route('/home')
 def index():
-  user = {'username': 'Archer'}
-  return render_template("index.html", title="Home", user=user)
+  return render_template("home.html", title="Home")
