@@ -120,3 +120,17 @@ def register():
         return redirect(url_for('register'))
     pass
   return render_template("register.html", title="Register")
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+  if request.method == 'POST':
+    username = request.form['username']
+    password = request.form['password']
+    if username == "":
+      flash("Username cannot be empty", "error")
+      return redirect(url_for('login'))
+    if password == "":
+      flash("Password cannot be empty", "error")
+      return redirect(url_for('login'))
+    pass
+  return render_template("login.html", title="Login")
