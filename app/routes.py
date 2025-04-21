@@ -10,3 +10,15 @@ def index():
 @app.route('/score')
 def score():
   return render_template("score.html", title="Score")
+
+@app.route('/stats')
+def stats():
+  return render_template("stats.html", title="Stats")
+
+@app.route('/compare_scores')
+def compare_scores():
+  return render_template("compare_scores.html", title="Compare Scores")
+
+@app.route('/compare_stats')
+def compare_stats():
+  return render_template("compare_stats.html", title="Compare Stats")
