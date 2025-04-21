@@ -1,3 +1,5 @@
+/* Styling for the item component used on scoring related pages */ 
+
 .item {
   display: flex;
   flex-direction: row;
