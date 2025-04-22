@@ -17,7 +17,7 @@ class Score(db.Model):
   __table_name__ = 'Score'
 
   score = db.Column(db.Integer, nullable=True) # nullable to allow users to remove their ratings
-  user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
   # From the spotify API
   item_id = db.Column(db.String, primary_key=True)
   item_type = db.Column(db.String, nullable=False)
@@ -37,8 +37,8 @@ class Score(db.Model):
 class Friend(db.Model):
   __table_name__ = 'Friend'
 
-  user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
-  friend_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
+  friend_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
 
   __table_args__ = (
     db.PrimaryKeyConstraint('user_id', 'friend_id'), # comma is necessary as table args must be a tuple
