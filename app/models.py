@@ -27,10 +27,19 @@ class Score(db.Model):
 
   # Composite Key
   __table_args__ = (
-    db.PrimaryKeyConstraint('user_id', 'item_id'),
+    db.PrimaryKeyConstraint('user_id', 'item_id'), # comma is necessary as table args must be a tuple
   )
 
   def __repr__(self):
     return 'score={}, title={}, creator={}, item_type={}, img_url={}, user_id={}, item_id={}\
       '.format(self.score, self.title, self.creator, self.item_type, self.img_url, self.user_id, self.item_id)
-  
+
+class Friend(db.Model):
+  __table_name__ = 'Friend'
+
+  user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
+  friend_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
+
+  __table_args__ = (
+    db.PrimaryKeyConstraint('user_id', 'friend_id'), # comma is necessary as table args must be a tuple
+  )
