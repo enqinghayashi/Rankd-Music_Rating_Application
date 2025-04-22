@@ -27,9 +27,9 @@ class Score(db.Model):
   img_url = db.Column(db.String, nullable=False)
 
   # Composite Key
-  #__table_args__ = (
-  #  PrimaryKeyConstraint('user_id', 'item_id')
-  #)
+  __table_args__ = (
+    db.PrimaryKeyConstraint('user_id', 'item_id'),
+  )
 
   def __repr__(self):
     return 'score={}, title={}, creator={}, item_type={}, img_url={}, user_id={}, item_id={}\
