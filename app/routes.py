@@ -173,4 +173,10 @@ def edit_profile():
     return redirect(url_for('profile'))
   return render_template("edit_profile.html", title="Edit Profile", user=user)
   
+app.secret_key = 'admin3403'
 
+@app.route('/logout')
+def logout():
+  session.pop('user', None)
+  flash("Logged out successfully", "success")
+  return redirect(url_for('index'))
