@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request, redirect, url_for, flash
 from app import app
 
 @app.route('/')
@@ -100,3 +100,37 @@ def compare_scores():
 @app.route('/compare_stats')
 def compare_stats():
   return render_template("compare_stats.html", title="Compare Stats")
+
+import re
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+  regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@!#$%^&*])[A-Za-z\d@!#$%^&*]{8,}$'
+  
+  if request.method == 'POST':
+    password = request.form['password']
+    confirmed_password = request.form['confirm_password']
+    if not re.match(regex, password):
+        flash("Password must contain at least 1 letter and 1 special character", "error")
+        return redirect(url_for('register'))
+    if len(password) < 8:
+        flash("Password must be at least 8 characters long", "error")
+        return redirect(url_for('register'))
+    if password != request.form['confirm_password']:
+        flash("Passwords do not match", "error")
+        return redirect(url_for('register'))
+    pass
+  return render_template("register.html", title="Register")
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+  if request.method == 'POST':
+    username = request.form['username']
+    password = request.form['password']
+    if username == "":
+      flash("Username cannot be empty", "error")
+      return redirect(url_for('login'))
+    if password == "":
+      flash("Password cannot be empty", "error")
+      return redirect(url_for('login'))
+    pass
+  return render_template("login.html", title="Login")
