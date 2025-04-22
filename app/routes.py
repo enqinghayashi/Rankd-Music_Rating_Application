@@ -134,3 +134,19 @@ def login():
       return redirect(url_for('login'))
     pass
   return render_template("login.html", title="Login")
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+  user = {
+    "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+    "username": "admin",
+    "name" : "Admin",
+    "bio" : "This is a test bio",
+  }
+  if request.method == 'POST':
+    user["img_url"] = request.form['img_url']
+    user['name'] = request.form['name']
+    user['bio'] = request.form['bio']
+    flash("Profile updated", "success")
+    return redirect(url_for('profile'))
+  return render_template("profile.html", title="Profile", user=user)
