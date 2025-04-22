@@ -16,8 +16,7 @@ class User(db.Model):
 class Score(db.Model):
   __table_name__ = 'Score'
 
-  # Score is nullable to allow users to remove their ratings
-  score = db.Column(db.Integer, nullable=True)   
+  score = db.Column(db.Integer, nullable=True) # nullable to allow users to remove their ratings
   user_id = db.Column(db.Integer, db.ForeignKey('User.user_id'), primary_key=True)
   # From the spotify API
   item_id = db.Column(db.String, primary_key=True)
