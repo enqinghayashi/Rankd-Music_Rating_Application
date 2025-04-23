@@ -47,5 +47,5 @@ class Auth:
     }
     auth_url = url + "?" + urlencode(params)
     return auth_url
-
+  
 auth = Auth()

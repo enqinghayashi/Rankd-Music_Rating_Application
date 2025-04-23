@@ -3,7 +3,7 @@ from app import app
 from app.config import Config
 from werkzeug.utils import secure_filename
 import os
-import auth
+from app.auth import auth
 
 @app.route('/')
 @app.route('/index')
@@ -186,6 +186,19 @@ def logout():
   flash("Logged out successfully", "success")
   return redirect(url_for('index'))
 
+@app.route('/auth')
 @app.route('/authenticate')
-def authenticate():
-  return 'Authenticate'
+@app.route('/authorize')
+def link_to_spotify():
+  num_args = len(request.args)
+  if (num_args == 0):
+    return redirect(auth.generateAuthURL())
+  elif (num_args == 1):
+    if ('code' in request.args.keys()): # User accepted the authorization
+      return "Success"
+    elif ('error' in request.args.keys()): # User declined the authorization
+      return "Failure"
+    else: # An invalid argument has been given to the route
+      return "Error"
+  else: # This page should never receive more than 1 argument
+    return "Error"
