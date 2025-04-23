@@ -167,7 +167,7 @@ def login():
       return redirect(url_for('login'))
     session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
-    return redirect(url_for('account'))
+    return redirect(url_for('index'))
   return render_template("login.html", title="Login")
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -207,36 +207,43 @@ def logout():
   return redirect(url_for('index'))
 
 @app.route('/account_settings')
-def account():
+def account_settings():
   return render_template("account_settings.html", title = "Account Setting")
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
-    user = session.get('users')
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
     if request.method == 'POST':
         current_password = request.form.get('password')
         new_password = request.form.get('new_password')
         confirm_new_password = request.form.get('confirm_new_password')
-        if current_password != user['password']:
+        if not user or not check_password_hash(user.password, current_password):
             flash("Please enter the correct current password", "error")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
             return validation_error
-        user['password'] = new_password
-        session['user'] = user
-        flash("Account created successfully", "success")
-        return redirect(url_for('index'))
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Password updated successfully", "success")
+        return redirect(url_for('account_settings'))
     return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
 def change_email():
-    user = session.get('user')
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
     if request.method == 'POST':
-      user['email'] = request.form['email']
-      session['user'] = user
-      flash("Email updated successfully", "success")
-      return redirect(url_for('account'))
+      new_email = request.form['email']
+      if User.query.filter_by(email=new_email).first():
+            flash("This email is already in use. Please enter a different one", "danger")
+      else:
+            user.email = new_email
+            db.session.commit()
+            session['user']['email'] = new_email
+            flash("Email updated successfully", "success")
+      return redirect(url_for('account_settings'))
     return render_template("change_email.html", title = "change email", user = user)
 
 @app.route('/delete_account', methods=['POST'])
