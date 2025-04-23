@@ -1,5 +1,6 @@
 import random
 from Crypto.Hash import SHA256
+import base64
 
 class Auth:
   def __init__(self):
@@ -24,15 +25,12 @@ class Auth:
     data = input.encode("utf-8")
     hash = SHA256.new()
     hash.update(data)
-    hash_hex = hash.hexdigest()
-    return hash_hex
+    return hash.digest()
   def base64encode(self, input):
-    pass
+    return base64.b64encode(input).decode().replace("=","").replace("+","-").replace("/","_")
   def generateCodeChallenge(self, input):
     hashed = self.sha256(input)
     code_challenge = self.base64encode(hashed)
     return code_challenge
     
-test_input = "chMtyufB7X7MROVVAa3rt9yHhYKRDtMovjFwNxe02LWfvxyouNpufwIrgBGM1BOdUCpkCQaTYUSofahKcpQdMcsKGn01w6HLSMHPW8yH6m16oILQP6689OyGe6fXlJRQ"
-expected_code_challenge = "PYbYtoexwDw6wzWLcHtPZxF2Sh_exu6rKOoUljNJvBM"
 auth = Auth()
