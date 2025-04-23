@@ -26,5 +26,13 @@ class Auth:
     hash.update(data)
     hash_hex = hash.hexdigest()
     return hash_hex
-
+  def base64encode(self, input):
+    pass
+  def generateCodeChallenge(self, input):
+    hashed = self.sha256(input)
+    code_challenge = self.base64encode(hashed)
+    return code_challenge
+    
+test_input = "chMtyufB7X7MROVVAa3rt9yHhYKRDtMovjFwNxe02LWfvxyouNpufwIrgBGM1BOdUCpkCQaTYUSofahKcpQdMcsKGn01w6HLSMHPW8yH6m16oILQP6689OyGe6fXlJRQ"
+expected_code_challenge = "PYbYtoexwDw6wzWLcHtPZxF2Sh_exu6rKOoUljNJvBM"
 auth = Auth()
