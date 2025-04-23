@@ -3,29 +3,30 @@
 {% block title %}Edit My Profile{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4" style="width: 100%; max-width: 500px;">
-        <h3 class="text-center">My Profile</h3>
-        <div class="text-center mb-3">
-            <label for="profile_picture" class="form-label"></label>
-            <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Current Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
+<div class="page-content container-fluid">
+    <div class="row justify-content-center mt-3">
+        <div class="card p-4" style="width: 100%; max-width: 500px;">
+            <h3 class="text-center">My Profile</h3>
+            <div class="text-center mb-3">
+                <label for="profile_picture" class="form-label"></label>
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Current Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
+            </div>
+            <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="profile_picture" class="form-label">Upload New Profile Picture</label>
+                    <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="bio" class="form-label">Bio</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="3" required>{{ user.bio }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Save Changes</button>
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
+            </form>
         </div>
-        <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label for="profile_picture" class="form-label">Upload New Profile Picture</label>
-                <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
-            </div>
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="bio" class="form-label">Bio</label>
-                <textarea class="form-control" id="bio" name="bio" rows="3" required>{{ user.bio }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-success w-100">Save Changes</button>
-            <a href="{{ url_for('profile') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
-        </form>
     </div>
-</div>
 {% endblock %}
