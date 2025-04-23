@@ -3,7 +3,7 @@ from Crypto.Hash import SHA256
 from base64 import b64encode
 from urllib.parse import urlencode
 import requests
-import datetime
+from datetime import datetime, timedelta
 
 class Auth:
   def __init__(self):
@@ -66,7 +66,7 @@ class Auth:
     data = response.json()
     self.access_token = data['access_token']
     self.refresh_token = data['refresh_token']
-    self.time_token_granted = datetime.datetime.now()
+    self.time_token_granted = datetime.now()
     return self.time_token_granted
   def completeAuth(self, code):
     self.auth_code = code
@@ -86,5 +86,13 @@ class Auth:
   def refreshCurrentToken(self):
     response = self.requestTokenRefresh()
     return self.setCurrentToken(response)
+  def getCurrentToken(self):
+    current_time = datetime.now()
+    # token expires in 60 minutes so refresh every 55 to be safe
+    if ((current_time - self.time_token_granted) > timedelta(minutes=55)):
+      self.refreshCurrentToken()
+      return self.access_token
+    else:
+      return self.access_token
   
 auth = Auth()
