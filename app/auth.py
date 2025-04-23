@@ -62,7 +62,7 @@ class Auth:
       "code_verifier": self.code_verifier
     }
     return requests.post(url, headers=headers, data=data)
-  def setAccessToken(self, response):
+  def setCurrentToken(self, response):
     data = response.json()
     self.access_token = data['access_token']
     self.refresh_token = data['refresh_token']
@@ -71,6 +71,20 @@ class Auth:
   def completeAuth(self, code):
     self.auth_code = code
     response = self.requestAccessToken()
-    return self.setAccessToken(response)
+    return self.setCurrentToken(response)
+  def requestTokenRefresh(self):
+    url = "https://accounts.spotify.com/api/token"
+    headers = {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+    data = {
+      "grant_type": "refresh_token",
+      "refresh_token": self.refresh_token,
+      "client_id": self.client_id
+    }
+    return requests.post(url, headers=headers, data=data)
+  def refreshCurrentToken(self):
+    response = self.requestTokenRefresh()
+    return self.setCurrentToken(response)
   
 auth = Auth()
