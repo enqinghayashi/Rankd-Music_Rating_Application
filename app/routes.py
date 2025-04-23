@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
 from app.config import Config
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.models import User
 from app.util import validate_password
@@ -147,25 +147,16 @@ def login():
   if request.method == 'POST':
     username = request.form['username']
     password = request.form['password']
-#    if username == "":
-#      flash("Username cannot be empty", "error")
-#      return redirect(url_for('login'))
-#    if password == "":
-#      flash("Password cannot be empty", "error")
-#      return redirect(url_for('login'))
-#    pass
-    if username == "admin" and password == "admin":
-      session['user'] = {
-        "username": "admin",
-        "name": "Admin",
-        "bio": "This is a test bio",
-        "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      }
-      flash("Logged in successfully", "success")
-      return redirect(url_for('index'))
-    else:
-      flash("Invalid username or password", "error")
+    user = User.query.filter_by(username=username).first()
+    if not user:
+      flash("User does not exist", "error")
       return redirect(url_for('login'))
+    if not check_password_hash(user.password, password):
+      flash("Incorrect password", "error")
+      return redirect(url_for('login'))
+    session['user'] = {'id': user.id, 'username': user.username, 'email': user.email}
+    flash(f"Log in successfully", "success")
+    return redirect(url_for('account'))
   return render_template("login.html", title="Login")
 
 @app.route('/profile', methods=['GET', 'POST'])
