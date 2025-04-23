@@ -5,9 +5,9 @@ from app.config import Config
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+from app.auth import auth
 from app.models import User
 from app.util import validate_password
-
 
 @app.route('/')
 @app.route('/index')
@@ -206,6 +206,25 @@ def logout():
   flash("Logged out successfully", "success")
   return redirect(url_for('index'))
 
+@app.route('/auth')
+@app.route('/authenticate')
+@app.route('/authorize')
+@app.route('/connect_music', methods=['GET'])
+def link_to_spotify():
+  num_args = len(request.args)
+  if (num_args == 0): # First visit
+    return redirect(auth.generateAuthURL())
+  elif (num_args == 1): # After redirect
+    if ('code' in request.args.keys()): # User accepted the authorization
+      auth.completeAuth(request.args['code'])
+      return "Success!"
+    elif ('error' in request.args.keys()): # User declined the authorization
+      return "Failure"
+    else: # An invalid argument has been given to the route (i.e. user input on purpose)
+      return "Error"
+  else: # This page should never receive more than 1 argument
+    return "Error"
+
 @app.route('/account_settings')
 def account_settings():
   return render_template("account_settings.html", title = "Account Setting")
@@ -249,7 +268,3 @@ def change_email():
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
     return "Account Deleted"
-
-@app.route('/connect_music', methods=['GET'])
-def connect_music():
-    return "Connect to your music service page"
