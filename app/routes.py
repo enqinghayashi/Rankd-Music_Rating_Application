@@ -114,13 +114,29 @@ def compare_stats():
 def register():
   
   if request.method == 'POST':
-    username = request.form('username')
-    email = request.form('email')
+    username = request.form['username']
+    email = request.form['email']
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
     validation_error = validate_password(password, confirmed_password)
     if validation_error:
         return validation_error
+
+    hashed_password = generate_password_hash(password, method = 'sha256')
+    new_user = User(username=username, email=email, password = hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+    flash("Account created successfully", "success")
+    return redirect(url_for('login'))
+  return render_template("register.html", title="Register")
+
+@app.route('/validate_user', methods=['POST'])
+def validate_user():
+    username = request.json.get('username')
+    email = request.json.get('email')
+
+    response = {}
+
     if username:
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
@@ -134,13 +150,8 @@ def register():
             response['email'] = "Email is already registered with another account."
         else:
             response['email'] = "Email is available."
-    hashed_password = generate_password_hash(password)
-    new_user = User(username=username, email=email, password = hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
-    flash("Account created successfully", "success")
-    return redirect(url_for('login'))
-  return render_template("register.html", title="Register")
+
+    return response
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -154,7 +165,7 @@ def login():
     if not check_password_hash(user.password, password):
       flash("Incorrect password", "error")
       return redirect(url_for('login'))
-    session['user'] = {'id': user.id, 'username': user.username, 'email': user.email}
+    session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
     return redirect(url_for('account'))
   return render_template("login.html", title="Login")
