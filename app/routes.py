@@ -1,8 +1,10 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from app import app
+from app import app, db
 from app.config import Config
 from werkzeug.utils import secure_filename
 import os
+from app.models import User
+
 
 @app.route('/')
 @app.route('/index')
@@ -158,6 +160,7 @@ def profile():
 app.config.from_object(Config)
 def allowed_file(filename):
   return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
   user = session ['user']
@@ -184,3 +187,29 @@ def logout():
   session.pop('user', None)
   flash("Logged out successfully", "success")
   return redirect(url_for('index'))
+
+@app.route('/account_settings')
+def account():
+  return render_template("account_settings.html", title = "Account Setting")
+
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    return "Change Password Page"
+
+@app.route('/change_email', methods=['GET', 'POST'])
+def change_email():
+    user = session.get('user')
+    if request.method == 'POST':
+      user['email'] = request.form['email']
+      session['user'] = user
+      flash("Email updated successfully", "success")
+      return redirect(url_for('account'))
+    return render_template("change_email.html", title = "change email", user = user)
+
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
+    return "Account Deleted"
+
+@app.route('/connect_music', methods=['GET'])
+def connect_music():
+    return "Connect to your music service page"
