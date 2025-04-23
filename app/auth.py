@@ -1,11 +1,12 @@
 import random
 from Crypto.Hash import SHA256
-import base64
+from base64 import b64encode
+from urllib.parse import urlencode
 
 class Auth:
   def __init__(self):
     self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
-    self.redirect_uri = "https://localhost:5000/authenticate"
+    self.redirect_uri = "http://127.0.0.1:5000/authenticate"
     self.code_verifier = ""
     self.code_challenge = ""
     self.auth_code = ""
@@ -27,10 +28,24 @@ class Auth:
     hash.update(data)
     return hash.digest()
   def base64encode(self, input):
-    return base64.b64encode(input).decode().replace("=","").replace("+","-").replace("/","_")
+    return b64encode(input).decode().replace("=","").replace("+","-").replace("/","_")
   def generateCodeChallenge(self, input):
     hashed = self.sha256(input)
     code_challenge = self.base64encode(hashed)
     return code_challenge
-    
+  def generateAuthURL(self):
+    self.code_verifier = self.generateRandomString(128)
+    self.code_challenge = self.generateCodeChallenge(self.code_verifier)
+    url = "https://accounts.spotify.com/authorize"
+    params = {
+      "client_id": self.client_id,
+      "response_type": "code",
+      "redirect_uri": self.redirect_uri,
+      "scope": "playlist-read-private playlist-read-collaborative user-top-read user-read-recently-played user-library-read",
+      "code_challenge_method": "S256",
+      "code_challenge": self.code_challenge
+    }
+    auth_url = url + "?" + urlencode(params)
+    return auth_url
+
 auth = Auth()

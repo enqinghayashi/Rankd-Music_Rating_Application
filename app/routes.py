@@ -3,7 +3,7 @@ from app import app
 from app.config import Config
 from werkzeug.utils import secure_filename
 import os
-from app.auth import auth
+import auth
 
 @app.route('/')
 @app.route('/index')
