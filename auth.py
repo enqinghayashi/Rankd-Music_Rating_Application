@@ -1,4 +1,5 @@
 import random
+from Crypto.Hash import SHA256
 
 class Auth:
   def __init__(self):
@@ -19,6 +20,11 @@ class Auth:
       random_int = random.randint(0, available_characters_length-1)
       random_string += available_characters[random_int]
     return random_string
-
+  def sha256(self, input):
+    data = input.encode("utf-8")
+    hash = SHA256.new()
+    hash.update(data)
+    hash_hex = hash.hexdigest()
+    return hash_hex
 
 auth = Auth()
