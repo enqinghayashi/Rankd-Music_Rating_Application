@@ -1,7 +1,9 @@
+from urllib import response
 from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
 from app.config import Config
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 import os
 from app.models import User
 from app.util import validate_password
@@ -110,14 +112,32 @@ def compare_stats():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-  regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@!#$%^&*])[A-Za-z\d@!#$%^&*]{8,}$'
   
   if request.method == 'POST':
+    username = request.form('username')
+    email = request.form('email')
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
     validation_error = validate_password(password, confirmed_password)
     if validation_error:
         return validation_error
+    if username:
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            response['username'] = "Username is already taken."
+        else:
+            response['username'] = "Username is available."
+
+    if email:
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            response['email'] = "Email is already registered with another account."
+        else:
+            response['email'] = "Email is available."
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, email=email, password = hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
     flash("Account created successfully", "success")
     return redirect(url_for('login'))
   return render_template("register.html", title="Register")
