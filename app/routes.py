@@ -3,6 +3,7 @@ from app import app
 from app.config import Config
 from werkzeug.utils import secure_filename
 import os
+from app.auth import auth
 
 @app.route('/')
 @app.route('/index')
@@ -184,3 +185,7 @@ def logout():
   session.pop('user', None)
   flash("Logged out successfully", "success")
   return redirect(url_for('index'))
+
+@app.route('/authenticate')
+def authenticate():
+  return 'Authenticate'
