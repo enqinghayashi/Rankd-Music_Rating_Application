@@ -177,7 +177,7 @@ def edit_profile():
   
   return render_template("edit_profile.html", title="Edit Profile", user=user)
   
-app.secret_key = Config.SERCRET_KEY
+app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 def logout():
   session.pop('user', None)
