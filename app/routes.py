@@ -1,5 +1,8 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session
 from app import app
+from app.config import Config
+from werkzeug.utils import secure_filename
+import os
 
 @app.route('/')
 @app.route('/index')
@@ -126,11 +129,58 @@ def login():
   if request.method == 'POST':
     username = request.form['username']
     password = request.form['password']
-    if username == "":
-      flash("Username cannot be empty", "error")
+#    if username == "":
+#      flash("Username cannot be empty", "error")
+#      return redirect(url_for('login'))
+#    if password == "":
+#      flash("Password cannot be empty", "error")
+#      return redirect(url_for('login'))
+#    pass
+    if username == "admin" and password == "admin":
+      session['user'] = {
+        "username": "admin",
+        "name": "Admin",
+        "bio": "This is a test bio",
+        "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+      }
+      flash("Logged in successfully", "success")
+      return redirect(url_for('index'))
+    else:
+      flash("Invalid username or password", "error")
       return redirect(url_for('login'))
-    if password == "":
-      flash("Password cannot be empty", "error")
-      return redirect(url_for('login'))
-    pass
   return render_template("login.html", title="Login")
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+  user = session.get('user')
+  return render_template("profile.html", title="Profile", user=user)
+
+app.config.from_object(Config)
+def allowed_file(filename):
+  return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+  user = session ['user']
+  if request.method == 'POST':
+    if 'profile_picture' in request.files:
+      files = request.files['profile_picture']
+      if files.filename != '':
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'])
+        filename = secure_filename(files.filename)
+        files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        user['img_url'] = f"static/img/profile_pictures/{filename}"
+    user['name'] = request.form['name']
+    user['bio'] = request.form['bio']
+    session['user'] = user
+    flash("Profile updated", "success")
+    return redirect(url_for('profile'))
+  
+  return render_template("edit_profile.html", title="Edit Profile", user=user)
+  
+app.secret_key = Config.SERCRET_KEY
+@app.route('/logout')
+def logout():
+  session.pop('user', None)
+  flash("Logged out successfully", "success")
+  return redirect(url_for('index'))
