@@ -195,6 +195,7 @@ def link_to_spotify():
     return redirect(auth.generateAuthURL())
   elif (num_args == 1): # After redirect
     if ('code' in request.args.keys()): # User accepted the authorization
+      auth.completeAuth(request.args['code'])
       return "Success!"
     elif ('error' in request.args.keys()): # User declined the authorization
       return "Failure"

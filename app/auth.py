@@ -62,5 +62,15 @@ class Auth:
       "code_verifier": self.code_verifier
     }
     return requests.post(url, headers=headers, data=data)
+  def setAccessToken(self, response):
+    data = response.json()
+    self.access_token = data['access_token']
+    self.refresh_token = data['refresh_token']
+    self.time_token_granted = datetime.datetime.now()
+    return self.time_token_granted
+  def completeAuth(self, code):
+    self.auth_code = code
+    response = self.requestAccessToken()
+    return self.setAccessToken(response)
   
 auth = Auth()
