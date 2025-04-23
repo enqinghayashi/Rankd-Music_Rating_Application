@@ -191,14 +191,14 @@ def logout():
 @app.route('/authorize')
 def link_to_spotify():
   num_args = len(request.args)
-  if (num_args == 0):
+  if (num_args == 0): # First visit
     return redirect(auth.generateAuthURL())
-  elif (num_args == 1):
+  elif (num_args == 1): # After redirect
     if ('code' in request.args.keys()): # User accepted the authorization
-      return "Success"
+      return "Success!"
     elif ('error' in request.args.keys()): # User declined the authorization
       return "Failure"
-    else: # An invalid argument has been given to the route
+    else: # An invalid argument has been given to the route (i.e. user input on purpose)
       return "Error"
   else: # This page should never receive more than 1 argument
     return "Error"

@@ -2,6 +2,8 @@ import random
 from Crypto.Hash import SHA256
 from base64 import b64encode
 from urllib.parse import urlencode
+import requests
+import datetime
 
 class Auth:
   def __init__(self):
@@ -47,5 +49,18 @@ class Auth:
     }
     auth_url = url + "?" + urlencode(params)
     return auth_url
+  def requestAccessToken(self):
+    url = "https://accounts.spotify.com/api/token"
+    headers = {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+    data = {
+      "grant_type": "authorization_code",
+      "code": self.auth_code,
+      "redirect_uri": self.redirect_uri,
+      "client_id": self.client_id,
+      "code_verifier": self.code_verifier
+    }
+    return requests.post(url, headers=headers, data=data)
   
 auth = Auth()
