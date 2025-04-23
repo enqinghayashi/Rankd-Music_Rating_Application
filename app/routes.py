@@ -4,6 +4,7 @@ from app.config import Config
 from werkzeug.utils import secure_filename
 import os
 from app.models import User
+from app.util import validate_password
 
 
 @app.route('/')
@@ -106,7 +107,7 @@ def compare_scores():
 def compare_stats():
   return render_template("compare_stats.html", title="Compare Stats")
 
-import re
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
   regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@!#$%^&*])[A-Za-z\d@!#$%^&*]{8,}$'
@@ -114,16 +115,11 @@ def register():
   if request.method == 'POST':
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
-    if not re.match(regex, password):
-        flash("Password must contain at least 1 letter and 1 special character", "error")
-        return redirect(url_for('register'))
-    if len(password) < 8:
-        flash("Password must be at least 8 characters long", "error")
-        return redirect(url_for('register'))
-    if password != request.form['confirm_password']:
-        flash("Passwords do not match", "error")
-        return redirect(url_for('register'))
-    pass
+    validation_error = validate_password(password, confirmed_password)
+    if validation_error:
+        return validation_error
+    flash("Account created successfully", "success")
+    return redirect(url_for('login'))
   return render_template("register.html", title="Register")
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -194,7 +190,22 @@ def account():
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
-    return "Change Password Page"
+    user = session.get('users')
+    if request.method == 'POST':
+        current_password = request.form.get('password')
+        new_password = request.form.get('new_password')
+        confirm_new_password = request.form.get('confirm_new_password')
+        if current_password != user['password']:
+            flash("Please enter the correct current password", "error")
+            return redirect(url_for('change_password'))
+        validation_error = validate_password(new_password, confirm_new_password)
+        if validation_error:
+            return validation_error
+        user['password'] = new_password
+        session['user'] = user
+        flash("Account created successfully", "success")
+        return redirect(url_for('index'))
+    return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
 def change_email():
