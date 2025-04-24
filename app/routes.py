@@ -122,7 +122,7 @@ def register():
     if validation_error:
         return validation_error
 
-    hashed_password = generate_password_hash(password, method = 'sha256')
+    hashed_password = generate_password_hash(password, method = 'pbkdf2:sha256')
     new_user = User(username=username, email=email, password = hashed_password)
     db.session.add(new_user)
     db.session.commit()
@@ -234,21 +234,22 @@ def account():
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
-    user = session.get('users')
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
     if request.method == 'POST':
         current_password = request.form.get('password')
         new_password = request.form.get('new_password')
         confirm_new_password = request.form.get('confirm_new_password')
-        if current_password != user['password']:
+        if not user or not check_password_hash(user.password, current_password):
             flash("Please enter the correct current password", "error")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
             return validation_error
-        user['password'] = new_password
-        session['user'] = user
-        flash("Account created successfully", "success")
-        return redirect(url_for('index'))
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Password updated successfully", "success")
+        return redirect(url_for('account_settings'))
     return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
