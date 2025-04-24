@@ -5,9 +5,9 @@ from sqlalchemy.schema import PrimaryKeyConstraint
 class User(db.Model):
   __table_name__ = 'User'
   
-  user_id = db.Column(db.Integer, primary_key=True, autoincrement = True)
-  username = db.Column(db.String, unique = True, nullable=False)
-  email = db.Column(db.String, unique = True, nullable=False)
+  user_id = db.Column(db.Integer, primary_key=True)
+  username = db.Column(db.String, nullable=False)
+  email = db.Column(db.String, nullable=False)
   password = db.Column(db.String, nullable=False)
 
   def __repr__(self):
