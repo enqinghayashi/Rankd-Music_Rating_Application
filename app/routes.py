@@ -229,7 +229,7 @@ def link_to_spotify():
     return "Error"
 
 @app.route('/account_settings')
-def account():
+def account_settings():
   return render_template("account_settings.html", title = "Account Setting")
 
 @app.route('/change_password', methods=['GET', 'POST'])
