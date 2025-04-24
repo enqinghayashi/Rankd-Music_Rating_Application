@@ -130,6 +130,29 @@ def register():
     return redirect(url_for('login'))
   return render_template("register.html", title="Register")
 
+@app.route('/validate_user', methods=['POST'])
+def validate_user():
+    username = request.json.get('username')
+    email = request.json.get('email')
+
+    response = {}
+
+    if username:
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            response['username'] = "Username is already taken."
+        else:
+            response['username'] = "Username is available."
+
+    if email:
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            response['email'] = "Email is already registered with another account."
+        else:
+            response['email'] = "Email is available."
+
+    return response
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
   if request.method == 'POST':
