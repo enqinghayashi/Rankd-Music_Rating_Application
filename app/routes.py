@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session, current_app
 from urllib import response
 from app import app, db
 from app.config import Config
@@ -188,12 +188,17 @@ def edit_profile():
       if 'profile_picture' in request.files:
         files = request.files['profile_picture']
         if files.filename != '':
+          old_profile = user.img_url
+          if old_profile and old_profile != 'img/profile_pictures/default.png':
+            old_profile_path = os.path.join(current_app.root_path, 'static', old_profile)
+            if os.path.exists(old_profile_path):
+               os.remove(old_profile_path)
           if not os.path.exists(app.config['UPLOAD_FOLDER']):
               os.makedirs(app.config['UPLOAD_FOLDER'])
           filename = secure_filename(files.filename)
           file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
           files.save(file_path)
-          user.img_url = f"static/img/profile_pictures/{filename}"
+          user.img_url = f"img/profile_pictures/{filename}"
       user.name = request.form['name']
       user.bio = request.form['bio']
       db.session.commit()
@@ -271,4 +276,10 @@ def change_email():
 
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
-    return "Account Deleted"
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    session.clear()
+    flash('Your account has been deleted. See ya', 'success')
+    return redirect(url_for('index'))
