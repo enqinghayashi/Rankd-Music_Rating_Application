@@ -9,10 +9,11 @@ class User(db.Model):
   username = db.Column(db.String, nullable=False)
   email = db.Column(db.String, nullable=False)
   password = db.Column(db.String, nullable=False)
-  img_url = db.Column(db.String, nullable=False)
-
+  img_url = db.Column(db.String, nullable=False, default='default_profile_picture.png')
+  bio = db.Column(db.Text)
+  name = db.Column(db.String)
   def __repr__(self):
-    return 'user_id={}, username={}, email={}, password={} img_url={}'.format(self.user_id, self.username, self.email, self.password, self.img_url)
+    return 'user_id={}, username={}, email={}, password={} img_url={} , bio = {}, name = {}'.format(self.user_id, self.username, self.email, self.password, self.img_url, self.bio, self.name)
 
 class Score(db.Model):
   __table_name__ = 'Score'
