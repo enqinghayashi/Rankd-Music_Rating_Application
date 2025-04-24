@@ -172,8 +172,9 @@ def login():
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-  user = session.get('user')
-  return render_template("profile.html", title="Profile", user=user)
+    user_id = session['user']['id']
+    user = User.query.get(user_id)    
+    return render_template("profile.html", title="Profile", user=user)
 
 app.config.from_object(Config)
 def allowed_file(filename):
@@ -198,7 +199,7 @@ def edit_profile():
       db.session.commit()
       flash("Profile updated", "success")
       return redirect(url_for('profile'))
-  
+    
     return render_template("edit_profile.html", title="Edit Profile", user=user)
 
 app.secret_key = Config.SECRET_KEY
