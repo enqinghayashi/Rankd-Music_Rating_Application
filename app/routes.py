@@ -1,7 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash, session
+from urllib import response
 from app import app, db
 from app.config import Config
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
 from app.models import User
@@ -110,14 +112,20 @@ def compare_stats():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-  regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@!#$%^&*])[A-Za-z\d@!#$%^&*]{8,}$'
   
   if request.method == 'POST':
+    username = request.form['username']
+    email = request.form['email']
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
     validation_error = validate_password(password, confirmed_password)
     if validation_error:
         return validation_error
+
+    hashed_password = generate_password_hash(password, method = 'sha256')
+    new_user = User(username=username, email=email, password = hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
     flash("Account created successfully", "success")
     return redirect(url_for('login'))
   return render_template("register.html", title="Register")
