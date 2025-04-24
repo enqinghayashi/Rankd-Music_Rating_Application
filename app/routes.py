@@ -254,12 +254,18 @@ def change_password():
 
 @app.route('/change_email', methods=['GET', 'POST'])
 def change_email():
-    user = session.get('user')
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
     if request.method == 'POST':
-      user['email'] = request.form['email']
-      session['user'] = user
-      flash("Email updated successfully", "success")
-      return redirect(url_for('account'))
+      new_email = request.form['email']
+      if User.query.filter_by(email=new_email).first():
+            flash("This email is already in use. Please enter a different one", "danger")
+      else:
+            user.email = new_email
+            db.session.commit()
+            session['user']['email'] = new_email
+            flash("Email updated successfully", "success")
+      return redirect(url_for('account_settings'))
     return render_template("change_email.html", title = "change email", user = user)
 
 @app.route('/delete_account', methods=['POST'])
