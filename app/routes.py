@@ -181,25 +181,28 @@ def allowed_file(filename):
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
-  user = session ['user']
-  if request.method == 'POST':
-    if 'profile_picture' in request.files:
-      files = request.files['profile_picture']
-      if files.filename != '':
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
-        filename = secure_filename(files.filename)
-        files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        user['img_url'] = f"static/img/profile_pictures/{filename}"
-    user['name'] = request.form['name']
-    user['bio'] = request.form['bio']
-    session['user'] = user
-    flash("Profile updated", "success")
-    return redirect(url_for('profile'))
+    user_id = session['user']['id']
+    user = User.query.get(user_id)  
+    if request.method == 'POST':
+      if 'profile_picture' in request.files:
+        files = request.files['profile_picture']
+        if files.filename != '':
+          if not os.path.exists(app.config['UPLOAD_FOLDER']):
+              os.makedirs(app.config['UPLOAD_FOLDER'])
+          filename = secure_filename(files.filename)
+          file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+          files.save(file_path)
+          user.img_url = f"static/img/profile_pictures/{filename}"
+      user.name = request.form['name']
+      user.bio = request.form['bio']
+      db.session.commit()
+      flash("Profile updated", "success")
+      return redirect(url_for('profile'))
   
-  return render_template("edit_profile.html", title="Edit Profile", user=user)
-  
-app.secret_key = Config.SERCRET_KEY
+    return render_template("edit_profile.html", title="Edit Profile", user=user)
+
+app.secret_key = Config.SECRET_KEY
+
 @app.route('/logout')
 def logout():
   session.pop('user', None)
