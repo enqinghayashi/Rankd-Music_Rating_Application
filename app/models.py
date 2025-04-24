@@ -5,13 +5,14 @@ from sqlalchemy.schema import PrimaryKeyConstraint
 class User(db.Model):
   __table_name__ = 'User'
   
-  user_id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   username = db.Column(db.String, nullable=False)
   email = db.Column(db.String, nullable=False)
   password = db.Column(db.String, nullable=False)
+  img_url = db.Column(db.String, nullable=False)
 
   def __repr__(self):
-    return 'user_id={}, username={}, email={}, password={}'.format(self.user_id, self.username, self.email, self.password)
+    return 'user_id={}, username={}, email={}, password={} img_url={}'.format(self.user_id, self.username, self.email, self.password, self.img_url)
 
 class Score(db.Model):
   __table_name__ = 'Score'
