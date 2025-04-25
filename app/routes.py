@@ -1,7 +1,9 @@
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session, current_app
+from urllib import response
 from app import app, db
 from app.config import Config
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
 from app.models import User
@@ -110,48 +112,69 @@ def compare_stats():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-  regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@!#$%^&*])[A-Za-z\d@!#$%^&*]{8,}$'
   
   if request.method == 'POST':
+    username = request.form['username']
+    email = request.form['email']
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
     validation_error = validate_password(password, confirmed_password)
     if validation_error:
         return validation_error
+
+    hashed_password = generate_password_hash(password, method = 'pbkdf2:sha256')
+    new_user = User(username=username, email=email, password = hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
     flash("Account created successfully", "success")
     return redirect(url_for('login'))
   return render_template("register.html", title="Register")
+
+@app.route('/validate_user', methods=['POST'])
+def validate_user():
+    username = request.json.get('username')
+    email = request.json.get('email')
+
+    response = {}
+
+    if username:
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            response['username'] = "Username is already taken."
+        else:
+            response['username'] = "Username is available."
+
+    if email:
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            response['email'] = "Email is already registered with another account."
+        else:
+            response['email'] = "Email is available."
+
+    return response
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
   if request.method == 'POST':
     username = request.form['username']
     password = request.form['password']
-#    if username == "":
-#      flash("Username cannot be empty", "error")
-#      return redirect(url_for('login'))
-#    if password == "":
-#      flash("Password cannot be empty", "error")
-#      return redirect(url_for('login'))
-#    pass
-    if username == "admin" and password == "admin":
-      session['user'] = {
-        "username": "admin",
-        "name": "Admin",
-        "bio": "This is a test bio",
-        "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      }
-      flash("Logged in successfully", "success")
-      return redirect(url_for('index'))
-    else:
-      flash("Invalid username or password", "error")
+    user = User.query.filter_by(username=username).first()
+    if not user:
+      flash("User does not exist", "error")
       return redirect(url_for('login'))
+    if not check_password_hash(user.password, password):
+      flash("Incorrect password", "error")
+      return redirect(url_for('login'))
+    session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
+    flash(f"Log in successfully", "success")
+    return redirect(url_for('index'))
   return render_template("login.html", title="Login")
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-  user = session.get('user')
-  return render_template("profile.html", title="Profile", user=user)
+    user_id = session['user']['id']
+    user = User.query.get(user_id)    
+    return render_template("profile.html", title="Profile", user=user)
 
 app.config.from_object(Config)
 def allowed_file(filename):
@@ -159,25 +182,33 @@ def allowed_file(filename):
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
-  user = session ['user']
-  if request.method == 'POST':
-    if 'profile_picture' in request.files:
-      files = request.files['profile_picture']
-      if files.filename != '':
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
-        filename = secure_filename(files.filename)
-        files.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        user['img_url'] = f"static/img/profile_pictures/{filename}"
-    user['name'] = request.form['name']
-    user['bio'] = request.form['bio']
-    session['user'] = user
-    flash("Profile updated", "success")
-    return redirect(url_for('profile'))
-  
-  return render_template("edit_profile.html", title="Edit Profile", user=user)
-  
-app.secret_key = Config.SERCRET_KEY
+    user_id = session['user']['id']
+    user = User.query.get(user_id)  
+    if request.method == 'POST':
+      if 'profile_picture' in request.files:
+        files = request.files['profile_picture']
+        if files.filename != '':
+          old_profile = user.img_url
+          if old_profile and old_profile != 'img/profile_pictures/default.png':
+            old_profile_path = os.path.join(current_app.root_path, 'static', old_profile)
+            if os.path.exists(old_profile_path):
+               os.remove(old_profile_path)
+          if not os.path.exists(app.config['UPLOAD_FOLDER']):
+              os.makedirs(app.config['UPLOAD_FOLDER'])
+          filename = secure_filename(files.filename)
+          file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+          files.save(file_path)
+          user.img_url = f"img/profile_pictures/{filename}"
+      user.name = request.form['name']
+      user.bio = request.form['bio']
+      db.session.commit()
+      flash("Profile updated", "success")
+      return redirect(url_for('profile'))
+    
+    return render_template("edit_profile.html", title="Edit Profile", user=user)
+
+app.secret_key = Config.SECRET_KEY
+
 @app.route('/logout')
 def logout():
   session.pop('user', None)
@@ -204,38 +235,51 @@ def link_to_spotify():
     return "Error"
 
 @app.route('/account_settings')
-def account():
+def account_settings():
   return render_template("account_settings.html", title = "Account Setting")
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
-    user = session.get('users')
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
     if request.method == 'POST':
         current_password = request.form.get('password')
         new_password = request.form.get('new_password')
         confirm_new_password = request.form.get('confirm_new_password')
-        if current_password != user['password']:
+        if not user or not check_password_hash(user.password, current_password):
             flash("Please enter the correct current password", "error")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
             return validation_error
-        user['password'] = new_password
-        session['user'] = user
-        flash("Account created successfully", "success")
-        return redirect(url_for('index'))
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Password updated successfully", "success")
+        return redirect(url_for('account_settings'))
     return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
 def change_email():
-    user = session.get('user')
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
     if request.method == 'POST':
-      user['email'] = request.form['email']
-      session['user'] = user
-      flash("Email updated successfully", "success")
-      return redirect(url_for('account'))
+      new_email = request.form['email']
+      if User.query.filter_by(email=new_email).first():
+            flash("This email is already in use. Please enter a different one", "danger")
+      else:
+            user.email = new_email
+            db.session.commit()
+            session['user']['email'] = new_email
+            flash("Email updated successfully", "success")
+      return redirect(url_for('account_settings'))
     return render_template("change_email.html", title = "change email", user = user)
 
 @app.route('/delete_account', methods=['POST'])
 def delete_account():
-    return "Account Deleted"
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    session.clear()
+    flash('Your account has been deleted. See ya', 'success')
+    return redirect(url_for('index'))

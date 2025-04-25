@@ -10,7 +10,7 @@
                 <h5 class = "card-title text-center">Profile</h5>
                 <div class = "text-center mb-3">
                     <label for="profile_picture" class="form-label"></label>
-                    <img class="card-img-top" src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Profile Image" style="width: 150px; height: 150px;">            <p class = "card-text">Username: {{ user.username }}</p>
+                    <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Current Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
                 </div>
                 <p class = "card-text text-center">Name: {{ user.name }}</p>
                 <p class = "card-text text-center">Bio: {{ user.bio }}</p>
