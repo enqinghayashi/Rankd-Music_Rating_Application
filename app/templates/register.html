@@ -6,69 +6,124 @@
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="card shadow-sm p-4" style="max-width: 400px; width: 100%;">
         <h1 class="text-center mb-4">Register</h1>
-            <form action="/register" method="POST">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="confirm-password" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Confirm your password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register</button>
-            </form>
+        
+        <!-- Display flashed messages for server-side validation errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-            <p class = "mt-3">
-                Already have an account?
-                <a href="{{ url_for('login') }}">Log in here</a>
-            </p>
-        </div>
+        <form action="{{ url_for('register') }}" method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                <div id="username-feedback" class="feedback-message"></div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                <div id="email-feedback" class="feedback-message"></div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirm-password" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Confirm your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+
+        <p class="mt-3 text-center">
+            Already have an account? <a href="{{ url_for('login') }}">Log in here</a>
+        </p>
     </div>
-    <script>
-        document.getElementById('username').addEventListener('input', function () {
-            const username = this.value;
-            fetch('{{ url_for("validate_user") }}', {
+</div>
+
+<style>
+    .feedback-message {
+        font-size: 0.9em;
+        margin-top: 5px;
+        min-height: 20px; /* Reserve space to prevent layout shifts */
+    }
+    .feedback-success {
+        color: green;
+    }
+    .feedback-error {
+        color: red;
+    }
+</style>
+
+<script>
+    // Debounce function to limit API calls while typing
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Function to validate a field (username or email) dynamically
+    async function validateField(field, value) {
+        const payload = {};
+        if (field === 'username') {
+            payload.username = value;
+        } else if (field === 'email') {
+            payload.email = value;
+        }
+
+        try {
+            const response = await fetch('{{ url_for("validate_user") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username: username })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const feedback = document.getElementById('username-feedback');
-                feedback.textContent = data.username;
-                feedback.style.color = data.username === "Username is available." ? "green" : "red";
+                body: JSON.stringify(payload)
             });
-        });
+            const data = await response.json();
+            const feedback = document.getElementById(`${field}-feedback`);
+            
+            if (data[field]) {
+                feedback.textContent = data[field];
+                feedback.classList.remove('feedback-success', 'feedback-error');
+                if (data[field].includes('available')) {
+                    feedback.classList.add('feedback-success');
+                } else {
+                    feedback.classList.add('feedback-error');
+                }
+            } else {
+                feedback.textContent = '';
+                feedback.classList.remove('feedback-success', 'feedback-error');
+            }
+        } catch (error) {
+            console.error(`Error validating ${field}:`, error);
+            const feedback = document.getElementById(`${field}-feedback`);
+            feedback.textContent = 'Error validating. Please try again.';
+            feedback.classList.remove('feedback-success');
+            feedback.classList.add('feedback-error');
+        }
+    }
 
-        document.getElementById('email').addEventListener('input', function () {
-            const email = this.value;
-            fetch('{{ url_for("validate_user") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: email })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const feedback = document.getElementById('email-feedback');
-                feedback.textContent = data.email;
-                feedback.style.color = data.email === "Email is available." ? "green" : "red";
-            });
-        });
-    </script>
-</body>
-</html>
+    // Debounced validation functions for username and email
+    const validateUsernameDebounced = debounce((value) => validateField('username', value), 500);
+    const validateEmailDebounced = debounce((value) => validateField('email', value), 500);
 
+    // Event listeners for input fields
+    document.getElementById('username').addEventListener('input', function () {
+        validateUsernameDebounced(this.value);
+    });
+
+    document.getElementById('email').addEventListener('input', function () {
+        validateEmailDebounced(this.value);
+    });
+</script>
 {% endblock %}
 
