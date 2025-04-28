@@ -151,16 +151,18 @@ def validate_user():
     response = {}
 
     if username:
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
+        existing_username = User.query.filter_by(username=username).first()
+        if existing_username:
             response['username'] = "Username is already taken."
         else:
             response['username'] = "Username is available."
 
     if email:
         existing_email = User.query.filter_by(email=email).first()
+        if validate_email(email):
+            response['email'] = "Invalid email address. Please enter a valid email."
         if existing_email:
-            response['email'] = "Email is already registered with another account."
+           response['email'] = "Email is already registered with another account."
         else:
             response['email'] = "Email is available."
 
