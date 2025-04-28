@@ -174,11 +174,8 @@ def login():
     username = request.form['username']
     password = request.form['password']
     user = User.query.filter_by(username=username).first()
-    if not user:
-      flash("User does not exist", "error")
-      return redirect(url_for('login'))
-    if not check_password_hash(user.password, password):
-      flash("Incorrect password", "error")
+    if not user or not check_password_hash(user.password, password):
+      flash("Incorrect username or password", "danger")
       return redirect(url_for('login'))
     session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
@@ -227,7 +224,7 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 def logout():
   session.pop('user', None)
-  flash("Logged out successfully", "success")
+  flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
 @app.route('/auth')
