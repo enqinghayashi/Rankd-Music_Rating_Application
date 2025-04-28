@@ -278,14 +278,18 @@ def change_email():
     user = User.query.get(user_id)
     if request.method == 'POST':
       new_email = request.form['email']
+      email_invalid = validate_email(new_email)
       if User.query.filter_by(email=new_email).first():
             flash("This email is already in use. Please enter a different one", "danger")
+            return redirect(url_for('change_email'))
+      if email_invalid:
+         return redirect(url_for('change_email'))
       else:
             user.email = new_email
             db.session.commit()
             session['user']['email'] = new_email
             flash("Email updated successfully", "success")
-      return redirect(url_for('account_settings'))
+            return redirect(url_for('account_settings'))
     return render_template("change_email.html", title = "change email", user = user)
 
 @app.route('/delete_account', methods=['POST'])
