@@ -260,15 +260,16 @@ def change_password():
         new_password = request.form.get('new_password')
         confirm_new_password = request.form.get('confirm_new_password')
         if not user or not check_password_hash(user.password, current_password):
-            flash("Please enter the correct current password", "error")
+            flash("Please enter the correct current password", "danger")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
-            return validation_error
-        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
-        db.session.commit()
-        flash("Password updated successfully", "success")
-        return redirect(url_for('account_settings'))
+            return redirect(url_for('change_password'))
+        else:
+          user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+          db.session.commit()
+          flash("Password updated successfully", "success")
+          return redirect(url_for('account_settings'))
     return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
@@ -294,5 +295,5 @@ def delete_account():
     db.session.delete(user)
     db.session.commit()
     session.clear()
-    flash('Your account has been deleted. See ya', 'success')
+    flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
