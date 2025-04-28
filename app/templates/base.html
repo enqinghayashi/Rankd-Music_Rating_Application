@@ -11,19 +11,28 @@
   <body>
     <nav id="top-nav" class="navbar navbar-expand bg-primary fixed-top">
       <div class="container-fluid">
+        <div class="d-flex align-items-center">
         <a class="navbar-brand" href="/home" aria-current="page">Rankd</a>
-        <ul class="navbar-nav d-none d-lg-flex">
+        {% if 'spotify_access' in session %}
+        <ul class="navbar-nav d-flex flex-row ms-3">
           <li class="nav-item">
-            <a class="nav-link" href="/scores">Scores</a>
+            <a class="nav-link text-light" href="/scores">Scores</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/stats">Stats</a>
+            <a class="nav-link text-light" href="/stats">Stats</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/compare_scores">Share</a>
+            <a class="nav-link text-light" href="/compare_scores">Share</a>
           </li>
         </ul>
-        <div class="col"></div>
+        {% endif %}
+        {% if 'user' in session %}
+        <a class="nav-link btn-outline-light ms-3" href="{{ url_for('link_to_spotify') }}">
+          <img src="{{ url_for('static', filename='img/spotify_logo.jpeg') }}" alt="Spotify" class="img-fluid rounded-circle" style="width: 40px; height: 40px;">
+        </a>
+        {% endif %}
+      </div>
+      
         {% if 'user' in session %}
         <div class="dropdown">
           <a class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expended="false">

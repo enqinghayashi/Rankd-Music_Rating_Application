@@ -225,7 +225,8 @@ def link_to_spotify():
     return redirect(auth.generateAuthURL())
   elif (num_args == 1): # After redirect
     if ('code' in request.args.keys()): # User accepted the authorization
-      auth.completeAuth(request.args['code'])
+      spotify_token = auth.completeAuth(request.args['code'])
+      session['spotify_access'] = spotify_token
       return "Success!"
     elif ('error' in request.args.keys()): # User declined the authorization
       return "Failure"
