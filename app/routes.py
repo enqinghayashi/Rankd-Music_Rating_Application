@@ -301,3 +301,12 @@ def delete_account():
     session.clear()
     flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
+
+@app.route('/friends')
+def friends():
+    ### MISSING SEARCH FRIEND BY LINK FUNCTION
+    your_friend_link = "https://example.com/addfriend/your-unique-link"
+    return render_template(
+        'friends.html',
+        your_friend_link=your_friend_link,
+    )
