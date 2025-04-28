@@ -7,7 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
 from app.models import User
-from app.util import validate_password
+from app.util import validate_password, validate_email
+
 
 @app.route('/')
 @app.route('/index')
@@ -119,9 +120,21 @@ def register():
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
     validation_error = validate_password(password, confirmed_password)
+    email_invalid = validate_email(email)
     if validation_error:
-        return validation_error
+        flash(validation_error, "danger")
+        return redirect(url_for('register'))
+    if email_invalid:
+        flash("Invalid email address. Please enter a valid email.", "danger")
+        return redirect(url_for('register'))
 
+    if User.query.filter_by(username=username).first():
+        flash("Username is already taken. Please choose a different one.", "danger")
+        return redirect(url_for('register'))
+    if User.query.filter_by(email=email).first():
+        flash("Email is already registered. Please use a different email.", "danger")
+        return redirect(url_for('register'))  
+        
     hashed_password = generate_password_hash(password, method = 'pbkdf2:sha256')
     new_user = User(username=username, email=email, password = hashed_password)
     db.session.add(new_user)
