@@ -12,6 +12,14 @@
     <nav id="top-nav" class="navbar navbar-expand bg-primary fixed-top">
       <div class="container-fluid">
         <a class="navbar-brand" href="/home" aria-current="page">Rankd</a>
+        {% if 'user' in session %}
+        <a class = "nav-link btn-outline-light float-end" href = "{{ url_for('link_to_spotify')}}" >
+          <img src ="{{ url_for('static', filename='img/spotify_logo.jpeg') }}" alt="Spotify" class="img-fluid rounded-circle" style="width: 40px; height: 40px;">
+        </a>
+        {% else %}
+        {% endif %}
+
+        {% if 'spotify_access' in session %}
         <ul class="navbar-nav d-none d-lg-flex">
           <li class="nav-item">
             <a class="nav-link" href="/scores">Scores</a>
@@ -24,6 +32,9 @@
           </li>
         </ul>
         <div class="col"></div>
+        {% else %}
+        {% endif %}
+
         {% if 'user' in session %}
         <div class="dropdown">
           <a class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expended="false">
