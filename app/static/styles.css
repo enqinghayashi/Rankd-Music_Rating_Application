@@ -7,6 +7,9 @@
 
 @import "nav.css";
 @import "item.css";
+@import "comparison.css";
+@import "bar_graph.css";
+@import "percentage_circle.css";
 @import "page_top.css";
 
 body {
