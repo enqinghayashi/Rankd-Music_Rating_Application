@@ -3,7 +3,8 @@
 .item {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: start;
+  align-items: center;
   width: 100%;
   border: 1px solid #A0A0A0;
   border-radius: 0.5rem;
