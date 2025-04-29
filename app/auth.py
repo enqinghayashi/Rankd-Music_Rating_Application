@@ -12,6 +12,7 @@ class Auth:
     self.code_verifier = ""
     self.code_challenge = ""
     self.auth_code = ""
+    # after user has been authorized the below are all that should ever be altered
     self.access_token = ""
     self.refresh_token = ""
     self.time_token_granted = ""
@@ -116,7 +117,8 @@ class Auth:
     self.auth_code = code
     response = self.requestAccessToken()
     return self.setCurrentToken(response)
-  
+
+
   """
   Request a token refresh from the Spotify API.
   """
@@ -150,5 +152,5 @@ class Auth:
       return self.access_token
     else:
       return self.access_token
-  
+
 auth = Auth()
