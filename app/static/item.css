@@ -3,7 +3,8 @@
 .item {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: start;
+  align-items: center;
   width: 100%;
   border: 1px solid #A0A0A0;
   border-radius: 0.5rem;
@@ -16,6 +17,7 @@
   border: 1px solid #A0A0A0;
   border-radius: 0.5rem;
   margin-right: 1rem;
+  height: 50px;
 }
 
 .item-score {
@@ -47,4 +49,16 @@
 .item-desc p {
   white-space: nowrap;
   margin-bottom: 0px;
+}
+
+.item-lg {
+  font-size: 1.25rem;
+}
+
+.item-lg .item-img {
+  height: 80px;
+}
+
+.item-borderless {
+  border-width: 0px;
 }

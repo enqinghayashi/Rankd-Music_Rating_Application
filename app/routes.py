@@ -47,9 +47,128 @@ def scores():
   ]
   return render_template("scores.html", title="Scores", items=items)
 
+track = {
+  "id": "r",
+  "type": "track",
+  "title": "Welcome To The Black Parade", 
+  "creator": "My Chemical Romance", 
+  "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+}
+album = {
+  "id": "",
+  "type": "album",
+  "title": "The Black Parade", 
+  "creator": "My Chemical Romance", 
+  "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+}
+artist = {
+  "id": "",
+  "type": "artist",
+  "title": "My Chemical Romance", 
+  "creator": "My Chemical Romance", 
+  "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
+}
+
+item_comparisons = [
+  (
+    "Top Track", 
+    {
+      "id": "r",
+      "type": "track",
+      "title": "Welcome To The Black Parade", 
+      "creator": "My Chemical Romance", 
+      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+    },
+    {
+      "id": "",
+      "type": "track",
+      "title": "The End.", 
+      "creator": "My Chemical Romance", 
+      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+    }
+  ),
+  (
+    "Top Album", 
+    {
+      "id": "",
+      "type": "album",
+      "title": "The Black Parade", 
+      "creator": "My Chemical Romance", 
+      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+    },
+    {
+      "id": "",
+      "type": "album",
+      "title": "The Black Parade", 
+      "creator": "My Chemical Romance", 
+      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
+    }
+  ),
+  (
+    "Top Artist", 
+    {
+      "id": "",
+      "type": "artist",
+      "title": "My Chemical Romance", 
+      "creator": "My Chemical Romance", 
+      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
+    },
+    {
+      "id": "",
+      "type": "artist",
+      "title": "My Chemical Romance", 
+      "creator": "My Chemical Romance", 
+      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
+    }
+  )
+]
+outlier_comparisons = [
+  ("Track Outliers", [("Highest Rated Least Listened", track),("Lowest Rated Most Listened", track)]),
+  ("Album Outliers", [("Highest Rated Least Listened", album),("Lowest Rated Most Listened", album)]),
+  ("Artist Outliers", [("Highest Rated Least Listened", artist),("Lowest Rated Most Listened", artist)])
+]
+graphs = [
+  {
+    "title": "Top 10 Years by Average Rating",
+    "data": [
+       ("2023", 9.5, 0, 10), #these are label, data, min, max
+       ("2024", 9.1, 0, 10),
+       ("2013", 9.0, 0, 10),
+       ("2000", 8.8, 0, 10),
+       ("2004", 8.5, 0, 10),
+       ("2005", 8.2, 0, 10),
+       ("2012", 7.9, 0, 10),
+       ("2011", 7.5, 0, 10),
+       ("1999", 7.2, 0, 10),
+       ("1983", 7.0, 0, 10),
+    ]
+  },
+  {
+    "title": "Top 10 Years by Songs In Your Most Listened",
+    "data": [
+       ("2023", 11, 0, 11), #these are label, data, min, max
+       ("2024", 9, 0, 11),
+       ("2013", 8, 0, 11),
+       ("2000", 7, 0, 11),
+       ("2004", 6, 0, 11),
+       ("2005", 6, 0, 11),
+       ("2012", 5, 0, 11),
+       ("2011", 5, 0, 11),
+       ("1999", 5, 0, 11),
+       ("1983", 5, 0, 11),
+    ]
+  }
+]
+
 @app.route('/stats')
 def stats():
-  return render_template("stats.html", title="Stats")
+  return render_template("stats.html",\
+                         title="Stats",\
+                         item_comparisons=item_comparisons,\
+                         outlier_comparisons=outlier_comparisons,\
+                         graphs=graphs,\
+                         similarity_percentage=65\
+  )
 
 @app.route('/compare_scores')
 def compare_scores():
@@ -109,8 +228,13 @@ def compare_scores():
 
 @app.route('/compare_stats')
 def compare_stats():
-  return render_template("compare_stats.html", title="Compare Stats")
-
+  return render_template("compare_stats.html",\
+                         title="Compare Stats",\
+                         item_comparisons=item_comparisons,\
+                         outlier_comparisons=outlier_comparisons,\
+                         graphs=graphs,\
+                         similarity_percentage=65\
+  )
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
