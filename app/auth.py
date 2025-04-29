@@ -111,6 +111,7 @@ class Auth:
     self.access_token = data['access_token']
     self.refresh_token = data['refresh_token']
     self.time_token_granted = datetime.now()
+    self.storeToken()
     return self.time_token_granted
   
   """
