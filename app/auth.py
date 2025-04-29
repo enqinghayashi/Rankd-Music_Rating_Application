@@ -236,7 +236,8 @@ class Auth:
   def getCurrentToken(self):
     # check if this is a fresh auth instance
     if (self.access_token == ""):
-      if (not self.restoreToken()): # user has not been authorized yet
+      # restore the auth state from stored token
+      if (not self.restoreToken()):
         raise Exception("User has not been authorized.")
     
     # get the current token
