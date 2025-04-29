@@ -16,6 +16,7 @@ from app.util import validate_password, validate_email
 def index():
   return render_template("index.html", title="Home")
 
+@app.route('/score')
 @app.route('/scores')
 def scores():
   items = [
@@ -239,9 +240,8 @@ def link_to_spotify():
   elif (num_args == 1): # After redirect
     if ('code' in request.args.keys()): # User accepted the authorization
       auth.completeAuth(request.args['code'])
-      auth.storeToken()
       flash("Authorization successful!", "success")
-      return redirect(url_for('score'))
+      return redirect(url_for('scores'))
     elif ('error' in request.args.keys()): # User declined the authorization
       flash("Authorization failed! Please try again.", "danger")
       return redirect(url_for('profile'))

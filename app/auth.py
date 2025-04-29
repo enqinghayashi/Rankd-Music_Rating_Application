@@ -9,6 +9,18 @@ from flask import session
 from app import db
 from app.models import User
 
+"""
+USAGE GUIDE
+
+GETTING A TOKEN TO USE FOR AN API REQUEST
+    
+    call auth.getCurrentToken() and use the return value as the token
+
+    if the user has not been authorized getCurrentToken() will raise an exception
+
+YOU SHOULD NOT NEED TO USE ANY OTHER METHOD MANUALLY OR ACCESS ANY PART OF AUTH
+"""
+
 class Auth:
   def __init__(self):
     self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
@@ -123,7 +135,6 @@ class Auth:
     response = self.requestAccessToken()
     return self.setCurrentToken(response)
 
-
   """
   Request a token refresh from the Spotify API.
   """
@@ -147,18 +158,6 @@ class Auth:
     return self.setCurrentToken(response)
   
   """
-  Gets a current token. If current token is close to expiring, requests a new one.
-  """
-  def getCurrentToken(self):
-    current_time = datetime.now()
-    # token expires in 60 minutes so refresh every 55 to be safe
-    if ((current_time - self.time_token_granted) > timedelta(minutes=55)):
-      self.refreshCurrentToken()
-      return self.access_token
-    else:
-      return self.access_token
-
-  """
   Stores a token in the session.
   """
   def storeSessionToken(self): 
@@ -180,10 +179,73 @@ class Auth:
     db.session.commit()
   
   """
-  Stores a token in the session, and the refresh token in the database
+  Stores a token in the session, and the refresh token in the database.
   """
   def storeToken(self):
     self.storeSessionToken()
     self.storeDatabaseToken()
+
+  """
+  Restores auth from a session token.
+
+  Returns false if no session_token exists.
+  """
+  def restoreSessionToken(self):
+    try:
+      session_token = session["spotify_access"]
+      self.setCurrentToken(session_token)
+      return True
+    except KeyError:
+      return False
+
+  """
+  Restores auth from database token. Assumes user is logged in.
+
+  Returns false if user has not been authorized.
+  """
+  def restoreDatabaseToken(self):
+    try:
+      user_id = session["user"]["id"]
+      user = User.query.get(user_id)
+    except KeyError:
+      return False
+    
+    refresh_token = user.refresh_token
+    if refresh_token == None:
+      return False
+    
+    self.refresh_token = refresh_token
+    self.refreshCurrentToken()
+    return True
+
+  """
+  Restores auth from previous usage (session or database if no token in session).
+
+  Returns false if the user has not been authorized.
+  """
+  def restoreToken(self):
+    if (self.restoreSessionToken()):
+      return True
+    return self.restoreDatabaseToken()
+  
+  """
+  Gets a current token. If current token is close to expiring, requests a new one.
+
+  Raises an exception if user has not been authorized.
+  """
+  def getCurrentToken(self):
+    # check if this is a fresh auth instance
+    if (self.access_token == ""):
+      if (not self.restoreToken()): # user has not been authorized yet
+        raise Exception("User has not been authorized.")
+    
+    # get the current token
+    current_time = datetime.now()
+    # token expires in 60 minutes so refresh every 55 to be safe
+    if ((current_time - self.time_token_granted) > timedelta(minutes=55)):
+      self.refreshCurrentToken()
+      return self.access_token
+    else:
+      return self.access_token
 
 auth = Auth()
