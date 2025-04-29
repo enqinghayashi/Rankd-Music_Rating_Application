@@ -1,0 +1,29 @@
+.bar-graph {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1rem;
+}
+
+.bar-graph-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.bar-graph-group div {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.bar-graph-label {
+  font-weight: 600;
+}
+
+.bar-graph-bar {
+  border-radius: 1rem;
+  height: 15px;
+  background-color: gray;
+}
