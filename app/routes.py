@@ -7,7 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
 from app.models import User
-from app.util import validate_password
+from app.util import validate_password, validate_email
+
 
 @app.route('/')
 @app.route('/index')
@@ -119,9 +120,21 @@ def register():
     password = request.form['password']
     confirmed_password = request.form['confirm_password']
     validation_error = validate_password(password, confirmed_password)
+    email_invalid = validate_email(email)
     if validation_error:
-        return validation_error
+        flash(validation_error, "danger")
+        return redirect(url_for('register'))
+    if email_invalid:
+        flash("Invalid email address. Please enter a valid email.", "danger")
+        return redirect(url_for('register'))
 
+    if User.query.filter_by(username=username).first():
+        flash("Username is already taken. Please choose a different one.", "danger")
+        return redirect(url_for('register'))
+    if User.query.filter_by(email=email).first():
+        flash("Email is already registered. Please use a different email.", "danger")
+        return redirect(url_for('register'))  
+        
     hashed_password = generate_password_hash(password, method = 'pbkdf2:sha256')
     new_user = User(username=username, email=email, password = hashed_password)
     db.session.add(new_user)
@@ -138,16 +151,18 @@ def validate_user():
     response = {}
 
     if username:
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
+        existing_username = User.query.filter_by(username=username).first()
+        if existing_username:
             response['username'] = "Username is already taken."
         else:
             response['username'] = "Username is available."
 
     if email:
         existing_email = User.query.filter_by(email=email).first()
+        if validate_email(email):
+            response['email'] = "Invalid email address. Please enter a valid email."
         if existing_email:
-            response['email'] = "Email is already registered with another account."
+           response['email'] = "Email is already registered with another account."
         else:
             response['email'] = "Email is available."
 
@@ -159,11 +174,8 @@ def login():
     username = request.form['username']
     password = request.form['password']
     user = User.query.filter_by(username=username).first()
-    if not user:
-      flash("User does not exist", "error")
-      return redirect(url_for('login'))
-    if not check_password_hash(user.password, password):
-      flash("Incorrect password", "error")
+    if not user or not check_password_hash(user.password, password):
+      flash("Incorrect username or password", "danger")
       return redirect(url_for('login'))
     session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
@@ -212,7 +224,7 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 def logout():
   session.pop('user', None)
-  flash("Logged out successfully", "success")
+  flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
 @app.route('/auth')
@@ -248,15 +260,16 @@ def change_password():
         new_password = request.form.get('new_password')
         confirm_new_password = request.form.get('confirm_new_password')
         if not user or not check_password_hash(user.password, current_password):
-            flash("Please enter the correct current password", "error")
+            flash("Please enter the correct current password", "danger")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
-            return validation_error
-        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
-        db.session.commit()
-        flash("Password updated successfully", "success")
-        return redirect(url_for('account_settings'))
+            return redirect(url_for('change_password'))
+        else:
+          user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+          db.session.commit()
+          flash("Password updated successfully", "success")
+          return redirect(url_for('account_settings'))
     return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
@@ -265,14 +278,18 @@ def change_email():
     user = User.query.get(user_id)
     if request.method == 'POST':
       new_email = request.form['email']
+      email_invalid = validate_email(new_email)
       if User.query.filter_by(email=new_email).first():
             flash("This email is already in use. Please enter a different one", "danger")
+            return redirect(url_for('change_email'))
+      if email_invalid:
+         return redirect(url_for('change_email'))
       else:
             user.email = new_email
             db.session.commit()
             session['user']['email'] = new_email
             flash("Email updated successfully", "success")
-      return redirect(url_for('account_settings'))
+            return redirect(url_for('account_settings'))
     return render_template("change_email.html", title = "change email", user = user)
 
 @app.route('/delete_account', methods=['POST'])
@@ -282,5 +299,14 @@ def delete_account():
     db.session.delete(user)
     db.session.commit()
     session.clear()
-    flash('Your account has been deleted. See ya', 'success')
+    flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
+
+@app.route('/friends')
+def friends():
+    ### MISSING SEARCH FRIEND BY LINK FUNCTION
+    your_friend_link = "https://example.com/addfriend/your-unique-link"
+    return render_template(
+        'friends.html',
+        your_friend_link=your_friend_link,
+    )
