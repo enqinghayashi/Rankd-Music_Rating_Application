@@ -224,6 +224,7 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 def logout():
   session.pop('user', None)
+  session.pop("spotify_access", None)
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
@@ -237,13 +238,16 @@ def link_to_spotify():
     return redirect(auth.generateAuthURL())
   elif (num_args == 1): # After redirect
     if ('code' in request.args.keys()): # User accepted the authorization
-      spotify_token = auth.completeAuth(request.args['code'])
-      session['spotify_access'] = spotify_token
-      return "Success!"
+      auth.completeAuth(request.args['code'])
+      auth.storeToken()
+      flash("Authorization successful!", "success")
+      return redirect(url_for('score'))
     elif ('error' in request.args.keys()): # User declined the authorization
-      return "Failure"
+      flash("Authorization failed! Please try again.", "danger")
+      return redirect(url_for('profile'))
     else: # An invalid argument has been given to the route (i.e. user input on purpose)
-      return "Error"
+      flash("Authorization failed! Please try again.", "danger")
+      return redirect(url_for('profile'))
   else: # This page should never receive more than 1 argument
     return "Error"
 

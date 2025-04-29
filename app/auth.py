@@ -5,6 +5,10 @@ from urllib.parse import urlencode
 import requests
 from datetime import datetime, timedelta
 
+from flask import session
+from app import db
+from app.models import User
+
 class Auth:
   def __init__(self):
     self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
@@ -152,5 +156,33 @@ class Auth:
       return self.access_token
     else:
       return self.access_token
+
+  """
+  Stores a token in the session.
+  """
+  def storeSessionToken(self): 
+    session_token = {
+      "access_token": self.access_token,
+      "refresh_token": self.refresh_token,
+      "time_granted": self.time_token_granted
+    }
+    session["spotify_access"] = session_token
+    return session_token
+  
+  """
+  Stores the refresh token in the database.
+  """
+  def storeDatabaseToken(self):
+    user_id = session['user']['id']
+    user = User.query.get(user_id)
+    user.refresh_token = self.refresh_token
+    db.session.commit()
+  
+  """
+  Stores a token in the session, and the refresh token in the database
+  """
+  def storeToken(self):
+    self.storeSessionToken()
+    self.storeDatabaseToken()
 
 auth = Auth()
