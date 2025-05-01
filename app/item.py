@@ -33,12 +33,18 @@ class Item:
 
     # Image fields (and album for tracks)
     if self.type == "track":
-      self.img_url = data["album"]["images"][0]["url"]
+      try:
+        self.img_url = data["album"]["images"][0]["url"]
+      except IndexError:
+        pass
       self.album = data["album"]["name"]
       self.album_id = data["album"]["id"]
     else: 
-      self.img_url = data["images"][0]["url"]
-    
+      try:
+        self.img_url = data["images"][0]["url"]
+      except IndexError:
+        pass
+   
     # Artist fields
     if self.type == "track" or self.type == "album":
       for artist in data["artists"]:

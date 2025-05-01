@@ -22,10 +22,7 @@ def index():
 @app.route('/score')
 @app.route('/scores')
 def scores():
-  track = Item(data["tracks"]["items"][0])
-  album = Item(data["albums"]["items"][0])
-  artist = Item(data["artists"]["items"][0])
-  items = [track, album, artist]
+  items = api.search("The Black Parade")
   return render_template("scores.html", title="Scores", items=items)
 
 track = {

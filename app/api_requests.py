@@ -1,5 +1,6 @@
 import requests
 from app.auth import auth
+from app.item import Item
 
 class API:
   def __init__(self):
@@ -42,6 +43,18 @@ class API:
     }
     response = self.api_request("search", params)
     data = response.json()
-    return data
+
+    search_items = []
+    item_types = type.split(',')
+    if "track" in item_types:
+      for track in data["tracks"]["items"]:
+        search_items.append(Item(track))
+    if "album" in item_types:
+      for album in data["albums"]["items"]:
+        search_items.append(Item(album))
+    if "artist" in item_types:
+      for artist in data["artists"]["items"]:
+        search_items.append(Item(artist))
+    return search_items
 
 api = API()

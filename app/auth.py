@@ -163,13 +163,8 @@ class Auth:
   Stores a token in the session.
   """
   def storeSessionToken(self): 
-    session_token = {
-      "access_token": self.access_token,
-      "refresh_token": self.refresh_token,
-      "time_granted": self.time_token_granted
-    }
-    session["spotify_access"] = session_token
-    return session_token
+    session["refresh_token"] = self.refresh_token
+    return session["refresh_token"]
   
   """
   Stores the refresh token in the database.
@@ -194,8 +189,8 @@ class Auth:
   """
   def restoreSessionToken(self):
     try:
-      session_token = session["spotify_access"]
-      self.setCurrentToken(session_token)
+      self.refresh_token = session["refresh_token"]
+      self.refreshCurrentToken()
       return True
     except KeyError:
       return False
