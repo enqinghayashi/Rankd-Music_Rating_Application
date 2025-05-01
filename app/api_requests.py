@@ -30,7 +30,7 @@ class API:
   """
   Make a search request to the API with the given query.
 
-  NOTE: The limit applies to each type. I.e. a limit of 5 returns 5 tracks, 5 albums, and 5 artists if type is left as default.
+  NOTE: The limit applies to each type independently. I.e. a limit of 5 returns 5 tracks, 5 albums, and 5 artists if type is left as default.
   """
   def search(self, query, offset=0, limit=5, type="track,album,artist"):
     query = self.sanitize_query(query)

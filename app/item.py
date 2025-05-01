@@ -1,0 +1,54 @@
+from flask import session
+from app import db
+from app.models import Score
+
+class Item:
+  def __init__(self, data):
+    """
+    List of fields for documentation purposes.
+    """
+    self.id = "" # The ID of the item, used for API requests
+    self.score = "" # User rating from the database if it exists
+    
+    self.type = "" # track, album, artist
+    self.title = "" # Title of the item e.g. My Chemical Romance
+    self.creator = "" # String of artists e.g. "ROSE, Bruno Mars", "My Chemical Romance" (same as title for artists)
+    self.img_url = "" # Image to display
+    
+    self.album = "" # Name of album if item is track, empty if album or artist (Mostly used for search)
+    self.album_id = "" # If the item is a track, the id of the album it belongs to, otherwise blank
+    
+    self.artist_ids = [] # The IDs of the artists if item is a track or album
+    
+    """
+    Setting fields.
+    """
+    # General fields
+    self.id = data.id
+    user_id = session["user_id"]
+    # NEED TO HANDLE ERRORS HERE FOR DB QUERY
+    self.score = Score.query.get({"user_id": user_id, "item_id": self.id})
+    self.type = data.type
+    self.title = data.name
+
+    # Image fields (and album for tracks)
+    if self.type == "track":
+      self.img_url = data.album.images[0].url
+      self.album = data.album.name
+      self.album_id = data.album.id
+    else: 
+      self.img_url = data.images[0].url
+    
+    # Artist fields
+    if self.type == "track" or self.type == "album":
+      for artist in data.artists:
+        self.artist_ids.append(artist.id)
+        self.creator += artist.name + ", "
+      self.creator = self.creator[0:(len(self.creator)-2)] # Remove the last ", "
+    else:
+      self.artist_ids.append(self.id)
+      self.creator = self.title
+       
+
+
+    
