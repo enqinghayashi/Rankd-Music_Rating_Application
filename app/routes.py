@@ -10,6 +10,8 @@ from app.models import User
 from app.util import validate_password, validate_email
 from app.api_requests import api
 
+from app.item import Item
+from example_data import data
 
 @app.route('/')
 @app.route('/index')
@@ -20,32 +22,10 @@ def index():
 @app.route('/score')
 @app.route('/scores')
 def scores():
-  items = [
-    {
-      "id": "",
-      "type": "track",
-      "title": "Welcome To The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "10"
-    },
-    {
-      "id": "",
-      "type": "album",
-      "title": "The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "9.9"
-    },
-    {
-      "id": "",
-      "type": "artist",
-      "title": "My Chemical Romance", 
-      "creator": "My Chemical Romance", 
-      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
-      "score": ""
-    }
-  ]
+  track = Item(data["tracks"]["items"][0])
+  album = Item(data["albums"]["items"][0])
+  artist = Item(data["artists"]["items"][0])
+  items = [track, album, artist]
   return render_template("scores.html", title="Scores", items=items)
 
 track = {

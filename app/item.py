@@ -24,31 +24,28 @@ class Item:
     Setting fields.
     """
     # General fields
-    self.id = data.id
-    user_id = session["user_id"]
+    self.id = data["id"]
+    user_id = session["user"]["id"]
     # NEED TO HANDLE ERRORS HERE FOR DB QUERY
-    self.score = Score.query.get({"user_id": user_id, "item_id": self.id})
-    self.type = data.type
-    self.title = data.name
+    #self.score = Score.query.get({"user_id": user_id, "item_id": self.id})
+    self.type = data["type"]
+    self.title = data["name"]
 
     # Image fields (and album for tracks)
     if self.type == "track":
-      self.img_url = data.album.images[0].url
-      self.album = data.album.name
-      self.album_id = data.album.id
+      self.img_url = data["album"]["images"][0]["url"]
+      self.album = data["album"]["name"]
+      self.album_id = data["album"]["id"]
     else: 
-      self.img_url = data.images[0].url
+      self.img_url = data["images"][0]["url"]
     
     # Artist fields
     if self.type == "track" or self.type == "album":
-      for artist in data.artists:
-        self.artist_ids.append(artist.id)
-        self.creator += artist.name + ", "
+      for artist in data["artists"]:
+        self.artist_ids.append(artist["id"])
+        self.creator += artist["name"] + ", "
       self.creator = self.creator[0:(len(self.creator)-2)] # Remove the last ", "
     else:
       self.artist_ids.append(self.id)
       self.creator = self.title
        
-
-
-    
