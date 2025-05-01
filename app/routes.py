@@ -46,7 +46,6 @@ def scores():
       "score": ""
     }
   ]
-  api.search("My Chemical Romance")
   return render_template("scores.html", title="Scores", items=items)
 
 track = {
