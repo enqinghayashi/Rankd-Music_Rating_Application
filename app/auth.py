@@ -115,11 +115,11 @@ class Auth:
     return requests.post(url, headers=headers, data=data)
   
   """
-  Parses the response into the access token and refresh token.
+  Parses json token into the access token and refresh token.
+  
   Stores the time the token was granted so that we can refresh the token before it expires.
   """
-  def setCurrentToken(self, response):
-    data = response.json()
+  def setCurrentToken(self, data):
     self.access_token = data['access_token']
     self.refresh_token = data['refresh_token']
     self.time_token_granted = datetime.now()
@@ -133,7 +133,8 @@ class Auth:
   def completeAuth(self, code):
     self.auth_code = code
     response = self.requestAccessToken()
-    return self.setCurrentToken(response)
+    data = response.json()
+    return self.setCurrentToken(data)
 
   """
   Request a token refresh from the Spotify API.
@@ -155,7 +156,8 @@ class Auth:
   """
   def refreshCurrentToken(self):
     response = self.requestTokenRefresh()
-    return self.setCurrentToken(response)
+    data = response.json()
+    return self.setCurrentToken(data)
   
   """
   Stores a token in the session.
@@ -245,8 +247,6 @@ class Auth:
     # token expires in 60 minutes so refresh every 55 to be safe
     if ((current_time - self.time_token_granted) > timedelta(minutes=55)):
       self.refreshCurrentToken()
-      return self.access_token
-    else:
-      return self.access_token
+    return self.access_token
 
 auth = Auth()

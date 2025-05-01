@@ -8,6 +8,7 @@ import os
 from app.auth import auth
 from app.models import User
 from app.util import validate_password, validate_email
+from app.api_requests import api
 
 
 @app.route('/')
@@ -45,6 +46,7 @@ def scores():
       "score": ""
     }
   ]
+  api.search("My Chemical Romance")
   return render_template("scores.html", title="Scores", items=items)
 
 track = {
