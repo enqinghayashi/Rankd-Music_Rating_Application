@@ -58,29 +58,46 @@ class API:
     return search_items
   
   """
-  Get Track.
+  Get a single item from the API.
+
+  Type is one of track, album, or artist
   """
-  def getTrack(self, id):
-    response = self.api_request("tracks/" + id)
+  def getItem(self, type, id):
+    allowed_types = ["track", "album", "artist"]
+    if type not in allowed_types:
+      return False
+    response = self.api_request(type + "s/" + id)
     return Item(response)
   
   """
-  Get Several Tracks.
+  Get several items of the same type.
 
-  ids is an array of ids
+  Type is one of tracks, albums, or artists.
+  ids is an array of ids.
+
+  Raises an exception on error
   """
-  def getSeveralTracks(self, ids):
+  def getSeveralItems(self, type, ids):
+    allowed_types = ["tracks", "albums", "artists"]
+    if type not in allowed_types:
+      raise ValueError("Type is not of allowed types.")
+    
+    # Enforce maximum request lengths
+    if type == "albums" and len(ids) > 20:
+      raise ValueError("Cannot request more than 20 album ids at a time.")
+    elif type != "albums" and len(ids) > 50:
+      raise ValueError("cannot request more than 50 Tracks or Artists at a time.")
+
     ids_str = ""
     for id in ids:
       ids_str += "," + id
     ids_str = ids_str[1:] # remove first comma
     params = {"ids":ids_str}
     
-    response = self.api_request("tracks", params)
-    tracks = []
-    for track in response["tracks"]:
-      tracks.append(Item(track))
-    return tracks
-
+    response = self.api_request(type, params)
+    items = []
+    for item in response[type]:
+      items.append(Item(item))
+    return items
 
 api = API()
