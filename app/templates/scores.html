@@ -32,27 +32,33 @@
         <button class="btn btn-secondary" id="sort-direction"><i class="bi bi-sort-down"></i></button>
       </div>
       <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
-        {% for item in items %}
-        <div class="item item-type-{{ item.type }}">
-          <input type="text" class="item-score-input col-2 col-lg-1" placeholder="/10" value="{{ item.score }}">
-          <img class="item-img" src="{{ item.img_url }}" alt="...">
-          <div class="item-desc col">
-            <p class="item-title">{{ item.title }}</p>
-            {% if item.type != 'artist' %}
-            <p class="item-creator">{{ item.creator }}</p>
-            {% endif %}
+        <div id="loaded-scores" class="w-100">
+          {% for item in items %}
+          <div class="item item-type-{{ item.type }}">
+            <input type="text" class="item-score-input col-2 col-lg-1" placeholder="/10" value="{{ item.score }}">
+            <img class="item-img" src="{{ item.img_url }}" alt="...">
+            <div class="item-desc col">
+              <p class="item-title">{{ item.title }}</p>
+              {% if item.type != 'artist' %}
+              <p class="item-creator">{{ item.creator }}</p>
+              {% endif %}
+            </div>
+            <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary">Save</button>
           </div>
-          <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary">Save</button>
+          {% endfor %}
         </div>
-        {% endfor %}
-        <div class="item placeholder-glow">
-          <input type="text" class="item-score-input placeholder disabled col-2 col-lg-1" placeholder="/10" aria-disabled="true">
-          <img src="..." class="item-img placeholder" alt="...">
-          <div class="item-desc col">
-            <span class="item-title mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
-            <span class="item-creator mb-0 placeholder col-5" aria-disabled="true"></span>
+        <div id="placeholders" class="w-100">
+          {% for i in range(0,12) %}
+          <div class="item placeholder-glow">
+            <input type="text" class="item-score-input placeholder disabled col-2 col-lg-1" placeholder="/10" aria-disabled="true">
+            <img src="..." class="item-img placeholder" alt="...">
+            <div class="item-desc col">
+              <span class="item-title mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
+              <span class="item-creator mb-0 placeholder col-5" aria-disabled="true"></span>
+            </div>
+            <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary placeholder disabled" aria-disabled="true"></button>
           </div>
-          <button type="button" class="item-save col-2 col-lg-1 btn btn-secondary placeholder disabled" aria-disabled="true"></button>
+          {% endfor %}
         </div>
       </div>
     </div>
