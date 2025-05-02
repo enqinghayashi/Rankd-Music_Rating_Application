@@ -19,10 +19,10 @@ from example_data import data
 def index():
   return render_template("index.html", title="Home")
 
-@app.route('/score')
+@app.route('/score',)
 @app.route('/scores')
 def scores():
-  items = api.search("The Black Parade")
+  items = api.search("The Black Parade", "track")
   return render_template("scores.html", title="Scores", items=items)
 
 track = {

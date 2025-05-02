@@ -33,7 +33,7 @@ class API:
 
   NOTE: The limit applies to each type independently. I.e. a limit of 5 returns 5 tracks, 5 albums, and 5 artists if type is left as default.
   """
-  def search(self, query, offset=0, limit=5, type="track,album,artist"):
+  def search(self, query, type="track,album,artist", limit=20, offset=0):
     query = self.sanitize_query(query)
     params = {
       "query": query,
@@ -60,14 +60,19 @@ class API:
   """
   Get a single item from the API.
 
-  Type is one of track, album, or artist
+  Type is one of track, album, or artist.
   """
   def getItem(self, type, id):
     allowed_types = ["track", "album", "artist"]
     if type not in allowed_types:
       return False
     response = self.api_request(type + "s/" + id)
-    return Item(response)
+    data = response.json()
+
+    if "error" in data.keys():
+      return None
+
+    return Item(data)
   
   """
   Get several items of the same type.
@@ -95,8 +100,12 @@ class API:
     params = {"ids":ids_str}
     
     response = self.api_request(type, params)
+    data = response.json()
+
     items = []
-    for item in response[type]:
+    for item in data[type]:
+      if item == None: # ids of the wrong type return "None", thus can be skipped
+        continue
       items.append(Item(item))
     return items
 
