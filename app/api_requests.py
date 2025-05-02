@@ -34,7 +34,7 @@ class API:
 
   NOTE: The limit applies to each type independently. I.e. a limit of 5 returns 5 tracks, 5 albums, and 5 artists if type is left as default.
   """
-  def search(self, query, type="track,album,artist", limit=20, offset=0):
+  def search(self, query, type, limit=20, offset=0):
     query = self.sanitize_query(query)
     params = {
       "query": query,
@@ -45,16 +45,8 @@ class API:
     data = self.api_request("search", params)
 
     search_items = []
-    item_types = type.split(',')
-    if "track" in item_types:
-      for track in data["tracks"]["items"]:
-        search_items.append(Item(track))
-    if "album" in item_types:
-      for album in data["albums"]["items"]:
-        search_items.append(Item(album))
-    if "artist" in item_types:
-      for artist in data["artists"]["items"]:
-        search_items.append(Item(artist))
+    for item in data[type+"s"]["items"]:
+        search_items.append(Item(item))
     return search_items
   
   """
