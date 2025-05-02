@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session, current_app
+from flask import render_template, request, redirect, url_for, flash, session, current_app, jsonify
 from urllib import response
 from app import app, db
 from app.config import Config
@@ -21,7 +21,14 @@ def index():
 
 @app.route('/scores')
 def scores():
-  items = api.getAllTopItems("tracks")
+  items = []
+  
+  if request.is_json:
+    search = request.args.get("search")
+    type = request.args.get("type")
+    saved = request.args.get("saved")
+    return jsonify({"items": items})
+  
   return render_template("scores.html", title="Scores", items=items)
 
 track = {
