@@ -108,13 +108,10 @@ class API:
     return items
   
   """
-  
+  Gets a user's top tracks or artists (max 50 at a time).
   """
   def getTopItems(self, type, offset=0, limit=50):
-    allowed_types = ["tracks", "artists"]
-    if type not in allowed_types:
-      raise ValueError("Type is not of allowed types.")
-    
+    # This method should only be called by the getAllTop Items so doesn't need type validation again
     params = {
       "time_range": "long_term",
       "offset": offset,
@@ -129,5 +126,26 @@ class API:
     
     return items
 
+  """
+  Get all of a user's top items up to limit.
+
+  Type can only be track or artist.
+
+  Intended to only be used in the analysis section.
+  """
+  def getAllTopItems(self, type, limit=100):
+    allowed_types = ["tracks", "artists"]
+    if type not in allowed_types:
+      raise ValueError("Type is not of allowed types.")
+    
+    received = 0
+    items = []
+    while received < limit:
+      new_items = self.getTopItems(type, received)
+      if new_items == []: # limit was higher than available tracks
+        break
+      items += new_items
+      received += len(new_items)
+    return items[:limit]
 
 api = API()

@@ -23,6 +23,7 @@ def index():
 @app.route('/scores')
 def scores():
   items = api.search("The Black Parade", "track")
+  items = api.getAllTopItems("tracks", 100)
   return render_template("scores.html", title="Scores", items=items)
 
 track = {
