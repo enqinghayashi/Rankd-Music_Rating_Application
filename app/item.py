@@ -54,4 +54,15 @@ class Item:
     else:
       self.artist_ids.append(self.id)
       self.creator = self.title
-       
+  def to_dict(self):
+    return {
+      "id": self.id,
+      "score": self.score,
+      "type": self.type,
+      "title": self.title,
+      "creator": self.creator,
+      "img_url": self.img_url,
+      "album": self.album,
+      "album_id": self.album_id,
+      "artist_ids": self.artist_ids
+    }
