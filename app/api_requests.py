@@ -20,7 +20,8 @@ class API:
       "Authorization": "Bearer  " + token # The two spaces after Bearer are required for some reason
     }
     res = requests.get(url, params=params, headers=headers)
-    return res
+    # Handle errors
+    return res.json()
 
   """
   THIS NEEDS IMPLEMENTING
@@ -41,8 +42,7 @@ class API:
       "limit": limit,
       "type": type
     }
-    response = self.api_request("search", params)
-    data = response.json()
+    data = self.api_request("search", params)
 
     search_items = []
     item_types = type.split(',')
@@ -66,8 +66,7 @@ class API:
     allowed_types = ["track", "album", "artist"]
     if type not in allowed_types:
       return False
-    response = self.api_request(type + "s/" + id)
-    data = response.json()
+    data = self.api_request(type + "s/" + id)
 
     if "error" in data.keys():
       return None
@@ -99,8 +98,7 @@ class API:
     ids_str = ids_str[1:] # remove first comma
     params = {"ids":ids_str}
     
-    response = self.api_request(type, params)
-    data = response.json()
+    data = self.api_request(type, params)
 
     items = []
     for item in data[type]:
@@ -108,5 +106,24 @@ class API:
         continue
       items.append(Item(item))
     return items
+  
+  """
+  
+  """
+  def getTopItems(self, type, offset=0, limit=50):
+    allowed_types = ["tracks", "artists"]
+    if type not in allowed_types:
+      raise ValueError("Type is not of allowed types.")
+    
+    params = {
+      "time_range": "long_term",
+      "offset": offset,
+      "limit": limit,
+    }
+    
+    data = self.api_request("me/top/"+ type, params)
+
+    print(data)
+
 
 api = API()
