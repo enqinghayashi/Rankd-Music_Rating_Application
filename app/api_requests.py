@@ -121,9 +121,13 @@ class API:
       "limit": limit,
     }
     
-    data = self.api_request("me/top/"+ type, params)
-
-    print(data)
+    data = self.api_request("me/top/" + type, params)
+    
+    items = []
+    for item in data["items"]:
+      items.append(Item(item))
+    
+    return items
 
 
 api = API()
