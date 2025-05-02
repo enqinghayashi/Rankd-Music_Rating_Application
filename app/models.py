@@ -27,6 +27,9 @@ class Score(db.Model):
   title = db.Column(db.String, nullable=False)
   creator = db.Column(db.String, nullable=False) 
   img_url = db.Column(db.String, nullable=False)
+  album = db.Column(db.String)
+  album_id = db.Column(db.String)
+  artist_ids = db.Column(db.String) # This will be a string of ids separated by commas
 
   # Composite Key
   __table_args__ = (
