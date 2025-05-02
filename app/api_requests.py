@@ -10,7 +10,7 @@ class API:
 
   THIS METHOD SHOULD ONLY BE CALLED INTERNALLY.
   """
-  def api_request(self, endpoint, params):
+  def api_request(self, endpoint, params={}):
     url = self.BASE_URL + endpoint
     try:
       token = auth.getCurrentToken() # raises an exception if user is not logged in
@@ -56,5 +56,31 @@ class API:
       for artist in data["artists"]["items"]:
         search_items.append(Item(artist))
     return search_items
+  
+  """
+  Get Track.
+  """
+  def getTrack(self, id):
+    response = self.api_request("tracks/" + id)
+    return Item(response)
+  
+  """
+  Get Several Tracks.
+
+  ids is an array of ids
+  """
+  def getSeveralTracks(self, ids):
+    ids_str = ""
+    for id in ids:
+      ids_str += "," + id
+    ids_str = ids_str[1:] # remove first comma
+    params = {"ids":ids_str}
+    
+    response = self.api_request("tracks", params)
+    tracks = []
+    for track in response["tracks"]:
+      tracks.append(Item(track))
+    return tracks
+
 
 api = API()
