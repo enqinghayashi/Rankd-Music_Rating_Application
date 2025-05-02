@@ -15,9 +15,9 @@ function getRadioSelected(radios) {
 
 // Get the contents of the search bar and search options
 function getSearchParameters() {
-  const search = document.getElementById("search-bar-input").value // This should be sanitized
+  const search = document.getElementById("search-bar-input").value // using jquery breaks this
   const type = getRadioSelected(document.getElementsByName("filter"))
-  const saved = document.getElementById("saved").checked
+  const saved = document.getElementById("saved").checked // using jquery breaks this too
   return {
     "search": search,
     "type": type,
