@@ -6,17 +6,17 @@
     <div class="col col-lg-9 col-xxl-7"> 
       <div class="search-bar input-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
+        <input type="text" class="form-control" id="search-bar-input" onkeydown="handleKeyDown(event)" placeholder="Search for something...">
       </div>
       <div class="search-options d-flex flex-row mb-3">
-        <input type="radio" class="btn-check" name="filter" id="tracks-filter" autocomplete="off" checked >
-        <label class="btn btn-secondary" for="tracks-filter">Tracks</label>
-        <input type="radio" class="btn-check" name="filter" id="albums-filter" autocomplete="off">
-        <label class="btn btn-secondary" for="albums-filter">Albums</label>
-        <input type="radio" class="btn-check" name="filter" id="artists-filter" autocomplete="off">
-        <label class="btn btn-secondary" for="artists-filter">Artists</label>
-        <input type="checkbox" class="btn-check" id="saved-filter" autocomplete="off">
-        <label class="btn btn-secondary" for="saved-filter">Saved</label>
+        <input type="radio" class="btn-check" name="filter" id="tracks" autocomplete="off" checked >
+        <label class="btn btn-secondary" for="tracks">Tracks</label>
+        <input type="radio" class="btn-check" name="filter" id="albums" autocomplete="off">
+        <label class="btn btn-secondary" for="albums">Albums</label>
+        <input type="radio" class="btn-check" name="filter" id="artists" autocomplete="off">
+        <label class="btn btn-secondary" for="artists">Artists</label>
+        <input type="checkbox" class="btn-check" id="saved" autocomplete="off">
+        <label class="btn btn-secondary" for="saved">Saved</label>
         <div class="col"></div>
         <div class="sort-select dropdown">
           <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -64,4 +64,5 @@
     </div>
   </div>
 </div>
+<script src="{{ url_for('static', filename='scores.js') }}"></script>
 {% endblock %}
