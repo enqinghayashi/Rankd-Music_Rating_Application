@@ -8,10 +8,7 @@ import os
 from app.auth import auth
 from app.models import User
 from app.util import validate_password, validate_email
-from app.api_requests import api
-
-from app.item import Item
-from example_data import data
+from app.item_requests import *
 
 @app.route('/')
 @app.route('/index')
@@ -27,6 +24,7 @@ def scores():
     search = request.args.get("search")
     type = request.args.get("type")
     saved = request.args.get("saved")
+    getScoreItems(search, type, saved)
     return jsonify({"items": items})
   
   return render_template("scores.html", title="Scores", items=items)
