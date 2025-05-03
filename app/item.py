@@ -60,14 +60,14 @@ class Item:
       self.creator = self.title
   
   def init_from_database(self, data):
-    self.score = data.score,
-    self.id = data.item_id,
-    self.type = data.item_type,
-    self.title = data.title,
-    self.creator = data.creator,
-    self.img_url = data.img_url,
+    self.score = data.score
+    self.id = data.item_id
+    self.type = data.item_type
+    self.title = data.title
+    self.creator = data.creator
+    self.img_url = data.img_url
     self.album = data.album
-    self.album_id = data.album_id,
+    self.album_id = data.album_id
     self.artist_ids = data.artist_ids.split(",")
 
   def to_dict(self):

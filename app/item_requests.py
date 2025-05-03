@@ -13,20 +13,28 @@ def getScoreItems(search, type, saved):
     db_items.append(Item(row[0], True))
   
   # TODO Filter the saved scores to the search
+  
+  # Convert items to dictionaries to conver to json to send
+  db_ids = []
+  total = len(db_items)
+  for i in range(0, total):
+    db_items[i] = db_items[i].to_dict()
+    db_ids.append(db_items[i]["id"])
 
   # Make search request
   search_items = []
   if saved == "false" and search != "": # This is from a json response
     search_items = api.search(search, type)
   
-  # Convert items to json to send
-  total = len(db_items)
-  for i in range(0, total):
-    db_items[i] = db_items[i].to_dict()
-  
+  # Convert items to dictionaries to conver to json to send
   total = len(search_items)
   for i in range(0, total):
     search_items[i] = search_items[i].to_dict()
+    try:
+      db_id = db_ids.index(search_items[i]["id"])
+      search_items[i]["score"] = db_items[db_id]["score"]
+    except ValueError:
+      continue
   
   items = {
     "search_results": search_items,
