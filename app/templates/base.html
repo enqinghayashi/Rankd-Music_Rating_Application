@@ -13,7 +13,7 @@
       <div class="container-fluid">
         <div class="d-flex align-items-center">
         <a class="navbar-brand" href="/home" aria-current="page">Rankd</a>
-        {% if 'spotify_access' in session %}
+        {% if 'refresh_token' in session %}
         <ul class="navbar-nav d-flex flex-row ms-3">
           <li class="nav-item">
             <a class="nav-link text-light" href="/scores">Scores</a>

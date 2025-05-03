@@ -8,7 +8,10 @@ import os
 from app.auth import auth
 from app.models import User
 from app.util import validate_password, validate_email
+from app.api_requests import api
 
+from app.item import Item
+from example_data import data
 
 @app.route('/')
 @app.route('/index')
@@ -16,34 +19,11 @@ from app.util import validate_password, validate_email
 def index():
   return render_template("index.html", title="Home")
 
+@app.route('/score',)
 @app.route('/scores')
 def scores():
-  items = [
-    {
-      "id": "",
-      "type": "track",
-      "title": "Welcome To The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "10"
-    },
-    {
-      "id": "",
-      "type": "album",
-      "title": "The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "9.9"
-    },
-    {
-      "id": "",
-      "type": "artist",
-      "title": "My Chemical Romance", 
-      "creator": "My Chemical Romance", 
-      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
-      "score": ""
-    }
-  ]
+  items = api.search("The Black Parade", "track")
+  items = api.getAllTopItems("tracks", 100)
   return render_template("scores.html", title="Scores", items=items)
 
 track = {
@@ -348,6 +328,7 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 def logout():
   session.pop('user', None)
+  session.pop("spotify_access", None)
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
@@ -361,13 +342,15 @@ def link_to_spotify():
     return redirect(auth.generateAuthURL())
   elif (num_args == 1): # After redirect
     if ('code' in request.args.keys()): # User accepted the authorization
-      spotify_token = auth.completeAuth(request.args['code'])
-      session['spotify_access'] = spotify_token
-      return "Success!"
+      auth.completeAuth(request.args['code'])
+      flash("Authorization successful!", "success")
+      return redirect(url_for('scores'))
     elif ('error' in request.args.keys()): # User declined the authorization
-      return "Failure"
+      flash("Authorization failed! Please try again.", "danger")
+      return redirect(url_for('profile'))
     else: # An invalid argument has been given to the route (i.e. user input on purpose)
-      return "Error"
+      flash("Authorization failed! Please try again.", "danger")
+      return redirect(url_for('profile'))
   else: # This page should never receive more than 1 argument
     return "Error"
 

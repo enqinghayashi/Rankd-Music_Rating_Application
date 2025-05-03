@@ -12,8 +12,9 @@ class User(db.Model):
   img_url = db.Column(db.String, nullable=False, default='default_profile_picture.png')
   bio = db.Column(db.Text)
   name = db.Column(db.String)
+  refresh_token = db.Column(db.String)
   def __repr__(self):
-    return 'user_id={}, username={}, email={}, password={} img_url={} , bio = {}, name = {}'.format(self.user_id, self.username, self.email, self.password, self.img_url, self.bio, self.name)
+    return 'user_id={}, username={}, email={}, password={} img_url={} , bio = {}, name = {}'.format(self.user_id, self.username, self.email, self.password, self.img_url, self.bio, self.name, self.refresh_token)
 
 class Score(db.Model):
   __table_name__ = 'Score'
@@ -23,9 +24,12 @@ class Score(db.Model):
   # From the spotify API
   item_id = db.Column(db.String, primary_key=True)
   item_type = db.Column(db.String, nullable=False)
-  title = db.Column(db.String, nullable=False)   
+  title = db.Column(db.String, nullable=False)
   creator = db.Column(db.String, nullable=False) 
   img_url = db.Column(db.String, nullable=False)
+  album = db.Column(db.String)
+  album_id = db.Column(db.String)
+  artist_ids = db.Column(db.String) # This will be a string of ids separated by commas
 
   # Composite Key
   __table_args__ = (
