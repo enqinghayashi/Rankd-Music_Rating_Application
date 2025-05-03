@@ -7,10 +7,10 @@ from app.api_requests import api
 def getScoreItems(search, type, saved):
   # Get user's saved scores
   user_id = session["user"]["id"]
-  db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id).filter_by(item_type=type)).all()
+  db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score)).all()
   db_items = []
   for row in db_rows:
-    db_items.append(Item(row._asdict()))
+    db_items.append(Item(row[0], True))
   
   # TODO Filter the saved scores to the search
 
