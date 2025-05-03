@@ -19,10 +19,18 @@ def getScoreItems(search, type, saved):
   if saved == "false" and search != "": # This is from a json response
     search_items = api.search(search, type)
   
-  items = search_items + db_items # This may have duplicates, that is fine
-  
   # Convert items to json to send
-  total_items = len(items)
-  for i in range(0, total_items):
-    items[i] = items[i].to_dict()
+  total = len(db_items)
+  for i in range(0, total):
+    db_items[i] = db_items[i].to_dict()
+  
+  total = len(search_items)
+  for i in range(0, total):
+    search_items[i] = search_items[i].to_dict()
+  
+  items = {
+    "search_results": search_items,
+    "db_results": db_items
+  }
+
   return jsonify(items)
