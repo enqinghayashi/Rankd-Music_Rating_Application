@@ -1,7 +1,6 @@
 /*
-This causes the event to be triggered twice even though stopPropagation should fix that
-
 $(document).ready(function() {
+  This causes the event to be triggered twice even though stopPropagation should fix that
   $("#search-bar-input").on("keydown", function(e) {
     if (e.key == "Enter") getItems();
     e.stopPropagation();
