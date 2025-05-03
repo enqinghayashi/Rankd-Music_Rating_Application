@@ -49,7 +49,7 @@ function getItems() {
     success: function(response) {
       renderItems(response)
     }
-  })
+  });
 }
 
 // Render the items on the page
@@ -63,6 +63,22 @@ function renderItems(response) {
 
   renderContainer(search_container, response.search_results);
   renderContainer(db_container, response.db_results);
+
+  $(".item-save").click(function(e) {
+    const item = e.currentTarget.parentElement;
+    const input = item.querySelector(".item-score-input");
+    let data = item.data;
+    data.score = input.value;
+    $.ajax({
+      url: "",
+      type: "post",
+      contentType: "application/json",
+      data: data,
+      success: function(response) {
+        console.log(response);
+      }
+    });
+  });
 }
 
 // Create the items and append the items to the container
@@ -78,6 +94,7 @@ function createItem(data) {
   // Container
   let item = document.createElement("div");
   addClassTo(item, "item item-type-" + data.type);
+  item.data = data;
  
   // Rating input
   let input = document.createElement("input");

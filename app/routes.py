@@ -16,10 +16,14 @@ from app.item_requests import *
 def index():
   return render_template("index.html", title="Home")
 
-@app.route('/scores')
+@app.route('/scores', methods=["GET", "POST"])
 def scores():
-  items = []
+  # Save to Database
+  if request.method == "POST":
+    allowed_characters = "0123456789"
+    return "Hi"
   
+  # Make Search
   if request.is_json:
     search = request.args.get("search")
     type = request.args.get("type")
@@ -27,7 +31,8 @@ def scores():
     response = getScoreItems(search, type, saved)
     return jsonify(response)
   
-  return render_template("scores.html", title="Scores", items=items)
+  # View Page
+  return render_template("scores.html", title="Scores")
 
 track = {
   "id": "r",
