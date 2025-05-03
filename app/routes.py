@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session, current_app
+from flask import render_template, request, redirect, url_for, flash, session, current_app, jsonify
 from urllib import response
 from app import app, db
 from app.config import Config
@@ -7,11 +7,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
 from app.models import User
-from app.util import validate_password, validate_email
-from app.api_requests import api
-
-from app.item import Item
-from example_data import data
+from app.util import validate_password, validate_email, validate_score
+from app.item_requests import *
+from urllib.parse import parse_qs
 
 @app.route('/')
 @app.route('/index')
@@ -19,12 +17,65 @@ from example_data import data
 def index():
   return render_template("index.html", title="Home")
 
-@app.route('/score',)
-@app.route('/scores')
+@app.route('/scores', methods=["GET", "POST"])
 def scores():
-  items = api.search("The Black Parade", "track")
-  items = api.getAllTopItems("tracks", 100)
-  return render_template("scores.html", title="Scores", items=items)
+  # Alter Database
+  if request.method == "POST":
+    data = request.json
+    user_id = session["user"]["id"]
+    
+    try:
+       score = validate_score(data["score"])
+    except ValueError as e:
+       return "Unable to save score. " + str(e)
+    
+    db_score = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_id=data["id"])).all()
+    if db_score != []:
+       db_score = Score.query.get({
+          "user_id": user_id,
+          "item_id": data["id"]
+       })
+
+    # remove score from database
+    if score == "":
+       if db_score == []:
+        return "Nothing to delete."
+       else:
+        db.session.delete(db_score)
+        db.session.commit()
+        return "Score deleted."
+    
+    new_score = Score(
+      score = score,
+      user_id = user_id,
+      item_id = data["id"],
+      item_type = data["type"],
+      title = data["title"],
+      creator = data["creator"],
+      img_url = data["img_url"],
+      album = data["album"],
+      album_id = data["album_id"],
+      artist_ids = Item.stringify_artist_ids(data["artist_ids"])
+    )
+
+    if db_score == []:
+      db.session.add(new_score)
+    else:
+      db_score.score = new_score.score
+    db.session.commit()
+    
+    return "Saved successfully."
+  
+  # Make Search
+  if request.is_json:
+    search = request.args.get("search")
+    type = request.args.get("type")
+    saved = request.args.get("saved")
+    response = getScoreItems(search, type, saved)
+    return jsonify(response)
+  
+  # View Page
+  return render_template("scores.html", title="Scores")
 
 track = {
   "id": "r",

@@ -3,7 +3,7 @@ from app import db
 from app.models import Score
 
 class Item:
-  def __init__(self, data):
+  def __init__(self, data, from_db=False):
     """
     List of fields for documentation purposes.
     """
@@ -23,6 +23,10 @@ class Item:
     """
     Setting fields.
     """
+    if from_db:
+      self.init_from_database(data)
+      return
+
     # General fields
     self.id = data["id"]
     user_id = session["user"]["id"]
@@ -54,4 +58,33 @@ class Item:
     else:
       self.artist_ids.append(self.id)
       self.creator = self.title
-       
+  
+  def init_from_database(self, data):
+    self.score = data.score
+    self.id = data.item_id
+    self.type = data.item_type
+    self.title = data.title
+    self.creator = data.creator
+    self.img_url = data.img_url
+    self.album = data.album
+    self.album_id = data.album_id
+    self.artist_ids = data.artist_ids.split(",")
+
+  def to_dict(self):
+    return {
+      "id": self.id,
+      "score": self.score,
+      "type": self.type,
+      "title": self.title,
+      "creator": self.creator,
+      "img_url": self.img_url,
+      "album": self.album,
+      "album_id": self.album_id,
+      "artist_ids": self.artist_ids
+    }
+  @staticmethod
+  def stringify_artist_ids(artist_ids):
+    string = ""
+    for id in artist_ids:
+      string += "," + id
+    return string[1:]
