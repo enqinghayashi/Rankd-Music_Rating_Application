@@ -3,6 +3,7 @@ from app import db
 from app.models import *
 from app.item import Item
 from app.api_requests import api
+import re
 
 def getScoreItems(search, type, saved):
   # Get user's saved scores
@@ -12,7 +13,14 @@ def getScoreItems(search, type, saved):
   for row in db_rows:
     db_items.append(Item(row[0], True))
   
-  # TODO Filter the saved scores to the search
+  # Filter the saved scores to the search
+  filtered_items = []
+  for item in db_items:
+    title = re.search(search, item.title)
+    album = re.search(search, item.album)
+    creator = re.search(search, item.creator)
+    if (title or album or creator): filtered_items.append(item)
+  db_items = filtered_items
   
   # Convert items to dictionaries to conver to json to send
   db_ids = []
