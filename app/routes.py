@@ -23,7 +23,12 @@ def scores():
   if request.method == "POST":
     data = request.json
 
-    score = validate_score(data.score) # not implemented yet
+    try:
+       score = validate_score(data["score"])
+    except ValueError as e:
+       return str(e)
+    
+    return score
   
   # Make Search
   if request.is_json:
