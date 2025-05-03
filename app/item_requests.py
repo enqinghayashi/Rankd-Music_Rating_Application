@@ -33,4 +33,4 @@ def getScoreItems(search, type, saved):
     "db_results": db_items
   }
 
-  return jsonify(items)
+  return items

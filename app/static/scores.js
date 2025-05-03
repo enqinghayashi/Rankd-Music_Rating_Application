@@ -50,15 +50,31 @@ function getItems() {
 
 // Render the items on the page
 function renderItems(response) {
-  console.log(response)
+  const search_container = $("#search-results");
+  const db_container = $("#db-results");
+  
+  // We don't want to empty the containers every time, this will be specified in the response
+  emptyContainer(search_container);
+  emptyContainer(db_container);
+
+  renderContainer(search_container, response.search_results);
+  renderContainer(db_container, response.db_results);
 }
 
 // Remove the currently loaded items
-function clearScores() {
+function emptyContainer(container) {
 
 }
 
+// Create the items and append the items to the container
+function renderContainer(container, items) {
+  for (let i in items) {
+    const item = createItem(items[i]);
+    container.appendChild(item);
+  }
+}
+
 // Create an item from data
-function createItem() {
+function createItem(item) {
 
 }
