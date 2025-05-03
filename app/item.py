@@ -66,3 +66,9 @@ class Item:
       "album_id": self.album_id,
       "artist_ids": self.artist_ids
     }
+  @staticmethod
+  def stringify_artist_ids(artist_ids):
+    string = ""
+    for id in artist_ids:
+      string += "," + id
+    return string[1:]

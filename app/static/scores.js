@@ -74,7 +74,7 @@ function renderItems(response) {
       contentType: "application/json",
       data: JSON.stringify(data),
       success: function(response) {
-        console.log(response);
+        alert(response);
       }
     });
   });

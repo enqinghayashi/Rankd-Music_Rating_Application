@@ -19,16 +19,49 @@ def index():
 
 @app.route('/scores', methods=["GET", "POST"])
 def scores():
-  # Save to Database
+  # Alter Database
   if request.method == "POST":
     data = request.json
-
+    user_id = session["user"]["id"]
+    
     try:
        score = validate_score(data["score"])
     except ValueError as e:
        return "Unable to save score. " + str(e)
     
-    return score
+    db_score = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_id=data["id"])).all()
+    if db_score != []:
+       db_score = Score.query.get({
+          "user_id": user_id,
+          "item_id": data["id"]
+       })
+
+    # remove score from database
+    if score == "":
+       if db_score == []:
+        return "Nothing to delete."
+       else:
+        db.session.delete(db_score)
+        return "Score deleted."
+    
+    new_score = Score(
+      score = score,
+      user_id = user_id,
+      item_id = data["id"],
+      item_type = data["title"],
+      img_url = data["img_url"],
+      album = data["album"],
+      album_id = data["album_id"],
+      artist_ids = Item.stringify_artist_ids(data["artist_ids"])
+    )
+
+    if db_score == []:
+      db.session.add(new_score)
+    else:
+      db_score = new_score 
+    db.session.commit()
+    
+    return "Saved successfully."
   
   # Make Search
   if request.is_json:
