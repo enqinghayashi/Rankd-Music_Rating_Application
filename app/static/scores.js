@@ -9,6 +9,8 @@ $(document).ready(function() {
   $(".filter").click(function() {
     window.setTimeout(getItems, 10); // Timeout for 10ms before calling to give time for options to update
   });
+
+  getItems();
 });
 
 // Handler is added in HTML on search bar
