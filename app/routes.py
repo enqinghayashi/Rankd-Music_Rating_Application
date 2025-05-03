@@ -26,7 +26,7 @@ def scores():
     try:
        score = validate_score(data["score"])
     except ValueError as e:
-       return str(e)
+       return "Unable to save score. " + str(e)
     
     return score
   

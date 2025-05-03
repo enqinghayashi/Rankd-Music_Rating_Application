@@ -27,8 +27,8 @@ def validate_email(email):
     return None
 
 def validate_score(score):
+    if score == "": return score
     score = score.strip().split(".")
-    print(score)
     length = len(score)
     if (length == 1):
         score = score[0]
