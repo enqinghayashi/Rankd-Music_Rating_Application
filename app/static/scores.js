@@ -1,12 +1,15 @@
-/*
 $(document).ready(function() {
+  /*
   This causes the event to be triggered twice even though stopPropagation should fix that
   $("#search-bar-input").on("keydown", function(e) {
     if (e.key == "Enter") getItems();
     e.stopPropagation();
   });
+  */
+  $(".filter").click(function() {
+    window.setTimeout(getItems, 10); // Timeout for 10ms before calling to give time for options to update
+  });
 });
-*/
 
 // Handler is added in HTML on search bar
 function handleKeyDown(e) {
@@ -26,11 +29,13 @@ function getSearchParameters() {
   const search = document.getElementById("search-bar-input").value; // using jquery breaks this
   const type = getRadioSelected(document.getElementsByName("filter"));
   const saved = document.getElementById("saved").checked; // using jquery breaks this too
-  return {
+  const params = {
     "search": search,
     "type": type,
     "saved": saved
   };
+  console.log(params);
+  return params;
 }
 
 // Make a request to the server for the items
