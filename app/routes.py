@@ -25,7 +25,7 @@ def scores():
     type = request.args.get("type")
     saved = request.args.get("saved")
     response = getScoreItems(search, type, saved)
-    return response.jsonify()
+    return jsonify(response)
   
   return render_template("scores.html", title="Scores", items=items)
 

@@ -50,31 +50,77 @@ function getItems() {
 
 // Render the items on the page
 function renderItems(response) {
-  const search_container = $("#search-results");
-  const db_container = $("#db-results");
+  const search_container = document.getElementById("search-results");
+  const db_container = document.getElementById("db-results");
   
   // We don't want to empty the containers every time, this will be specified in the response
-  emptyContainer(search_container);
-  emptyContainer(db_container);
+  $("#search-results").empty()
+  $("#db-results").empty()
 
   renderContainer(search_container, response.search_results);
   renderContainer(db_container, response.db_results);
-}
-
-// Remove the currently loaded items
-function emptyContainer(container) {
-
 }
 
 // Create the items and append the items to the container
 function renderContainer(container, items) {
   for (let i in items) {
     const item = createItem(items[i]);
-    container.appendChild(item);
+    container.appendChild(item, i);
   }
 }
 
 // Create an item from data
-function createItem(item) {
+function createItem(data) {
+  // Container
+  let item = document.createElement("div");
+  addClassTo(item, "item item-type-" + data.type);
+ 
+  // Rating input
+  let input = document.createElement("input");
+  input.type = "text";
+  addClassTo(input, "item-score-input col-2 col-lg-1");
+  input.placeholder = "/10";
+  input.value = data.score;
+  item.appendChild(input);
 
+  // Img
+  let img = document.createElement("img");
+  addClassTo(img, "item-img");
+  img.src = data.img_url;
+  img.alt = data.title;
+  item.appendChild(img);
+  
+  // Description
+  let desc = document.createElement("div");
+  addClassTo(desc, "item-desc col");
+  
+  let title = document.createElement("p");
+  addClassTo(title, "item-title");
+  title.innerText = data.title;
+  desc.appendChild(title);
+  
+  if (data.type !== "artist") {
+    let creator = document.createElement("p");
+    addClassTo(creator, "item-creator");
+    creator.innerText = data.creator;
+    desc.appendChild(creator);
+  }
+  
+  item.appendChild(desc);
+
+  // Save Button
+  let button = document.createElement("button");
+  button.type = "button";
+  addClassTo(button,"item-save col-2 col-lg-1 btn btn-secondary");
+  button.innerText = "Save";
+  item.appendChild(button);
+
+  return item;
+}
+
+function addClassTo(item, class_str) {
+  const classes = class_str.split(" ")
+  for (let i in classes) {
+    item.classList.add(classes[i])
+  }
 }
