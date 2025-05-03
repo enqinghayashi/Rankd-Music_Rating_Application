@@ -42,6 +42,7 @@ def scores():
         return "Nothing to delete."
        else:
         db.session.delete(db_score)
+        db.session.commit()
         return "Score deleted."
     
     new_score = Score(
@@ -60,7 +61,7 @@ def scores():
     if db_score == []:
       db.session.add(new_score)
     else:
-      db_score = new_score 
+      db_score.score = new_score.score
     db.session.commit()
     
     return "Saved successfully."
