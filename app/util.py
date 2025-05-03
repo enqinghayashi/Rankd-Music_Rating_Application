@@ -25,3 +25,8 @@ def validate_email(email):
         flash("Invalid email address", "danger")
         return "Email address seems fake"
     return None
+
+def validate_score(score):
+    score = score.strip().split(".")
+    if (len(score) != 3): return False
+    if not (score[0].isnumeric() and score[2].isnumeric()): return False

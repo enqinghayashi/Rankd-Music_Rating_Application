@@ -7,8 +7,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
 from app.models import User
-from app.util import validate_password, validate_email
+from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
+from urllib.parse import parse_qs
 
 @app.route('/')
 @app.route('/index')
@@ -20,8 +21,9 @@ def index():
 def scores():
   # Save to Database
   if request.method == "POST":
-    allowed_characters = "0123456789"
-    return "Hi"
+    data = request.json
+
+    score = validate_score(data.score) # not implemented yet
   
   # Make Search
   if request.is_json:

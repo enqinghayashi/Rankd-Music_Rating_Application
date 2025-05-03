@@ -34,7 +34,6 @@ function getSearchParameters() {
     "type": type,
     "saved": saved
   };
-  console.log(params);
   return params;
 }
 
@@ -73,7 +72,7 @@ function renderItems(response) {
       url: "",
       type: "post",
       contentType: "application/json",
-      data: data,
+      data: JSON.stringify(data),
       success: function(response) {
         console.log(response);
       }
