@@ -36,6 +36,10 @@ class API:
   """
   def search(self, query, type, limit=20, offset=0):
     query = self.sanitize_query(query)
+
+    if type not in ["track", "album", "artist"]: # If user alters html then default to tracks
+      type = "track"
+
     params = {
       "query": query,
       "offset": offset,
