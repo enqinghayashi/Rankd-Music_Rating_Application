@@ -61,6 +61,22 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="LinkSpotify" tabindex="-1" aria-labelledby="LinktoSpotify" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+          <div class="modal-header">
+            <h5 class="modal-title text-center" id="LinktoSpotify">Link to Spotify</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Please link to Spotify first to access these pages
+          </div>
+          <div class="modal-footer justify-content-center">
+            <a class="btn btn-primary" href=" {{ url_for('link_to_spotify')}}">Link</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <nav id="bottom-nav" class="nav nav-justified d-flex d-lg-none bg-primary fixed-bottom">
       <a class="nav-link nav-protected" href="/scores">
@@ -105,8 +121,8 @@
         }
 
       
-      // Login prompts
-      {% if 'user' not in session or 'refresh_token' not in session  %}
+      // Login to account prompts
+      {% if 'user' not in session  %}
       document.querySelectorAll('.nav-protected').forEach(function(link) {
         link.addEventListener('click', function(e) {
           e.preventDefault();
@@ -115,7 +131,19 @@
         });
       });
     {% endif %}
+
+      // Link to Spotify prompts
+    {% if 'refresh_token' not in session  %}
+      document.querySelectorAll('.nav-protected').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var loginAccount = new bootstrap.Modal(document.getElementById('LinkSpotify'));
+          loginAccount.show();
+        });
+      });
+    {% endif %}
   });
+
     </script>
   </body>
 </html>
