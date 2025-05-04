@@ -14,24 +14,18 @@
       <div class="container-fluid">
         <div class="d-flex align-items-center">
         <a class="navbar-brand" href="/home" aria-current="page">Rankd</a>
-        {% if 'refresh_token' in session %}
+
         <ul class="navbar-nav d-flex flex-row ms-3">
           <li class="nav-item">
-            <a class="nav-link text-light" href="/scores">Scores</a>
+            <a class="nav-link text-light nav-protected" href="/scores">Scores</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-light" href="/stats">Stats</a>
+            <a class="nav-link text-light nav-protected" href="/stats">Stats</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-light" href="/compare_scores">Share</a>
+            <a class="nav-link text-light nav-protected" href="/compare_scores">Share</a>
           </li>
         </ul>
-        {% endif %}
-        {% if 'user' in session %}
-        <a class="nav-link btn-outline-light ms-3" href="{{ url_for('link_to_spotify') }}">
-          <img src="{{ url_for('static', filename='img/spotify_logo.jpeg') }}" alt="Spotify" class="img-fluid rounded-circle" style="width: 40px; height: 40px;">
-        </a>
-        {% endif %}
       </div>
 
         {% if 'user' in session %}
@@ -51,16 +45,33 @@
         {% endif %}
       </div>
     </nav>
+    <div class="modal fade" id="loginAccount" tabindex="-1" aria-labelledby="loginAccounts" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+          <div class="modal-header">
+            <h5 class="modal-title text-center" id="loginAccounts">Login Required</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Please log in first to view these pages
+          </div>
+          <div class="modal-footer justify-content-center">
+            <a class="btn btn-primary" href="/login">Log in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <nav id="bottom-nav" class="nav nav-justified d-flex d-lg-none bg-primary fixed-bottom">
-      <a class="nav-link" href="/scores">
+      <a class="nav-link nav-protected" href="/scores">
         <i class="bi bi-award"></i>
         <p>Scores</p>
       </a>
-      <a class="nav-link" href="/stats">
+      <a class="nav-link nav-protected" href="/stats">
         <i class="bi bi-bar-chart"></i>
         <p>Stats</p>
       </a>
-      <a class="nav-link" href="/compare_scores">
+      <a class="nav-link nav-protected" href="/compare_scores">
         <i class="bi bi-share"></i>
         <p>Share</p>
       </a>
@@ -84,6 +95,7 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
+        // Flash message
         const flashContainer = document.querySelector('.flash-message-container');
         if (flashContainer && flashContainer.innerHTML.trim() !== '') {
           flashContainer.style.display = 'block';
@@ -91,7 +103,19 @@
             flashContainer.style.display = 'none';
           }, 3000); 
         }
+
+      
+      // Login prompts
+      {% if 'user' not in session or 'refresh_token' not in session  %}
+      document.querySelectorAll('.nav-protected').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var loginAccount = new bootstrap.Modal(document.getElementById('loginAccount'));
+          loginAccount.show();
+        });
       });
+    {% endif %}
+  });
     </script>
   </body>
 </html>
