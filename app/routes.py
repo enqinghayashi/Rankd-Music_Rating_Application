@@ -334,6 +334,10 @@ def login():
       return redirect(url_for('login'))
     session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
+    try:
+      auth.getCurrentToken()
+    except:
+       return redirect(url_for('link_to_spotify'))
     return redirect(url_for('index'))
   return render_template("login.html", title="Login")
 
