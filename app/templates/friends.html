@@ -18,11 +18,12 @@
                 <button class="btn btn-primary" type="submit" id="add-friend-btn">Add</button>
             </form>
         </div>
-    
-    <div class="mb-3">
-        <input type="text" class="form-control d-inline-block w-auto" value="{{ your_friend_link }}" id="your-friend-link" readonly>
-        <button class="btn btn-outline-secondary" type="button" id="copy-link-btn">Press to Copy and Share</button>
-    </div>
+    <div class="flex-grow-1 min-w-300 bg-primary text-white p-3">
+        <h2>Copy your User ID here</h2>
+        <div class="mb-3 w-auto">
+            <input type="text" class="form-control d-inline-block w-auto" value="{{ my_user_id }}" id="my_user_id" readonly>
+            <button class="btn btn-outline-inform" type="button" id="copy-link-btn">Press to Copy and Share</button>
+        </div>
 </div>
 <script>
 document.getElementById('copy-link-btn').onclick = function() {
