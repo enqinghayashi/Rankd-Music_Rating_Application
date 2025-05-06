@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
-from app.models import User
+from app.models import User, Friend
 from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
@@ -464,11 +464,66 @@ def delete_account():
     flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
 
-@app.route('/friends')
+@app.route('/friends', method = ["GET", "POST"])
 def friends():
-    ### MISSING SEARCH FRIEND BY LINK FUNCTION
-    your_friend_link = "https://example.com/addfriend/your-unique-link"
-    return render_template(
-        'friends.html',
-        your_friend_link=your_friend_link,
+    my_user_id = int(session['user']['id'])
+    search_results = []
+    searching_friends = ""
+    search_friend_id = ""
+    friends = (
+        db.session.query(User)
+        .join(Friend, Friend.friend_id == User.user_id)
+        .filter(Friend.user_id == my_user_id)
+        .all()
+    )
+    search_someone_in_friendlist = friends
+    if request.method == 'POST' :
+        search_friend_id = request.form.get('search_friend_id', '').strip()    # Add/search friend by user id 
+        if search_friend_id:
+            user = User.query.filter_by(user_id=search_friend_id).first()
+            if user:
+              if user.user_id != my_user_id:
+                  existing_friendship = Friend.query.filter_by(user_id=my_user_id, friend_id=user.user_id).first()
+                  if not existing_friendship:
+                    search_results = [user]
+            else:
+                flash("No such user", "warning")
+        else:
+            # Search friends by name
+            searching_friends = request.form.get('searching_friends', '').strip()
+            if searching_friends:
+                search_someone_in_friendlist = []
+                for friend in friends: # Checks for all relevant friends names in the friend list for the given search input name
+                    lowercase_names = searching_friends.lower()
+                    friend_name = (friend.name or '').lower()
+                    friend_username = (friend.username or '').lower()
+                    if lowercase_names in friend_name or lowercase_names in friend_username:
+                       search_someone_in_friendlist.append(friend)
+            else:
+                search_someone_in_friendlist = friends
+            # Add friend by user_id
+            friend_user_id = request.form.get('add_friend_id')
+            if friend_user_id:
+                friend_user_id = int(friend_user_id)
+                if friend_user_id == my_user_id:
+                    flash("You cannot add yourself as a friend.", "danger")
+                    return redirect(url_for('friends'))
+                if Friend.query.filter_by(user_id=my_user_id, friend_id=friend_user_id).first():
+                    flash("Friend already added.", "warning")
+                    return redirect(url_for('friends'))
+                if not User.query.get(friend_user_id):
+                    flash("User does not exist.", "danger")
+                    return redirect(url_for('friends'))
+                new_friend = Friend(user_id=my_user_id, friend_id=friend_user_id)
+                db.session.add(new_friend)
+                db.session.commit()
+                flash("Friend added successfully!", "success")
+                return redirect(url_for('friends'))
+    else:
+        search_someone_in_friendlist = friends
+    return render_template('friends.html',         my_user_id=my_user_id,
+        friends=search_someone_in_friendlist,
+        search_results=search_results,
+        searching_friends = searching_friends,
+        search_friend_id = search_friend_id
     )
