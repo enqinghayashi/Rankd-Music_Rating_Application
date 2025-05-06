@@ -1,40 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4 max-w-100">
-    <div class="d-flex justify-content-between flex-wrap gap-3 w-100 py-3">
-        <div class="flex-grow-1 min-w-300 bg-primary text-white p-3">
-            <h2>Search Your Friends</h2>
-            <div class="mb-3 w-auto">
-                <form method="POST" action="{{ url_for('friends') }}" class = "w-auto">
-                    <input type="text" name = "searching_friends" class="w-auto max-w-400" placeholder="Search friends by username or name" value="{{ searching_friends }}" id="friend-search">
-                    <button class="btn btn-primary" type = "submit" id = "friend-search">Search</button>
+<div class="container mt-4">
+    <div class="row g-3">
+        <!-- Search Friends -->
+        <div class="col-12 col-md-4">
+            <div class="bg-primary text-white p-3 rounded h-100">
+                <h5>Search Your Friends</h5>
+                <form method="POST" action="{{ url_for('friends') }}">
+                    <input type="text" name="searching_friends" class="form-control mb-2" placeholder="Search by username or name" value="{{ searching_friends }}">
+                    <button class="btn btn-light w-100" type="submit">Search</button>
                 </form>
+            </div>
+        </div>
+        <!-- Add Friend by User ID -->
+        <div class="col-12 col-md-4">
+            <div class="bg-primary text-white p-3 rounded h-100">
+                <h5>Add Friend by User ID</h5>
+                <form method="POST" action="{{ url_for('friends') }}">
+                    <input type="text" name="search_friend_id" class="form-control mb-2" placeholder="Enter friend's User ID" value="{{ search_friend_id }}">
+                    <button class="btn btn-light w-100" type="submit">Add</button>
+                </form>
+            </div>
+        </div>
+        <!-- Copy Your User ID -->
+        <div class="col-12 col-md-4">
+            <div class="bg-primary text-white p-3 rounded h-100">
+                <h5>Copy your User ID here</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="{{ my_user_id }}" id="my_user_id" readonly>
+                    <button class="btn btn-outline-light" type="button" id="copy-link-btn">Copy</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="flex-grow-1 min-w-300 bg-primary text-white p-3">
-        <h2>Add Friends by User ID</h2>
-        <div class="mb-3 w-auto">
-            <form method = "POST" action = "{{ url_for('friends')}}" class= "w-auto">
-                <input type="text" name = "search_friend_id" class="form-control" class = "w-auto" placeholder="Enter friend's User ID" value = "{{search_friend_id}}" id="add-friend">
-                <button class="btn btn-primary" type="submit" id="add-friend-btn">Add</button>
-            </form>
-        </div>
-    <div class="flex-grow-1 min-w-300 bg-primary text-white p-3">
-        <h2>Copy your User ID here</h2>
-        <div class="mb-3 w-auto">
-            <input type="text" class="form-control d-inline-block w-auto" value="{{ my_user_id }}" id="my_user_id" readonly>
-            <button class="btn btn-outline-inform" type="button" id="copy-link-btn">Press to Copy and Share</button>
-        </div>
 </div>
 <script>
 document.getElementById('copy-link-btn').onclick = function() {
-    let input = document.getElementById('your-friend-link');
+    let input = document.getElementById('my_user_id');
     input.select();
+    input.setSelectionRange(0, 99999); // For mobile devices
     document.execCommand('copy');
 };
 </script>
-
-<h4>Searching:...</h4>
+{% if search_results %}
+<h4 class="mt-4">Searching...</h4>
 <div class="container">
+    {% for user in search_results %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
                 <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
@@ -48,12 +59,14 @@ document.getElementById('copy-link-btn').onclick = function() {
                     <button type="submit" class="btn btn-primary btn-sm">Add Friend</button>
                 </form>
             </div>
-            <div class="mt-2 text-secondary small">{{ user.bio  }}</div>
+            <div class="mt-2 text-secondary small">{{ user.bio }}</div>
         </div>
+    {% endfor %}
 </div>
-
-<h2>Friends</h2>
+{% else %}
+<h2 class="mt-4">Friends</h2>
 <div class="container">
+    {% for friend in friends %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
                 <img src="{{ url_for('static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
@@ -62,14 +75,18 @@ document.getElementById('copy-link-btn').onclick = function() {
                     <strong>{{ friend.name or friend.username }}</strong>
                 </div>
                 <form method="POST" action="{{ url_for('friends') }}" class="ms-auto">
-                    <input type="hidden" name="remove_friend_id" value="{{friend.user_id}}">
+                    <input type="hidden" name="remove_friend_id" value="{{ friend.user_id }}">
                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this friend?');">Remove</button>
                 </form>
             </div>
-            <div class="mt-2 text-secondary small">{{friend.bio}}</div>
+            <div class="mt-2 text-secondary small">{{ friend.bio }}</div>
         </div>
+    {% else %}
         <div class="alert alert-warning text-center">
             <p>YOU DON'T HAVE FRIENDS</p>
             <p>ASK YOUR FRIENDS FOR THEIR USER ID</p>
         </div>
-    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

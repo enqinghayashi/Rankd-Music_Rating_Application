@@ -464,7 +464,7 @@ def delete_account():
     flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
 
-@app.route('/friends', method = ["GET", "POST"])
+@app.route('/friends', methods = ["GET", "POST"])
 def friends():
     my_user_id = int(session['user']['id'])
     search_results = []
@@ -521,7 +521,8 @@ def friends():
                 return redirect(url_for('friends'))
     else:
         search_someone_in_friendlist = friends
-    return render_template('friends.html',         my_user_id=my_user_id,
+    return render_template('friends.html',         
+        my_user_id=my_user_id,
         friends=search_someone_in_friendlist,
         search_results=search_results,
         searching_friends = searching_friends,
