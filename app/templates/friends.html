@@ -51,3 +51,25 @@ document.getElementById('copy-link-btn').onclick = function() {
             <div class="mt-2 text-secondary small">{{ user.bio  }}</div>
         </div>
 </div>
+
+<h2>Friends</h2>
+<div class="container">
+        <div class="card mb-3 p-3">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
+                        alt="Profile" class="rounded-circle me-3" width="48" height="48">
+                <div>
+                    <strong>{{ friend.name or friend.username }}</strong>
+                </div>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto">
+                    <input type="hidden" name="remove_friend_id" value="{{friend.user_id}}">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this friend?');">Remove</button>
+                </form>
+            </div>
+            <div class="mt-2 text-secondary small">{{friend.bio}}</div>
+        </div>
+        <div class="alert alert-warning text-center">
+            <p>YOU DON'T HAVE FRIENDS</p>
+            <p>ASK YOUR FRIENDS FOR THEIR USER ID</p>
+        </div>
+    </div>
