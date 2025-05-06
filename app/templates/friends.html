@@ -3,18 +3,22 @@
 <div class="container mt-4 max-w-100">
     <div class="d-flex justify-content-between flex-wrap gap-3 w-100 py-3">
         <div class="flex-grow-1 min-w-300 bg-primary text-white p-3">
-    <h2>Search Your Friends</h2>
-    <div class="mb-3 w-100">
-        <form method="POST" action="{{ url_for('friends') }}" class = "w-100">
-            <input type="text" name = "searching_friends" class="w-auto max-w-400" placeholder="Search friends by username or name" id="friend-search">
-            <button class="btn btn-primary" type = "button" id = "friend-search">Search</button>
-        </form>
+            <h2>Search Your Friends</h2>
+            <div class="mb-3 w-auto">
+                <form method="POST" action="{{ url_for('friends') }}" class = "w-auto">
+                    <input type="text" name = "searching_friends" class="w-auto max-w-400" placeholder="Search friends by username or name" value="{{ searching_friends }}" id="friend-search">
+                    <button class="btn btn-primary" type = "submit" id = "friend-search">Search</button>
+                </form>
     </div>
-
-    <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Paste friend link here..." id="add-friend-link">
-        <button class="btn btn-primary" type="button" id="add-friend-btn">Add Friend</button>
-    </div>
+    <div class="flex-grow-1 min-w-300 bg-primary text-white p-3">
+        <h2>Add Friends by User ID</h2>
+        <div class="mb-3 w-auto">
+            <form method = "POST" action = "{{ url_for('friends')}}" class= "w-auto">
+                <input type="text" name = "search_friend_id" class="form-control" class = "w-auto" placeholder="Enter friend's User ID" value = "{{search_friend_id}}" id="add-friend-link">
+                <button class="btn btn-primary" type="submit" id="add-friend-btn">Add</button>
+            </form>
+        </div>
+    
     <div class="mb-3">
         <input type="text" class="form-control d-inline-block w-auto" value="{{ your_friend_link }}" id="your-friend-link" readonly>
         <button class="btn btn-outline-secondary" type="button" id="copy-link-btn">Press to Copy and Share</button>
