@@ -521,6 +521,17 @@ def friends():
                 return redirect(url_for('friends'))
     else:
         search_someone_in_friendlist = friends
+
+    # Remove friend
+    if 'remove_friend_id' in request.form:
+        remove_id = int(request.form.get('remove_friend_id'))
+        friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
+        if friend:
+            db.session.delete(friend)
+            db.session.commit()
+            flash("Friend removed.", "info")
+        return redirect(url_for('friends'))
+    
     return render_template('friends.html',         
         my_user_id=my_user_id,
         friends=search_someone_in_friendlist,
