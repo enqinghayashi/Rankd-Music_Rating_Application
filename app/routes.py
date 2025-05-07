@@ -383,7 +383,7 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 def logout():
   session.pop('user', None)
-  session.pop("spotify_access", None)
+  session.pop("refresh_token", None)
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 

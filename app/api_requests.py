@@ -11,17 +11,32 @@ class API:
   THIS METHOD SHOULD ONLY BE CALLED INTERNALLY.
   """
   def api_request(self, endpoint, params={}):
-    url = self.BASE_URL + endpoint
-    try:
-      token = auth.getCurrentToken() # raises an exception if user is not logged in
-    except:
-      return False
-    headers = {
-      "Authorization": "Bearer  " + token # The two spaces after Bearer are required for some reason
-    }
-    res = requests.get(url, params=params, headers=headers)
-    # Handle errors
-    return res.json()
+      url = self.BASE_URL + endpoint
+      try:
+          token = auth.getCurrentToken() # check if user linked to spotify
+      except Exception as e:
+          print("Token error:", e) # returns error if not
+          return False
+      headers = {
+          "Authorization": "Bearer  " + token
+      }
+      res = requests.get(url, params=params, headers=headers)
+      
+      # check the response from Spotify API before doing any conversions
+      try:
+          res.raise_for_status()
+      except Exception as e:
+          print(f"Spotify API error: {e}")
+          print(f"Status code: {res.status_code}")
+          print(f"Response text: {res.text}")
+          return {} 
+      
+      try:
+          return res.json()
+      except Exception as e:
+          print(f"JSON parse error: {e}")
+          print(f"Response text: {res.text}")
+          return {}
 
   """
   THIS NEEDS IMPLEMENTING
@@ -35,24 +50,33 @@ class API:
   NOTE: The limit applies to each type independently. I.e. a limit of 5 returns 5 tracks, 5 albums, and 5 artists if type is left as default.
   """
   def search(self, query, type, limit=20, offset=0):
-    query = self.sanitize_query(query)
+      query = self.sanitize_query(query)
 
-    if type not in ["track", "album", "artist"]: # If user alters html then default to tracks
-      type = "track"
+      if not query:  # avoid empty query to the API
+          return []
 
-    params = {
-      "query": query,
-      "offset": offset,
-      "limit": limit,
-      "type": type
-    }
-    data = self.api_request("search", params)
+      if type not in ["track", "album", "artist"]: 
+          type = "track"
 
-    search_items = []
-    for item in data[type+"s"]["items"]:
-        search_items.append(Item(item))
-    return search_items
-  
+      params = {
+        "query": query,
+        "offset": offset,
+        "limit": limit,
+        "type": type
+      }
+      data = self.api_request("search", params)
+
+      search_items = []
+
+      data_key = type + "s"  # tracks, albums, artists
+      if data_key in data and "items" in data[data_key]: # check we got the expected keys
+          for item in data[data_key]["items"]:
+              search_items.append(Item(item))
+      else:
+          print(f"Spotify response did not include '{data_key}/items' (data was: {data}).")
+      # print the errors
+      return search_items
+    
   """
   Get a single item from the API.
 
