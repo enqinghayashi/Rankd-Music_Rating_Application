@@ -172,6 +172,7 @@ class Auth:
     if response.status_code == 400:
       raise BadRefreshTokenError 
     data = response.json()
+    print(data)
     return self.setCurrentToken(data)
   
   """
@@ -194,7 +195,6 @@ class Auth:
   Stores a token in the session, and the refresh token in the database.
   """
   def storeToken(self):
-    print(f"DEBUG: STORING REFRESH TOKEN: {self.refresh_token}")
     self.storeSessionToken()
     self.storeDatabaseToken()
 
@@ -204,14 +204,11 @@ class Auth:
   Returns false if no session_token exists.
   """
   def restoreSessionToken(self):
-    print("DEBUG: ATTEMPTING TO FIND SESSION TOKEN")
     try:
       self.refresh_token = session["refresh_token"]
       self.refreshCurrentToken()
-      print("DEBUG: SESSION TOKEN FOUND")
       return True
     except KeyError:
-      print("DEBUG: SESSION TOKEN NOT FOUND")
       return False
 
   """
@@ -220,21 +217,16 @@ class Auth:
   Returns false if user has not been authorized.
   """
   def restoreDatabaseToken(self):
-    print("DEBUG: SEARCHING DATABASE FOR TOKEN")
     try:
       user_id = session["user"]["id"]
       user = User.query.get(user_id)
-      print("DEBUG: USER FOUND")
     except KeyError:
-      print("DEBUG: USER NOT FOUND")
       return False
     
     refresh_token = user.refresh_token
     if refresh_token == None:
-      print("DEBUG: USER HAS NO REFRESH TOKEN")
       return False
     
-    print(f"DEBUG: TOKEN FOUND {refresh_token}")
     self.refresh_token = refresh_token
     self.refreshCurrentToken()
     return True
@@ -258,10 +250,7 @@ class Auth:
     # check if this is a fresh auth instance
     if (self.access_token == ""):
       # restore the auth state from stored token
-      print(f"DEBUG: CALLING RESTORE TOKEN")
-      test = self.restoreToken()
-      print(f"DEBUG: RESTORE TOKEN ATTEMPT {test}")
-      if (not test):
+      if (self.restoreToken()):
         raise UserNotAuthroizedError
     
     # get the current token
