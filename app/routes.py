@@ -335,7 +335,9 @@ def login():
     session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
     try:
-      auth.getCurrentToken()
+      print("DEBUG: ATTEMPTING TO GET CURRENT TOKEN")
+      test = auth.getCurrentToken()
+      print(f"DEBUG: CURRENT TOKEN RETRIEVED {test}")
     except:
        return redirect(url_for('link_to_spotify'))
     return redirect(url_for('index'))
@@ -384,6 +386,7 @@ app.secret_key = Config.SECRET_KEY
 def logout():
   session.pop('user', None)
   session.pop("refresh_token", None)
+  auth.clear()
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
