@@ -206,7 +206,10 @@ class Auth:
   def restoreSessionToken(self):
     try:
       self.refresh_token = session["refresh_token"]
-      self.refreshCurrentToken()
+      try:
+        self.refreshCurrentToken()
+      except BadRefreshTokenError:
+        raise BadRefreshTokenError
       return True
     except KeyError:
       return False
@@ -228,7 +231,10 @@ class Auth:
       return False
     
     self.refresh_token = refresh_token
-    self.refreshCurrentToken()
+    try:
+        self.refreshCurrentToken()
+    except BadRefreshTokenError:
+        raise BadRefreshTokenError
     return True
 
   """
@@ -237,9 +243,12 @@ class Auth:
   Returns false if the user has not been authorized.
   """
   def restoreToken(self):
-    if (self.restoreSessionToken()):
-      return True
-    return self.restoreDatabaseToken()
+    try:
+      if (self.restoreSessionToken()):
+        return True
+      return self.restoreDatabaseToken()
+    except BadRefreshTokenError:
+        raise BadRefreshTokenError
   
   """
   Gets a current token. If current token is close to expiring, requests a new one.
@@ -250,8 +259,11 @@ class Auth:
     # check if this is a fresh auth instance
     if (self.access_token == ""):
       # restore the auth state from stored token
-      if (self.restoreToken()):
-        raise UserNotAuthroizedError
+      try:
+        if (self.restoreToken()):
+          raise UserNotAuthroizedError
+      except BadRefreshTokenError:
+        raise BadRefreshTokenError
     
     # get the current token
     current_time = datetime.now()
