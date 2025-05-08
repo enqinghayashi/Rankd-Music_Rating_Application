@@ -20,6 +20,11 @@ GETTING A TOKEN TO USE FOR AN API REQUEST
 
 YOU SHOULD NOT NEED TO USE ANY OTHER METHOD MANUALLY OR ACCESS ANY PART OF AUTH
 """
+class UserNotAuthroizedError(Exception):
+  pass
+
+class BadRefreshTokenError(Exception):
+  pass
 
 class Auth:
   def __init__(self):
@@ -157,7 +162,6 @@ class Auth:
       "refresh_token": self.refresh_token,
       "client_id": self.client_id
     }
-    print(f"DEBUG: DATA IN POST REQUEST: {data}")
     return requests.post(url, headers=headers, data=data)
   
   """
@@ -165,6 +169,8 @@ class Auth:
   """
   def refreshCurrentToken(self):
     response = self.requestTokenRefresh()
+    if response.status_code == 400:
+      raise BadRefreshTokenError 
     data = response.json()
     return self.setCurrentToken(data)
   
@@ -256,7 +262,7 @@ class Auth:
       test = self.restoreToken()
       print(f"DEBUG: RESTORE TOKEN ATTEMPT {test}")
       if (not test):
-        raise Exception("User has not been authorized.")
+        raise UserNotAuthroizedError
     
     # get the current token
     current_time = datetime.now()

@@ -5,7 +5,7 @@ from app.config import Config
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from app.auth import auth
+from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
 from app.models import User
 from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
@@ -335,11 +335,11 @@ def login():
     session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
     flash(f"Log in successfully", "success")
     try:
-      print("DEBUG: ATTEMPTING TO GET CURRENT TOKEN")
-      test = auth.getCurrentToken()
-      print(f"DEBUG: CURRENT TOKEN RETRIEVED {test}")
-    except:
+      auth.getCurrentToken()
+    except UserNotAuthroizedError:
        return redirect(url_for('link_to_spotify'))
+    except BadRefreshTokenError:
+       return redirect(url_for('bad_refresh_token_instructions'))
     return redirect(url_for('index'))
   return render_template("login.html", title="Login")
 
@@ -475,3 +475,7 @@ def friends():
         'friends.html',
         your_friend_link=your_friend_link,
     )
+
+@app.route('/for_marker_only')
+def bad_refresh_token_instructions():
+  return render_template('bad_refresh_token_instructions.html')
