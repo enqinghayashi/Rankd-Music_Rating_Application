@@ -166,6 +166,7 @@ class Auth:
   def refreshCurrentToken(self):
     response = self.requestTokenRefresh()
     data = response.json()
+    print(data)
     return self.setCurrentToken(data)
   
   """
