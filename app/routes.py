@@ -6,10 +6,11 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.auth import auth
-from app.models import User, Friend
+from app.models import User, Friend, Score
 from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
+from flask_login import login_user, logout_user, login_required, current_user
 
 @app.route('/')
 @app.route('/index')
@@ -18,11 +19,12 @@ def index():
   return render_template("index.html", title="Home")
 
 @app.route('/scores', methods=["GET", "POST"])
+@login_required
 def scores():
   # Alter Database
   if request.method == "POST":
     data = request.json
-    user_id = session["user"]["id"]
+    user_id = current_user.user_id
     
     try:
        score = validate_score(data["score"])
@@ -191,6 +193,7 @@ graphs = [
 ]
 
 @app.route('/stats')
+@login_required
 def stats():
   return render_template("stats.html",\
                          title="Stats",\
@@ -201,6 +204,7 @@ def stats():
   )
 
 @app.route('/compare_scores')
+@login_required
 def compare_scores():
   my_items = [
     {
@@ -257,6 +261,7 @@ def compare_scores():
   return render_template("compare_scores.html", title="Compare Scores", my_items=my_items, friend_items=friend_items)
 
 @app.route('/compare_stats')
+@login_required
 def compare_stats():
   return render_template("compare_stats.html",\
                          title="Compare Stats",\
@@ -332,7 +337,7 @@ def login():
     if not user or not check_password_hash(user.password, password):
       flash("Incorrect username or password", "danger")
       return redirect(url_for('login'))
-    session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
+    login_user(user)
     flash(f"Log in successfully", "success")
     try:
       auth.getCurrentToken()
@@ -342,9 +347,9 @@ def login():
   return render_template("login.html", title="Login")
 
 @app.route('/profile', methods=['GET', 'POST'])
+@login_required
 def profile():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)    
+    user = current_user    
     return render_template("profile.html", title="Profile", user=user)
 
 app.config.from_object(Config)
@@ -352,9 +357,9 @@ def allowed_file(filename):
   return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
 def edit_profile():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)  
+    user = current_user  
     if request.method == 'POST':
       if 'profile_picture' in request.files:
         files = request.files['profile_picture']
@@ -381,9 +386,9 @@ def edit_profile():
 app.secret_key = Config.SECRET_KEY
 
 @app.route('/logout')
+@login_required
 def logout():
-  session.pop('user', None)
-  session.pop("spotify_access", None)
+  logout_user()
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
@@ -391,6 +396,7 @@ def logout():
 @app.route('/authenticate')
 @app.route('/authorize')
 @app.route('/connect_music', methods=['GET'])
+@login_required
 def link_to_spotify():
   num_args = len(request.args)
   if (num_args == 0): # First visit
@@ -410,13 +416,14 @@ def link_to_spotify():
     return "Error"
 
 @app.route('/account_settings')
+@login_required
 def account_settings():
   return render_template("account_settings.html", title = "Account Setting")
 
 @app.route('/change_password', methods=['GET', 'POST'])
+@login_required
 def change_password():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)
+    user = current_user
     if request.method == 'POST':
         current_password = request.form.get('password')
         new_password = request.form.get('new_password')
@@ -435,9 +442,9 @@ def change_password():
     return render_template('change_password.html')
 
 @app.route('/change_email', methods=['GET', 'POST'])
+@login_required
 def change_email():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)
+    user = current_user
     if request.method == 'POST':
       new_email = request.form['email']
       email_invalid = validate_email(new_email)
@@ -449,24 +456,24 @@ def change_email():
       else:
             user.email = new_email
             db.session.commit()
-            session['user']['email'] = new_email
             flash("Email updated successfully", "success")
             return redirect(url_for('account_settings'))
     return render_template("change_email.html", title = "change email", user = user)
 
 @app.route('/delete_account', methods=['POST'])
+@login_required
 def delete_account():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)
+    user = current_user
     db.session.delete(user)
     db.session.commit()
-    session.clear()
+    logout_user()
     flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
 
 @app.route('/friends', methods = ["GET", "POST"])
+@login_required
 def friends():
-    my_user_id = int(session['user']['id'])
+    my_user_id = int(current_user.user_id)
     search_results = []
     searching_friends = ""
     search_friend_id = ""
