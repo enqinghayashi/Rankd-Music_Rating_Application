@@ -1,8 +1,8 @@
 from app import db
-
+from flask_login import UserMixin
 from sqlalchemy.schema import PrimaryKeyConstraint
 
-class User(db.Model):
+class User(db.Model, UserMixin):
   __table_name__ = 'User'
   
   user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
