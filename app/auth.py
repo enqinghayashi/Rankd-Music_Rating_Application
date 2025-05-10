@@ -28,8 +28,8 @@ class BadRefreshTokenError(Exception):
 
 class Auth:
   def __init__(self):
-    self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
-    self.redirect_uri = "http://127.0.0.1:5000/authenticate"
+    self.client_id = "e4be439d76a746ae995cc4cab5bc885c"
+    self.redirect_uri = "http://127.0.0.1:5000/auth"
     self.code_verifier = ""
     self.code_challenge = ""
     self.auth_code = ""
@@ -204,14 +204,19 @@ class Auth:
   Returns false if no session_token exists.
   """
   def restoreSessionToken(self):
+    print("DEBUG: Attempting to restore session token")
     try:
       self.refresh_token = session["refresh_token"]
+      print("DEBUG: Session token FOUND")
       try:
+        print("DEBUG: Attempting to refresh token")
         self.refreshCurrentToken()
       except BadRefreshTokenError:
+        print("DEBUG: Refresh from session token failed")
         raise BadRefreshTokenError
       return True
     except KeyError:
+      print("DEBUG: Session token NOT FOUND")
       return False
 
   """
@@ -220,20 +225,27 @@ class Auth:
   Returns false if user has not been authorized.
   """
   def restoreDatabaseToken(self):
+    print("DEBUG: Attemping to restore token from database")
     try:
       user_id = session["user"]["id"]
       user = User.query.get(user_id)
     except KeyError:
+      print("DEBUG: No user session token")
       return False
     
+    print("DEBUG: User session token found")
     refresh_token = user.refresh_token
     if refresh_token == None:
+      print("DEBUG: No refresh token found")
       return False
     
     self.refresh_token = refresh_token
     try:
+        print("DEBUG: Attempting refresh")
         self.refreshCurrentToken()
+        print("DEBUG: Refresh succesful")
     except BadRefreshTokenError:
+        print("DEBUG: Refresh from database failed")
         raise BadRefreshTokenError
     return True
 
@@ -260,7 +272,7 @@ class Auth:
     if (self.access_token == ""):
       # restore the auth state from stored token
       try:
-        if (self.restoreToken()):
+        if (not self.restoreToken()):
           raise UserNotAuthroizedError
       except BadRefreshTokenError:
         raise BadRefreshTokenError
