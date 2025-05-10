@@ -32,7 +32,7 @@ class BadRefreshTokenError(Exception):
 
 class Auth:
   def __init__(self):
-    self.client_id = "e4be439d76a746ae995cc4cab5bc885c"
+    self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
     self.redirect_uri = "http://127.0.0.1:5000/auth"
     self.code_verifier = ""
     self.code_challenge = ""
