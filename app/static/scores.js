@@ -65,20 +65,23 @@ function renderItems(response) {
   renderContainer(search_container, response.search_results);
   renderContainer(db_container, response.db_results);
 
-  $(".item-save").click(function(e) {
-    const item = e.currentTarget.parentElement;
-    const input = item.querySelector(".item-score-input");
-    let data = item.data;
-    data.score = input.value;
-    $.ajax({
-      url: "",
-      type: "post",
-      contentType: "application/json",
-      data: JSON.stringify(data),
-      success: function(response) {
-        alert(response);
-      }
-    });
+  $(".item-score-input").on("keydown", function(e) {if (e.key == "Enter") send_save_request(e);});
+  $(".item-save").click(function(e) {send_save_request(e)});
+}
+
+function send_save_request(e) {
+  const item = e.currentTarget.parentElement;
+  const input = item.querySelector(".item-score-input");
+  let data = item.data;
+  data.score = input.value;
+  $.ajax({
+    url: "",
+    type: "post",
+    contentType: "application/json",
+    data: JSON.stringify(data),
+    success: function(response) {
+      alert(response);
+    }
   });
 }
 
