@@ -8,7 +8,7 @@ import re
 def getDatabaseItems(search, type):
   # Get user's saved scores
   user_id = session["user"]["id"]
-  db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score)).all()
+  db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score.desc())).all()
   db_items = []
   for row in db_rows:
     db_items.append(Item(row[0], True))
@@ -22,11 +22,14 @@ def getDatabaseItems(search, type):
 
   # Filter the saved scores to the search
   filtered_items = []
-  for item in db_items: # I know the filter() method exists but this needs 2 parameters which was annoying to do
-    title = re.search(search, item.title)
-    album = re.search(search, item.album)
-    creator = re.search(search, item.creator)
-    if (title or album or creator): filtered_items.append(item)
+  if search == "":
+    filtered_items = db_items
+  else:
+    for item in db_items: # I know the filter() method exists but this needs 2 parameters which was annoying to do
+      title = re.search(search, item.title)
+      album = re.search(search, item.album)
+      creator = re.search(search, item.creator)
+      if (title or album or creator): filtered_items.append(item)
   
   # Convert items to dictionaries to convert to json to send later
   total = len(filtered_items)
