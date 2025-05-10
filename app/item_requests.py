@@ -5,7 +5,7 @@ from app.item import Item
 from app.api_requests import api
 import re
 
-def getScoreItems(search, type, saved):
+def getDatabaseItems(search, type):
   # Get user's saved scores
   user_id = session["user"]["id"]
   db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score)).all()
@@ -33,6 +33,11 @@ def getScoreItems(search, type, saved):
   for i in range(0, total):
     filtered_items[i] = filtered_items[i].to_dict()
 
+  return db_items, db_ids, filtered_items
+
+def getScoreItems(search, type, saved):
+  db_items, db_ids, filtered_items = getDatabaseItems(search, type)
+  
   # Make search request
   search_items = []
   if saved == "false" and search != "": # This is from a json response
