@@ -339,7 +339,7 @@ def login():
     except UserNotAuthroizedError:
        return redirect(url_for('link_to_spotify'))
     except BadRefreshTokenError:
-       return redirect(url_for('bad_refresh_token_instructions'))
+       return redirect(url_for('link_to_spotify'))
     return redirect(url_for('index'))
   return render_template("login.html", title="Login")
 
@@ -475,7 +475,3 @@ def friends():
         'friends.html',
         your_friend_link=your_friend_link,
     )
-
-@app.route('/for_marker_only')
-def bad_refresh_token_instructions():
-  return render_template('bad_refresh_token_instructions.html')

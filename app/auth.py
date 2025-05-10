@@ -16,7 +16,11 @@ GETTING A TOKEN TO USE FOR AN API REQUEST
     
     call auth.getCurrentToken() and use the return value as the token
 
-    if the user has not been authorized getCurrentToken() will raise an exception
+    if the user has not been authorized getCurrentToken() will raise a
+    UserNotAuthorizedError
+
+    if the refresh token used to request a token refresh is outdated it will
+    raise a BadRefreshTokenError
 
 YOU SHOULD NOT NEED TO USE ANY OTHER METHOD MANUALLY OR ACCESS ANY PART OF AUTH
 """
