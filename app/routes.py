@@ -284,12 +284,6 @@ def register():
         username = form.username.data
         email = form.email.data
         password = form.password.data
-        # Additional validation if needed
-        if User.query.filter_by(username=username).first():
-            flash("Username is already taken. Please choose a different one.", "danger")
-            return redirect(url_for('register'))
-        if User.query.filter_by(email=email).first():
-            return redirect(url_for('register'))
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
