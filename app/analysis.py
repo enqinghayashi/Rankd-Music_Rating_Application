@@ -16,7 +16,7 @@ class AnalysisStats:
     self.top_tracks = []
     self.top_artists = []
 
-    self.top_albums = []
+    self.top_albums = [] # will be empty for api stats
 
     """
     The following fields have some key that is relevant to the data they represent 
@@ -149,7 +149,7 @@ class AnalysisStats:
 
   """
   """
-  def run(self):
+  def getStats(self):
     self.setup()
     self.calculateFieldScores()
 
@@ -198,3 +198,13 @@ class APIStats(AnalysisStats):
     self.convertPlacementsToScores(self.top_tracks)
     self.convertPlacementsToScores(self.top_artists)
     self.calculateListenedItems()
+
+"""
+Performs the analysis on the data found above.
+"""
+class StatsAnalyser:
+  def __init__(self):
+    self.db_stats = DatabaseStats()
+    self.api_stats = APIStats()
+    self.db_stats.getStats()
+    self.api_stats.getStats()
