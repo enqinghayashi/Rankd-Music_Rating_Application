@@ -7,8 +7,12 @@
             <div class="bg-primary text-white p-3 rounded h-100">
                 <h5>Search Your Friends</h5>
                 <form method="POST" action="{{ url_for('friends') }}">
-                    <input type="text" name="searching_friends" class="form-control mb-2" placeholder="Search by username or name" value="{{ searching_friends }}">
-                    <button class="btn btn-light w-100" type="submit">Search</button>
+                    {{ form.hidden_tag() }}
+                    {{ form.searching_friends(class="form-control mb-2", placeholder="Search by username or name") }}
+                    {% for error in form.searching_friends.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                    {{ form.submit_search(class="btn btn-light w-100") }}
                 </form>
             </div>
         </div>
@@ -17,8 +21,12 @@
             <div class="bg-primary text-white p-3 rounded h-100">
                 <h5>Add Friend by User ID</h5>
                 <form method="POST" action="{{ url_for('friends') }}">
-                    <input type="text" name="search_friend_id" class="form-control mb-2" placeholder="Enter friend's User ID" value="{{ search_friend_id }}">
-                    <button class="btn btn-light w-100" type="submit">Add</button>
+                    {{ form.hidden_tag() }}
+                    {{ form.search_friend_id(class="form-control mb-2", placeholder="Enter friend's User ID") }}
+                    {% for error in form.search_friend_id.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                    {{ form.submit_add(class="btn btn-light w-100") }}
                 </form>
             </div>
         </div>

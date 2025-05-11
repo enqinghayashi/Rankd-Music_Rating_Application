@@ -13,6 +13,14 @@ from app.item_requests import *
 from urllib.parse import parse_qs
 from flask_login import login_user, logout_user, login_required, current_user
 from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm
+from wtforms import StringField, SubmitField
+from flask_wtf import FlaskForm
+
+class FriendForm(FlaskForm):
+    searching_friends = StringField('Search by username or name')
+    search_friend_id = StringField("Enter friend's User ID")
+    submit_search = SubmitField('Search')
+    submit_add = SubmitField('Add')
 
 @app.route('/')
 @app.route('/index')
@@ -464,14 +472,14 @@ def delete_account():
     flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
 
-@app.route('/friends', methods = ["GET", "POST"])
+@app.route('/friends', methods=["GET", "POST"])
 @login_required
 def friends():
-
     my_user_id = int(current_user.user_id)
     search_results = []
     searching_friends = ""
     search_friend_id = ""
+    form = FriendForm()
     friends = (
         db.session.query(User)
         .join(Friend, Friend.friend_id == User.user_id)
@@ -479,53 +487,37 @@ def friends():
         .all()
     )
     search_someone_in_friendlist = friends
-    if request.method == 'POST' :
-        search_friend_id = request.form.get('search_friend_id', '').strip()    # Add/search friend by user id 
-        if search_friend_id:
+
+    if form.validate_on_submit():
+        # Add/search friend by user id
+        search_friend_id = form.search_friend_id.data.strip()
+        searching_friends = form.searching_friends.data.strip()
+        if form.submit_add.data and search_friend_id:
             user = User.query.filter_by(user_id=search_friend_id).first()
             if user:
-              if user.user_id != my_user_id:
-                  existing_friendship = Friend.query.filter_by(user_id=my_user_id, friend_id=user.user_id).first()
-                  if not existing_friendship:
-                    search_results = [user]
+                if user.user_id != my_user_id:
+                    existing_friendship = Friend.query.filter_by(user_id=my_user_id, friend_id=user.user_id).first()
+                    if not existing_friendship:
+                        new_friend = Friend(user_id=my_user_id, friend_id=user.user_id)
+                        db.session.add(new_friend)
+                        db.session.commit()
+                        flash("Friend added successfully!", "success")
+                        return redirect(url_for('friends'))
             else:
                 flash("No such user", "warning")
+        elif form.submit_search.data and searching_friends:
+            search_someone_in_friendlist = []
+            for friend in friends:
+                lowercase_names = searching_friends.lower()
+                friend_name = (friend.name or '').lower()
+                friend_username = (friend.username or '').lower()
+                if lowercase_names in friend_name or lowercase_names in friend_username:
+                    search_someone_in_friendlist.append(friend)
         else:
-            # Search friends by name
-            searching_friends = request.form.get('searching_friends', '').strip()
-            if searching_friends:
-                search_someone_in_friendlist = []
-                for friend in friends: # Checks for all relevant friends names in the friend list for the given search input name
-                    lowercase_names = searching_friends.lower()
-                    friend_name = (friend.name or '').lower()
-                    friend_username = (friend.username or '').lower()
-                    if lowercase_names in friend_name or lowercase_names in friend_username:
-                       search_someone_in_friendlist.append(friend)
-            else:
-                search_someone_in_friendlist = friends
-            # Add friend by user_id
-            friend_user_id = request.form.get('add_friend_id')
-            if friend_user_id:
-                friend_user_id = int(friend_user_id)
-                if friend_user_id == my_user_id:
-                    flash("You cannot add yourself as a friend.", "danger")
-                    return redirect(url_for('friends'))
-                if Friend.query.filter_by(user_id=my_user_id, friend_id=friend_user_id).first():
-                    flash("Friend already added.", "warning")
-                    return redirect(url_for('friends'))
-                if not User.query.get(friend_user_id):
-                    flash("User does not exist.", "danger")
-                    return redirect(url_for('friends'))
-                new_friend = Friend(user_id=my_user_id, friend_id=friend_user_id)
-                db.session.add(new_friend)
-                db.session.commit()
-                flash("Friend added successfully!", "success")
-                return redirect(url_for('friends'))
-    else:
-        search_someone_in_friendlist = friends
+            search_someone_in_friendlist = friends
 
     # Remove friend
-    if 'remove_friend_id' in request.form:
+    if request.method == 'POST' and 'remove_friend_id' in request.form:
         remove_id = int(request.form.get('remove_friend_id'))
         friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
         if friend:
@@ -533,12 +525,13 @@ def friends():
             db.session.commit()
             flash("Friend removed.", "info")
         return redirect(url_for('friends'))
-    
-    return render_template('friends.html',         
+
+    return render_template(
+        'friends.html',
         my_user_id=my_user_id,
         friends=search_someone_in_friendlist,
         search_results=search_results,
-        searching_friends = searching_friends,
-        search_friend_id = search_friend_id
-
+        searching_friends=searching_friends,
+        search_friend_id=search_friend_id,
+        form=form
     )
