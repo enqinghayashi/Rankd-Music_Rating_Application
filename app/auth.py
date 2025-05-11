@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from flask import session
 from app import db
 from app.models import User
+from flask_login import current_user
 
 """
 USAGE GUIDE
@@ -16,15 +17,24 @@ GETTING A TOKEN TO USE FOR AN API REQUEST
     
     call auth.getCurrentToken() and use the return value as the token
 
-    if the user has not been authorized getCurrentToken() will raise an exception
+    if the user has not been authorized getCurrentToken() will raise a
+    UserNotAuthorizedError
+
+    if the refresh token used to request a token refresh is outdated it will
+    raise a BadRefreshTokenError
 
 YOU SHOULD NOT NEED TO USE ANY OTHER METHOD MANUALLY OR ACCESS ANY PART OF AUTH
 """
+class UserNotAuthroizedError(Exception):
+  pass
+
+class BadRefreshTokenError(Exception):
+  pass
 
 class Auth:
   def __init__(self):
     self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
-    self.redirect_uri = "http://127.0.0.1:5000/authenticate"
+    self.redirect_uri = "http://127.0.0.1:5000/auth"
     self.code_verifier = ""
     self.code_challenge = ""
     self.auth_code = ""
@@ -33,6 +43,14 @@ class Auth:
     self.refresh_token = ""
     self.time_token_granted = ""
   
+  def clear(self):
+    self.code_verifier = ""
+    self.code_challenge = ""
+    self.auth_code = ""
+    self.access_token = ""
+    self.refresh_token = ""
+    self.time_token_granted = ""
+
   """
   Generates a random alphanumeric string of length passed to funciton.
   """
@@ -156,7 +174,10 @@ class Auth:
   """
   def refreshCurrentToken(self):
     response = self.requestTokenRefresh()
+    if response.status_code == 400:
+      raise BadRefreshTokenError 
     data = response.json()
+    print(data)
     return self.setCurrentToken(data)
   
   """
@@ -170,7 +191,7 @@ class Auth:
   Stores the refresh token in the database.
   """
   def storeDatabaseToken(self):
-    user_id = session['user']['id']
+    user_id = current_user.user_id
     user = User.query.get(user_id)
     user.refresh_token = self.refresh_token
     db.session.commit()
@@ -188,11 +209,19 @@ class Auth:
   Returns false if no session_token exists.
   """
   def restoreSessionToken(self):
+    print("DEBUG: Attempting to restore session token")
     try:
       self.refresh_token = session["refresh_token"]
-      self.refreshCurrentToken()
+      print("DEBUG: Session token FOUND")
+      try:
+        print("DEBUG: Attempting to refresh token")
+        self.refreshCurrentToken()
+      except BadRefreshTokenError:
+        print("DEBUG: Refresh from session token failed")
+        raise BadRefreshTokenError
       return True
     except KeyError:
+      print("DEBUG: Session token NOT FOUND")
       return False
 
   """
@@ -201,18 +230,28 @@ class Auth:
   Returns false if user has not been authorized.
   """
   def restoreDatabaseToken(self):
+    print("DEBUG: Attemping to restore token from database")
     try:
       user_id = session["user"]["id"]
       user = User.query.get(user_id)
     except KeyError:
+      print("DEBUG: No user session token")
       return False
     
+    print("DEBUG: User session token found")
     refresh_token = user.refresh_token
     if refresh_token == None:
+      print("DEBUG: No refresh token found")
       return False
     
     self.refresh_token = refresh_token
-    self.refreshCurrentToken()
+    try:
+        print("DEBUG: Attempting refresh")
+        self.refreshCurrentToken()
+        print("DEBUG: Refresh succesful")
+    except BadRefreshTokenError:
+        print("DEBUG: Refresh from database failed")
+        raise BadRefreshTokenError
     return True
 
   """
@@ -221,9 +260,12 @@ class Auth:
   Returns false if the user has not been authorized.
   """
   def restoreToken(self):
-    if (self.restoreSessionToken()):
-      return True
-    return self.restoreDatabaseToken()
+    try:
+      if (self.restoreSessionToken()):
+        return True
+      return self.restoreDatabaseToken()
+    except BadRefreshTokenError:
+        raise BadRefreshTokenError
   
   """
   Gets a current token. If current token is close to expiring, requests a new one.
@@ -234,8 +276,11 @@ class Auth:
     # check if this is a fresh auth instance
     if (self.access_token == ""):
       # restore the auth state from stored token
-      if (not self.restoreToken()):
-        raise Exception("User has not been authorized.")
+      try:
+        if (not self.restoreToken()):
+          raise UserNotAuthroizedError
+      except BadRefreshTokenError:
+        raise BadRefreshTokenError
     
     # get the current token
     current_time = datetime.now()

@@ -1,20 +1,23 @@
 from app import db
-
+from flask_login import UserMixin
 from sqlalchemy.schema import PrimaryKeyConstraint
 
-class User(db.Model):
+class User(db.Model, UserMixin):
   __table_name__ = 'User'
   
   user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   username = db.Column(db.String, nullable=False)
   email = db.Column(db.String, nullable=False)
   password = db.Column(db.String, nullable=False)
-  img_url = db.Column(db.String, nullable=False, default='default_profile_picture.png')
+  img_url = db.Column(db.String, nullable=False, default='img/profile_pictures/default.png')
   bio = db.Column(db.Text)
   name = db.Column(db.String)
   refresh_token = db.Column(db.String)
   def __repr__(self):
     return 'user_id={}, username={}, email={}, password={} img_url={} , bio = {}, name = {}'.format(self.user_id, self.username, self.email, self.password, self.img_url, self.bio, self.name, self.refresh_token)
+
+  def get_id(self):
+    return str(self.user_id)
 
 class Score(db.Model):
   __table_name__ = 'Score'

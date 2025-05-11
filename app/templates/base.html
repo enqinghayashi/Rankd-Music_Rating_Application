@@ -28,7 +28,7 @@
         </ul>
       </div>
 
-        {% if 'user' in session %}
+        {% if current_user.is_authenticated %}
         <div class="dropdown">
           <a class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expended="false">
             Profile
@@ -122,7 +122,7 @@
 
       
       // Login to account prompts
-      {% if 'user' not in session  %}
+      {% if not current_user.is_authenticated %}
       document.querySelectorAll('.nav-protected').forEach(function(link) {
         link.addEventListener('click', function(e) {
           e.preventDefault();
@@ -133,7 +133,9 @@
     {% endif %}
 
       // Link to Spotify prompts
-    {% if 'user' in session and 'refresh_token' not in session  %}
+
+    {% if current_user.is_authenticated and 'refresh_token' not in session  %}
+
       document.querySelectorAll('.nav-protected').forEach(function(link) {
         link.addEventListener('click', function(e) {
           e.preventDefault();

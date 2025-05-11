@@ -1,4 +1,5 @@
 from flask import session, jsonify
+from flask_login import current_user
 from app import db
 from app.models import *
 from app.item import Item
@@ -7,7 +8,7 @@ import re
 
 def getScoreItems(search, type, saved):
   # Get user's saved scores
-  user_id = session["user"]["id"]
+  user_id = current_user.user_id
   db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score)).all()
   db_items = []
   for row in db_rows:

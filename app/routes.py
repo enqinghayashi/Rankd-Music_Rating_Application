@@ -5,11 +5,18 @@ from app.config import Config
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from app.auth import auth
-from app.models import User
+from app.models import User, Friend, Score
+from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
+
 from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
+from flask_login import login_user, logout_user, login_required, current_user
+from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm
+from wtforms import StringField, SubmitField
+from flask_wtf import FlaskForm
+
+
 
 @app.route('/')
 @app.route('/index')
@@ -18,11 +25,12 @@ def index():
   return render_template("index.html", title="Home")
 
 @app.route('/scores', methods=["GET", "POST"])
+@login_required
 def scores():
   # Alter Database
   if request.method == "POST":
     data = request.json
-    user_id = session["user"]["id"]
+    user_id = current_user.user_id
     
     try:
        score = validate_score(data["score"])
@@ -191,6 +199,7 @@ graphs = [
 ]
 
 @app.route('/stats')
+@login_required
 def stats():
   return render_template("stats.html",\
                          title="Stats",\
@@ -201,6 +210,7 @@ def stats():
   )
 
 @app.route('/compare_scores')
+@login_required
 def compare_scores():
   my_items = [
     {
@@ -257,6 +267,7 @@ def compare_scores():
   return render_template("compare_scores.html", title="Compare Scores", my_items=my_items, friend_items=friend_items)
 
 @app.route('/compare_stats')
+@login_required
 def compare_stats():
   return render_template("compare_stats.html",\
                          title="Compare Stats",\
@@ -268,40 +279,31 @@ def compare_stats():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-  
-  if request.method == 'POST':
-    username = request.form['username']
-    email = request.form['email']
-    password = request.form['password']
-    confirmed_password = request.form['confirm_password']
-    validation_error = validate_password(password, confirmed_password)
-    email_invalid = validate_email(email)
-    if validation_error:
-        flash(validation_error, "danger")
-        return redirect(url_for('register'))
-    if email_invalid:
-        flash("Invalid email address. Please enter a valid email.", "danger")
-        return redirect(url_for('register'))
-
-    if User.query.filter_by(username=username).first():
-        flash("Username is already taken. Please choose a different one.", "danger")
-        return redirect(url_for('register'))
-    if User.query.filter_by(email=email).first():
-        flash("Email is already registered. Please use a different email.", "danger")
-        return redirect(url_for('register'))  
-        
-    hashed_password = generate_password_hash(password, method = 'pbkdf2:sha256')
-    new_user = User(username=username, email=email, password = hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
-    flash("Account created successfully", "success")
-    return redirect(url_for('login'))
-  return render_template("register.html", title="Register")
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = form.password.data
+        # Additional validation if needed
+        if User.query.filter_by(username=username).first():
+            flash("Username is already taken. Please choose a different one.", "danger")
+            return redirect(url_for('register'))
+        if User.query.filter_by(email=email).first():
+            return redirect(url_for('register'))
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash("Account created successfully", "success")
+        return redirect(url_for('login'))
+    return render_template("register.html", title="Register", form=form)
 
 @app.route('/validate_user', methods=['POST'])
 def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
+    password = request.json.get('password')
+    confirm_password = request.json.get('confirm_password')
 
     response = {}
 
@@ -316,74 +318,84 @@ def validate_user():
         existing_email = User.query.filter_by(email=email).first()
         if validate_email(email):
             response['email'] = "Invalid email address. Please enter a valid email."
-        if existing_email:
-           response['email'] = "Email is already registered with another account."
+        elif existing_email:
+            response['email'] = "Email is already registered with another account."
         else:
             response['email'] = "Email is available."
+
+    if password is not None and confirm_password is not None:
+        validation_error = validate_password(password, confirm_password)
+        if validation_error:
+            response['password'] = validation_error
+        else:
+            response['password'] = "Password is valid."
 
     return response
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-  if request.method == 'POST':
-    username = request.form['username']
-    password = request.form['password']
-    user = User.query.filter_by(username=username).first()
-    if not user or not check_password_hash(user.password, password):
-      flash("Incorrect username or password", "danger")
-      return redirect(url_for('login'))
-    session['user'] = {'id': user.user_id, 'username': user.username, 'email': user.email}
-    flash(f"Log in successfully", "success")
-    try:
-      auth.getCurrentToken()
-    except:
-       return redirect(url_for('link_to_spotify'))
-    return redirect(url_for('index'))
-  return render_template("login.html", title="Login")
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        user = User.query.filter_by(username=username).first()
+        if not user or not check_password_hash(user.password, password):
+            flash("Incorrect username or password", "danger")
+            return redirect(url_for('login'))
+        login_user(user)
+        flash("Log in successfully", "success")
+        try:
+            auth.getCurrentToken()
+        except:
+            return redirect(url_for('link_to_spotify'))
+        return redirect(url_for('index'))
+    return render_template("login.html", title="Login", form=form)
+
 
 @app.route('/profile', methods=['GET', 'POST'])
+@login_required
 def profile():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)    
+    user = current_user    
     return render_template("profile.html", title="Profile", user=user)
-
 app.config.from_object(Config)
 def allowed_file(filename):
   return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
 def edit_profile():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)  
-    if request.method == 'POST':
-      if 'profile_picture' in request.files:
-        files = request.files['profile_picture']
-        if files.filename != '':
-          old_profile = user.img_url
-          if old_profile and old_profile != 'img/profile_pictures/default.png':
-            old_profile_path = os.path.join(current_app.root_path, 'static', old_profile)
-            if os.path.exists(old_profile_path):
-               os.remove(old_profile_path)
-          if not os.path.exists(app.config['UPLOAD_FOLDER']):
-              os.makedirs(app.config['UPLOAD_FOLDER'])
-          filename = secure_filename(files.filename)
-          file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-          files.save(file_path)
-          user.img_url = f"img/profile_pictures/{filename}"
-      user.name = request.form['name']
-      user.bio = request.form['bio']
-      db.session.commit()
-      flash("Profile updated", "success")
-      return redirect(url_for('profile'))
-    
-    return render_template("edit_profile.html", title="Edit Profile", user=user)
+    user = current_user
+    form = EditProfileForm(obj=user)
+    if form.validate_on_submit():
+        if form.profile_picture.data:
+            files = form.profile_picture.data
+            old_profile = user.img_url
+            if old_profile and old_profile != 'img/profile_pictures/default.png':
+                old_profile_path = os.path.join(current_app.root_path, 'static', old_profile)
+                if os.path.exists(old_profile_path):
+                    os.remove(old_profile_path)
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+            filename = secure_filename(files.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            files.save(file_path)
+            user.img_url = f"img/profile_pictures/{filename}"
+        user.name = form.name.data
+        user.bio = form.bio.data
+        db.session.commit()
+        flash("Profile updated", "success")
+        return redirect(url_for('profile'))
+    return render_template("edit_profile.html", title="Edit Profile", user=user, form=form)
 
 app.secret_key = Config.SECRET_KEY
 
 @app.route('/logout')
+@login_required
 def logout():
-  session.pop('user', None)
-  session.pop("refresh_token", None)
+
+  logout_user()
+
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
@@ -391,6 +403,7 @@ def logout():
 @app.route('/authenticate')
 @app.route('/authorize')
 @app.route('/connect_music', methods=['GET'])
+@login_required
 def link_to_spotify():
   num_args = len(request.args)
   if (num_args == 0): # First visit
@@ -410,65 +423,119 @@ def link_to_spotify():
     return "Error"
 
 @app.route('/account_settings')
+@login_required
 def account_settings():
   return render_template("account_settings.html", title = "Account Setting")
 
 @app.route('/change_password', methods=['GET', 'POST'])
+@login_required
 def change_password():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)
-    if request.method == 'POST':
-        current_password = request.form.get('password')
-        new_password = request.form.get('new_password')
-        confirm_new_password = request.form.get('confirm_new_password')
+    user = current_user
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        current_password = form.password.data
+        new_password = form.new_password.data
+        confirm_new_password = form.confirm_new_password.data
         if not user or not check_password_hash(user.password, current_password):
             flash("Please enter the correct current password", "danger")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
+            flash(validation_error, "danger")
             return redirect(url_for('change_password'))
-        else:
-          user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
-          db.session.commit()
-          flash("Password updated successfully", "success")
-          return redirect(url_for('account_settings'))
-    return render_template('change_password.html')
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Password updated successfully", "success")
+        return redirect(url_for('account_settings'))
+    return render_template('change_password.html', form=form)
 
 @app.route('/change_email', methods=['GET', 'POST'])
+@login_required
 def change_email():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)
-    if request.method == 'POST':
-      new_email = request.form['email']
-      email_invalid = validate_email(new_email)
-      if User.query.filter_by(email=new_email).first():
-            flash("This email is already in use. Please enter a different one", "danger")
+    user = current_user
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        new_email = form.email.data
+        if User.query.filter_by(email=new_email).first():
             return redirect(url_for('change_email'))
-      if email_invalid:
-         return redirect(url_for('change_email'))
-      else:
-            user.email = new_email
-            db.session.commit()
-            session['user']['email'] = new_email
-            flash("Email updated successfully", "success")
-            return redirect(url_for('account_settings'))
-    return render_template("change_email.html", title = "change email", user = user)
+        email_invalid = validate_email(new_email)
+        if email_invalid:
+            return redirect(url_for('change_email'))
+        user.email = new_email
+        db.session.commit()
+        flash("Email updated successfully", "success")
+        return redirect(url_for('account_settings'))
+    return render_template("change_email.html", title="change email", user=user, form=form)
 
 @app.route('/delete_account', methods=['POST'])
+@login_required
 def delete_account():
-    user_id = session['user']['id']
-    user = User.query.get(user_id)
+    user = current_user
     db.session.delete(user)
     db.session.commit()
-    session.clear()
+    logout_user()
     flash('Your account has been deleted. See ya', 'info')
     return redirect(url_for('index'))
 
-@app.route('/friends')
+@app.route('/friends', methods=["GET", "POST"])
+@login_required
 def friends():
-    ### MISSING SEARCH FRIEND BY LINK FUNCTION
-    your_friend_link = "https://example.com/addfriend/your-unique-link"
+    my_user_id = int(current_user.user_id)
+    search_results = []
+    searching_friends = ""
+    search_friend_id = ""
+    form = FriendForm()
+    friends = (
+        db.session.query(User)
+        .join(Friend, Friend.friend_id == User.user_id)
+        .filter(Friend.user_id == my_user_id)
+        .all()
+    )
+    search_someone_in_friendlist = friends
+
+    if form.validate_on_submit():
+        search_friend_id = form.search_friend_id.data.strip() if form.search_friend_id.data else ""
+        searching_friends = form.searching_friends.data.strip() if form.searching_friends.data else ""
+        if form.submit_add.data and search_friend_id:
+            user = User.query.filter_by(user_id=search_friend_id).first()
+            if user:
+                if user.user_id != my_user_id:
+                    existing_friendship = Friend.query.filter_by(user_id=my_user_id, friend_id=user.user_id).first()
+                    if not existing_friendship:
+                        new_friend = Friend(user_id=my_user_id, friend_id=user.user_id)
+                        db.session.add(new_friend)
+                        db.session.commit()
+                        flash("Friend added successfully!", "success")
+                        return redirect(url_for('friends'))
+            else:
+                flash("No such user", "warning")
+        elif form.submit_search.data and searching_friends:
+            search_someone_in_friendlist = []
+            for friend in friends:
+                lowercase_names = searching_friends.lower()
+                friend_name = (friend.name or '').lower()
+                friend_username = (friend.username or '').lower()
+                if lowercase_names in friend_name or lowercase_names in friend_username:
+                    search_someone_in_friendlist.append(friend)
+        else:
+            search_someone_in_friendlist = friends
+
+    # Remove friend
+    if request.method == 'POST' and 'remove_friend_id' in request.form:
+        remove_id = int(request.form.get('remove_friend_id'))
+        friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
+        if friend:
+            db.session.delete(friend)
+            db.session.commit()
+            flash("Friend removed.", "info")
+        return redirect(url_for('friends'))
+
     return render_template(
         'friends.html',
-        your_friend_link=your_friend_link,
+        my_user_id=my_user_id,
+        friends=search_someone_in_friendlist,
+        search_results=search_results,
+        searching_friends=searching_friends,
+        search_friend_id=search_friend_id,
+        form=form
     )
