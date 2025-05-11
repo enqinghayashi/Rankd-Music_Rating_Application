@@ -101,7 +101,7 @@ class API:
 
   Raises an exception on error
   """
-  def getSeveralItems(self, type, ids):
+  def getSeveralItems(self, type, ids, return_data=False):
     allowed_types = ["tracks", "albums", "artists"]
     if type not in allowed_types:
       raise ValueError("Type is not of allowed types.")
@@ -119,6 +119,8 @@ class API:
     params = {"ids":ids_str}
     
     data = self.api_request(type, params)
+    if return_data:
+       return data
 
     items = []
     for item in data[type]:
