@@ -443,6 +443,30 @@ def change_password():
         return redirect(url_for('account_settings'))
     return render_template('change_password.html', form=form)
 
+@app.route('/validate_password_change', methods=['POST'])
+@login_required
+def validate_password_change():
+    user = current_user
+    current_password = request.json.get('current_password')
+    new_password = request.json.get('new_password')
+    confirm_new_password = request.json.get('confirm_new_password')
+    response = {}
+
+    if current_password is not None:
+        if not check_password_hash(user.password, current_password):
+            response['current_password'] = "Current password is incorrect."
+        else:
+            response['current_password'] = "Current password is correct."
+
+    if new_password is not None and confirm_new_password is not None:
+        validation_error = validate_password(new_password, confirm_new_password)
+        if validation_error:
+            response['new_password'] = validation_error
+        else:
+            response['new_password'] = "Password is valid."
+
+    return jsonify(response)
+
 @app.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email():
@@ -451,9 +475,6 @@ def change_email():
     if form.validate_on_submit():
         new_email = form.email.data
         if User.query.filter_by(email=new_email).first():
-            return redirect(url_for('change_email'))
-        email_invalid = validate_email(new_email)
-        if email_invalid:
             return redirect(url_for('change_email'))
         user.email = new_email
         db.session.commit()
