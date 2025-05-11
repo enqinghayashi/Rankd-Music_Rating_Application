@@ -11,6 +11,7 @@ from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
 from flask_login import login_user, logout_user, login_required, current_user
+from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm
 
 @app.route('/')
 @app.route('/index')
@@ -273,35 +274,24 @@ def compare_stats():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-  
-  if request.method == 'POST':
-    username = request.form['username']
-    email = request.form['email']
-    password = request.form['password']
-    confirmed_password = request.form['confirm_password']
-    validation_error = validate_password(password, confirmed_password)
-    email_invalid = validate_email(email)
-    if validation_error:
-        flash(validation_error, "danger")
-        return redirect(url_for('register'))
-    if email_invalid:
-        flash("Invalid email address. Please enter a valid email.", "danger")
-        return redirect(url_for('register'))
-
-    if User.query.filter_by(username=username).first():
-        flash("Username is already taken. Please choose a different one.", "danger")
-        return redirect(url_for('register'))
-    if User.query.filter_by(email=email).first():
-        flash("Email is already registered. Please use a different email.", "danger")
-        return redirect(url_for('register'))  
-        
-    hashed_password = generate_password_hash(password, method = 'pbkdf2:sha256')
-    new_user = User(username=username, email=email, password = hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
-    flash("Account created successfully", "success")
-    return redirect(url_for('login'))
-  return render_template("register.html", title="Register")
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        email = form.email.data
+        password = form.password.data
+        # Additional validation if needed
+        if User.query.filter_by(username=username).first():
+            flash("Username is already taken. Please choose a different one.", "danger")
+            return redirect(url_for('register'))
+        if User.query.filter_by(email=email).first():
+            return redirect(url_for('register'))
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash("Account created successfully", "success")
+        return redirect(url_for('login'))
+    return render_template("register.html", title="Register", form=form)
 
 @app.route('/validate_user', methods=['POST'])
 def validate_user():
@@ -330,21 +320,22 @@ def validate_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-  if request.method == 'POST':
-    username = request.form['username']
-    password = request.form['password']
-    user = User.query.filter_by(username=username).first()
-    if not user or not check_password_hash(user.password, password):
-      flash("Incorrect username or password", "danger")
-      return redirect(url_for('login'))
-    login_user(user)
-    flash(f"Log in successfully", "success")
-    try:
-      auth.getCurrentToken()
-    except:
-       return redirect(url_for('link_to_spotify'))
-    return redirect(url_for('index'))
-  return render_template("login.html", title="Login")
+    form = LoginForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        user = User.query.filter_by(username=username).first()
+        if not user or not check_password_hash(user.password, password):
+            flash("Incorrect username or password", "danger")
+            return redirect(url_for('login'))
+        login_user(user)
+        flash("Log in successfully", "success")
+        try:
+            auth.getCurrentToken()
+        except:
+            return redirect(url_for('link_to_spotify'))
+        return redirect(url_for('index'))
+    return render_template("login.html", title="Login", form=form)
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -359,29 +350,28 @@ def allowed_file(filename):
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    user = current_user  
-    if request.method == 'POST':
-      if 'profile_picture' in request.files:
-        files = request.files['profile_picture']
-        if files.filename != '':
-          old_profile = user.img_url
-          if old_profile and old_profile != 'img/profile_pictures/default.png':
-            old_profile_path = os.path.join(current_app.root_path, 'static', old_profile)
-            if os.path.exists(old_profile_path):
-               os.remove(old_profile_path)
-          if not os.path.exists(app.config['UPLOAD_FOLDER']):
-              os.makedirs(app.config['UPLOAD_FOLDER'])
-          filename = secure_filename(files.filename)
-          file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-          files.save(file_path)
-          user.img_url = f"img/profile_pictures/{filename}"
-      user.name = request.form['name']
-      user.bio = request.form['bio']
-      db.session.commit()
-      flash("Profile updated", "success")
-      return redirect(url_for('profile'))
-    
-    return render_template("edit_profile.html", title="Edit Profile", user=user)
+    user = current_user
+    form = EditProfileForm(obj=user)
+    if form.validate_on_submit():
+        if form.profile_picture.data:
+            files = form.profile_picture.data
+            old_profile = user.img_url
+            if old_profile and old_profile != 'img/profile_pictures/default.png':
+                old_profile_path = os.path.join(current_app.root_path, 'static', old_profile)
+                if os.path.exists(old_profile_path):
+                    os.remove(old_profile_path)
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+            filename = secure_filename(files.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            files.save(file_path)
+            user.img_url = f"img/profile_pictures/{filename}"
+        user.name = form.name.data
+        user.bio = form.bio.data
+        db.session.commit()
+        flash("Profile updated", "success")
+        return redirect(url_for('profile'))
+    return render_template("edit_profile.html", title="Edit Profile", user=user, form=form)
 
 app.secret_key = Config.SECRET_KEY
 
