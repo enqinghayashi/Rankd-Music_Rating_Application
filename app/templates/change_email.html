@@ -7,21 +7,12 @@
     <div class="row justify-content-center mt-3">
         <div class = "card w-100" style ="max-width: 800px; max-height: 800px ; margin: 20px;">
             <h3 class="text-center">My Email</h3>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
             <div class="mb-3">
                 <label class="form-label">Current Email</label>
                 <input type="text" class="form-control" value="{{ current_user.email }}" readonly>
             </div>
             <form action="{{ url_for('change_email') }}" method="POST">
+                    {{ form.hidden_tag() }}
                     {{ form.email.label(class="form-label") }}
                     {{ form.email(class="form-control") }}
 
