@@ -306,6 +306,8 @@ def register():
 def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
+    password = request.json.get('password')
+    confirm_password = request.json.get('confirm_password')
 
     response = {}
 
@@ -320,10 +322,17 @@ def validate_user():
         existing_email = User.query.filter_by(email=email).first()
         if validate_email(email):
             response['email'] = "Invalid email address. Please enter a valid email."
-        if existing_email:
-           response['email'] = "Email is already registered with another account."
+        elif existing_email:
+            response['email'] = "Email is already registered with another account."
         else:
             response['email'] = "Email is available."
+
+    if password is not None and confirm_password is not None:
+        validation_error = validate_password(password, confirm_password)
+        if validation_error:
+            response['password'] = validation_error
+        else:
+            response['password'] = "Password is valid."
 
     return response
 
