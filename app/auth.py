@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from flask import session
 from app import db
 from app.models import User
+from flask_login import current_user
 
 """
 USAGE GUIDE
@@ -190,7 +191,7 @@ class Auth:
   Stores the refresh token in the database.
   """
   def storeDatabaseToken(self):
-    user_id = session['user']['id']
+    user_id = current_user.user_id
     user = User.query.get(user_id)
     user.refresh_token = self.refresh_token
     db.session.commit()

@@ -1,4 +1,4 @@
-from flask import session
+from flask_login import current_user
 from app import db
 from app.models import Score
 
@@ -29,7 +29,7 @@ class Item:
 
     # General fields
     self.id = data["id"]
-    user_id = session["user"]["id"]
+    user_id = current_user.user_id
     # NEED TO HANDLE ERRORS HERE FOR DB QUERY
     #self.score = Score.query.get({"user_id": user_id, "item_id": self.id})
     self.type = data["type"]
