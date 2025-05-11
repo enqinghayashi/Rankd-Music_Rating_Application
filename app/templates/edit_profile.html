@@ -11,20 +11,30 @@
                 <label for="profile_picture" class="form-label"></label>
                 <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Current Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
             </div>
-            <form action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data">
+            <form action="" method="POST" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
                 <div class="mb-3">
-                    <label for="profile_picture" class="form-label">Upload New Profile Picture</label>
-                    <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
+                    {{ form.profile_picture.label(class="form-label") }}
+                    {{ form.profile_picture(class="form-control") }}
+                    {% for error in form.profile_picture.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control") }}
+                    {% for error in form.name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="mb-3">
-                    <label for="bio" class="form-label">Bio</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="3" required>{{ user.bio }}</textarea>
+                    {{ form.bio.label(class="form-label") }}
+                    {{ form.bio(class="form-control", rows="3") }}
+                    {% for error in form.bio.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                <button type="submit" class="btn btn-success w-100">Save Changes</button>
+                {{ form.submit(class="btn btn-success w-100") }}
                 <a href="{{ url_for('profile') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
             </form>
         </div>
