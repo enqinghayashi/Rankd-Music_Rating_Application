@@ -35,3 +35,6 @@ class FriendForm(FlaskForm):
     search_friend_id = StringField("Enter friend's User ID")
     submit_search = SubmitField('Search')
     submit_add = SubmitField('Add')
+
+class DeleteAccountForm(FlaskForm):
+    submit = SubmitField('Delete Your Account')

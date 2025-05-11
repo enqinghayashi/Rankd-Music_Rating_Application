@@ -12,7 +12,7 @@ from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
 from flask_login import login_user, logout_user, login_required, current_user
-from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm
+from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm, DeleteAccountForm
 from wtforms import StringField, SubmitField
 from flask_wtf import FlaskForm
 
@@ -419,7 +419,8 @@ def link_to_spotify():
 @app.route('/account_settings')
 @login_required
 def account_settings():
-  return render_template("account_settings.html", title = "Account Setting")
+    form = DeleteAccountForm()
+    return render_template("account_settings.html", title="Account Setting", form=form)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
@@ -495,12 +496,17 @@ def change_email():
 @app.route('/delete_account', methods=['POST'])
 @login_required
 def delete_account():
-    user = current_user
-    db.session.delete(user)
-    db.session.commit()
-    logout_user()
-    flash('Your account has been deleted. See ya', 'info')
-    return redirect(url_for('index'))
+    form = DeleteAccountForm()
+    if form.validate_on_submit():
+        user = current_user
+        db.session.delete(user)
+        db.session.commit()
+        logout_user()
+        flash('Your account has been deleted. See ya', 'info')
+        return redirect(url_for('index'))
+    else:
+        flash('Your account cannot be delete, please contact admin', 'danger')
+        return redirect(url_for('account_settings'))
 
 @app.route('/friends', methods=["GET", "POST"])
 @login_required
