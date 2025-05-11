@@ -16,11 +16,7 @@ from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEma
 from wtforms import StringField, SubmitField
 from flask_wtf import FlaskForm
 
-class FriendForm(FlaskForm):
-    searching_friends = StringField('Search by username or name')
-    search_friend_id = StringField("Enter friend's User ID")
-    submit_search = SubmitField('Search')
-    submit_add = SubmitField('Add')
+
 
 @app.route('/')
 @app.route('/index')
