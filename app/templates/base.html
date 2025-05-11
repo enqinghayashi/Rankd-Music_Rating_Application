@@ -109,6 +109,9 @@
         {% endif %}
       {% endwith %}
     </div>
+
+
+
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // Flash message
@@ -145,6 +148,56 @@
       });
     {% endif %}
   });
+ //<---------------Email realtime validation-------------------------->
+            function debounce(func, delay) {
+                let timeoutId;
+                return function (...args) {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+        
+            async function validateEmailField(value) {
+                const payload = { email: value };
+                try {
+                    const response = await fetch('{{ url_for("validate_user") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    const feedback = document.getElementById('email-feedback');
+                    if (data.email) {
+                        feedback.textContent = data.email;
+                        feedback.classList.remove('text-success', 'text-danger');
+                        if (data.email.includes('available')) {
+                            feedback.classList.add('text-success');
+                        } else {
+                            feedback.classList.add('text-danger');
+                        }
+                    } else {
+                        feedback.textContent = '';
+                        feedback.classList.remove('text-success', 'text-danger');
+                    }
+                } catch (error) {
+                    console.error('Error validating email:', error);
+                    const feedback = document.getElementById('email-feedback');
+                    feedback.textContent = 'Error validating. Please try again.';
+                    feedback.classList.remove('text-success');
+                    feedback.classList.add('text-danger');
+                }
+            }
+        
+            const validateEmailDebounced = debounce((value) => validateEmailField(value), 500);
+        
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.addEventListener('input', function () {
+                    validateEmailDebounced(this.value);
+                });
+            }
 
     </script>
   </body>
