@@ -45,6 +45,21 @@
         {% endif %}
       </div>
     </nav>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-message-container position-fixed top-50 start-50 translate-middle" style="z-index: 1050;">
+          <div>
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
     <div class="modal fade" id="loginAccount" tabindex="-1" aria-labelledby="loginAccounts" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center">
@@ -92,25 +107,7 @@
         <p>Share</p>
       </a>
     </nav>
-    {% block content %}{% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-
-    <div class="flash-message-container position-fixed top-50 start-50 translate-middle" style="z-index: 1050; display: none;">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div>
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-    </div>
-
-
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
