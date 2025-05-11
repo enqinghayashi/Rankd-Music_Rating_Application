@@ -438,9 +438,12 @@ def change_password():
             flash(validation_error, "danger")
             return redirect(url_for('change_password'))
         user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+
         db.session.commit()
         flash("Password updated successfully", "success")
         return redirect(url_for('account_settings'))
+    elif request.method == 'POST':
+        flash("Failed to update password. Please check your input.", "danger")
     return render_template('change_password.html', form=form)
 
 @app.route('/validate_password_change', methods=['POST'])
@@ -475,11 +478,18 @@ def change_email():
     if form.validate_on_submit():
         new_email = form.email.data
         if User.query.filter_by(email=new_email).first():
+            flash("Email is already registered with another account.", "danger")
+            return redirect(url_for('change_email'))
+        if validate_email(new_email) is not None:
+            flash("Invalid email address. Please enter a valid email.", "danger")
             return redirect(url_for('change_email'))
         user.email = new_email
         db.session.commit()
         flash("Email updated successfully", "success")
         return redirect(url_for('account_settings'))
+
+    elif request.method == 'POST':
+        flash("Failed to update email. Please check your input.", "danger")
     return render_template("change_email.html", title="change email", user=user, form=form)
 
 @app.route('/delete_account', methods=['POST'])
