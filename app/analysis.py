@@ -6,11 +6,7 @@ from app.api_requests import api
 from app.item_requests import *
 
 """
-Converting position to score:
-- Scaling factor = 10/total_items in top tracks
-- Score = 10 - position * scaling factor
-Most listened to track will be a 10
-Least listened to track will be practically a 0
+REMEMBER TO CHANGE LIMIT ON GETALLTOPITEMS IN API REQUESTS BACK TO 1000 OR WHATEVER FEELS REASONABLE
 """
 
 """
@@ -195,7 +191,7 @@ class APIStats(AnalysisStats):
     total_items = len(items)
     item_weight = 10/(total_items - 1)
     for i in range(total_items):
-      items[i]["score"] = 10 - (i * item_weight)
+      items[i].score = 10 - (i * item_weight)
   
   def setup(self):
     self.getTopItemsFromAPI()

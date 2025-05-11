@@ -193,10 +193,10 @@ graphs = [
 
 @app.route('/stats')
 def stats():
-  b_stats = DatabaseStats()
-  b_stats.run()
-  #api_stats = APIStats()
-  #api_stats.run()
+  db_stats = DatabaseStats()
+  db_stats.run()
+  api_stats = APIStats()
+  api_stats.run()
   return render_template("stats.html",\
                          title="Stats",\
                          item_comparisons=item_comparisons,\
