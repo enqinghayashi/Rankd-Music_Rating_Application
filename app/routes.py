@@ -194,9 +194,7 @@ graphs = [
 @app.route('/stats')
 def stats():
   db_analysis = DatabaseAnalysis()
-  db_analysis.getTopItemsFromDatabase()
-  db_analysis.trackAnalysis()
-
+  db_analysis.run()
   return render_template("stats.html",\
                          title="Stats",\
                          item_comparisons=item_comparisons,\

@@ -88,7 +88,7 @@ class Analysis:
 
   """
   """
-  def addScore(self, dataset, bracket, track):
+  def addScore(self, dataset, bracket, score, total):
     try:
       dataset[bracket]
     except KeyError:
@@ -96,8 +96,8 @@ class Analysis:
         "sum": 0,
         "total": 0
       }
-    dataset[bracket]["sum"] += track["score"]
-    dataset[bracket]["total"] += 1
+    dataset[bracket]["sum"] += score
+    dataset[bracket]["total"] += total
 
   """
   """
@@ -109,27 +109,72 @@ class Analysis:
   
   """
   """
-  def trackAnalysis(self):
-    # Get the length of all tracks so we can do length analysis at the same time as getting 
-    # album and artist information for release date and genre analysis
+  def calcualteListenedAlbumsAndArtists(self):
+    for track in self.top_tracks:
+      self.addScore(self.listened_albums, track["album_id"], track["score"], 1)
+      artist_ids = track["artist_ids"]
+      for id in artist_ids:
+        self.addScore(self.listened_artists, id, track["score"], 1)
+
+  """
+  """
+  def getTrackData(self):
     track_ids = self.getTrackIds()
     track_data = self.getAllItemsData("tracks", track_ids)
     
     total_tracks = len(self.top_tracks)
     for i in range(total_tracks):
-      duration = track_data[i]["duration_ms"]
-      self.top_tracks[i]["duration_ms"] = duration
-      
       track = self.top_tracks[i]
-      minutes = duration//(60*1000)
-      self.addScore(self.duration_data, minutes, track)
-      
-      self.addScore(self.listened_albums, track["album_id"], track)
-      
-      artist_ids = track["artist_ids"]
-      for id in artist_ids:
-        self.addScore(self.listened_artists, id, track)
+      track["duration_ms"] = track_data[i]["duration_ms"]
+      track["popularity"] = track_data[i]["popularity"]
+
+  """
+  """
+  def getListenedAlbumData(self):
+    album_ids = list(self.listened_albums.keys())
+    album_data = self.getAllItemsData("albums", album_ids)
+    for album in album_data:
+      id = album["id"]
+      self.listened_albums[id]["release_year"] = album["release_date"][0:4]
+      self.listened_albums[id]["total_tracks"] = album["total_tracks"]
+
+  """
+  """
+  def getListenedArtistData(self):
+    artist_ids = list(self.listened_artists.keys())
+    artist_data = self.getAllItemsData("artists", artist_ids)
+    for artist in artist_data:
+      id = artist["id"]
+      self.listened_artists[id]["genres"] = artist["genres"]
+      self.listened_artists[id]["popularity"] = artist["popularity"]
+      self.listened_artists[id]["followers"] = artist["followers"]["total"]
   
+  """
+  """
+  def getBonusData(self):
+    self.getTrackData()
+    self.getListenedAlbumData()
+    self.getListenedArtistData()
+
+  """
+  """
+  def durationAnalysis(self):
+    for track in self.top_tracks:
+      minutes = track["duration_ms"]//(60*1000)
+      self.addScore(self.duration_data, minutes, track["score"], 1)
+
+  """
+  """
+  def releaseYearAnalysis(self):
+    pass
+
+  """
+  """
+  def genreAnalysis(self):
+    pass
+
+"""
+"""
 class DatabaseAnalysis(Analysis):
   def __init__(self):
     super().__init__()
@@ -138,6 +183,12 @@ class DatabaseAnalysis(Analysis):
   Get user's scores from the database.
   """
   def getTopItemsFromDatabase(self):
+    # getDatabaseItems returns a tuple but here we only care about the first item
     self.top_tracks = getDatabaseItems(search="", type="track")[0]
     self.top_albums = getDatabaseItems(search="", type="album")[0]
     self.top_artists = getDatabaseItems(search="", type="artist")[0]
+
+  def run(self):
+    self.getTopItemsFromDatabase()
+    self.calcualteListenedAlbumsAndArtists()
+    self.getBonusData()
