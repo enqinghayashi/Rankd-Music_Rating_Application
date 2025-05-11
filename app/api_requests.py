@@ -141,7 +141,7 @@ class API:
     }
     
     data = self.api_request("me/top/" + type, params)
-    
+
     items = []
     for item in data["items"]:
       items.append(Item(item))
@@ -155,7 +155,7 @@ class API:
 
   Intended to only be used in the analysis section.
   """
-  def getAllTopItems(self, type, limit=1000):
+  def getAllTopItems(self, type, limit=100):
     allowed_types = ["tracks", "artists"]
     if type not in allowed_types:
       raise ValueError("Type is not of allowed types.")
@@ -163,11 +163,13 @@ class API:
     received = 0
     items = []
     while received < limit:
-      new_items = self.getTopItems(type, received)
+      print(f"DEBUG: Retrieved {received} of {limit} items")
+      new_items = self.getTopItems(type, offset=received)
       if new_items == []: # limit was higher than available tracks
         break
       items += new_items
       received += len(new_items)
+    print(f"DEBUG: Retrieved all items")
     return items[:limit]
 
 api = API()
