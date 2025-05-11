@@ -32,6 +32,7 @@ class AnalysisStats:
 
     Listened albums and artists have a few extra fields that are used to fill in the other data sets.
     """
+    self.listened_tracks = {} # useful for comparison between database and api
     self.listened_albums = {} # used for release date analysis
     self.listened_artists = {} # used for genre analysis
     
@@ -77,33 +78,25 @@ class AnalysisStats:
 
   """
   """
-  def getTrackIds(self):
-    ids = []
+  def calculateListenedItems(self):
     for track in self.top_tracks:
-      ids.append(track["id"])
-    return ids
-  
-  """
-  """
-  def calculateListenedAlbumsAndArtists(self):
-    for track in self.top_tracks:
-      self.addScore(self.listened_albums, track["album_id"], track["score"], 1)
-      artist_ids = track["artist_ids"]
+      self.addScore(self.listened_tracks, track.id, track.score, 1)
+      self.addScore(self.listened_albums, track.album_id, track.score, 1)
+      artist_ids = track.artist_ids
       for id in artist_ids:
-        self.addScore(self.listened_artists, id, track["score"], 1)
+        self.addScore(self.listened_artists, id, track.score, 1)
 
   """
   """
   def getTrackData(self):
-    track_ids = self.getTrackIds()
+    track_ids = list(self.listened_tracks.keys())
     track_data = self.getAllItemsData("tracks", track_ids)
-    
-    total_tracks = len(self.top_tracks)
-    for i in range(total_tracks):
-      track = self.top_tracks[i]
-      track["duration_ms"] = track_data[i]["duration_ms"]
-      track["popularity"] = track_data[i]["popularity"]
-
+    for track in track_data:
+      id = track["id"]
+      self.listened_tracks[id]["duration_ms"] = track["duration_ms"]
+      self.listened_tracks[id]["popularity"] = track["popularity"]
+      self.listened_tracks[id]["item"] = Item(track)
+  
   """
   """
   def getListenedAlbumData(self):
@@ -138,7 +131,7 @@ class AnalysisStats:
   def calculateFieldScores(self):
     self.getBonusData()
     
-    for track in self.top_tracks:
+    for track in list(self.listened_tracks.values()):
       minutes = track["duration_ms"]//(60*1000)
       self.addScore(self.minute_data, minutes, track["score"], 1)
       self.addScore(self.duration_data, track["duration_ms"], track["score"], 1)
@@ -181,7 +174,7 @@ class DatabaseStats(AnalysisStats):
   
   def setup(self):
     self.getTopItemsFromDatabase()
-    self.calculateListenedAlbumsAndArtists()
+    self.calculateListenedItems()
 
 """
 """
@@ -208,4 +201,4 @@ class APIStats(AnalysisStats):
     self.getTopItemsFromAPI()
     self.convertPlacementsToScores(self.top_tracks)
     self.convertPlacementsToScores(self.top_artists)
-    self.calculateListenedAlbumsAndArtists()
+    self.calculateListenedItems()
