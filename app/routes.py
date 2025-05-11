@@ -414,41 +414,41 @@ def account_settings():
 @login_required
 def change_password():
     user = current_user
-    if request.method == 'POST':
-        current_password = request.form.get('password')
-        new_password = request.form.get('new_password')
-        confirm_new_password = request.form.get('confirm_new_password')
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        current_password = form.password.data
+        new_password = form.new_password.data
+        confirm_new_password = form.confirm_new_password.data
         if not user or not check_password_hash(user.password, current_password):
             flash("Please enter the correct current password", "danger")
             return redirect(url_for('change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
+            flash(validation_error, "danger")
             return redirect(url_for('change_password'))
-        else:
-          user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
-          db.session.commit()
-          flash("Password updated successfully", "success")
-          return redirect(url_for('account_settings'))
-    return render_template('change_password.html')
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Password updated successfully", "success")
+        return redirect(url_for('account_settings'))
+    return render_template('change_password.html', form=form)
 
 @app.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email():
     user = current_user
-    if request.method == 'POST':
-      new_email = request.form['email']
-      email_invalid = validate_email(new_email)
-      if User.query.filter_by(email=new_email).first():
-            flash("This email is already in use. Please enter a different one", "danger")
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        new_email = form.email.data
+        if User.query.filter_by(email=new_email).first():
             return redirect(url_for('change_email'))
-      if email_invalid:
-         return redirect(url_for('change_email'))
-      else:
-            user.email = new_email
-            db.session.commit()
-            flash("Email updated successfully", "success")
-            return redirect(url_for('account_settings'))
-    return render_template("change_email.html", title = "change email", user = user)
+        email_invalid = validate_email(new_email)
+        if email_invalid:
+            return redirect(url_for('change_email'))
+        user.email = new_email
+        db.session.commit()
+        flash("Email updated successfully", "success")
+        return redirect(url_for('account_settings'))
+    return render_template("change_email.html", title="change email", user=user, form=form)
 
 @app.route('/delete_account', methods=['POST'])
 @login_required
