@@ -29,3 +29,9 @@ class EditProfileForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=64)])
     bio = TextAreaField('Bio', validators=[DataRequired(), Length(max=256)])
     submit = SubmitField('Save Changes')
+
+class FriendForm(FlaskForm):
+    searching_friends = StringField('Search by username or name')
+    search_friend_id = StringField("Enter friend's User ID")
+    submit_search = SubmitField('Search')
+    submit_add = SubmitField('Add')

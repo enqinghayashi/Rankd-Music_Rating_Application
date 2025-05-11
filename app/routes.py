@@ -12,7 +12,7 @@ from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
 from flask_login import login_user, logout_user, login_required, current_user
-from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm
+from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm
 from wtforms import StringField, SubmitField
 from flask_wtf import FlaskForm
 
@@ -489,7 +489,6 @@ def friends():
     search_someone_in_friendlist = friends
 
     if form.validate_on_submit():
-        # Add/search friend by user id
         search_friend_id = form.search_friend_id.data.strip()
         searching_friends = form.searching_friends.data.strip()
         if form.submit_add.data and search_friend_id:
