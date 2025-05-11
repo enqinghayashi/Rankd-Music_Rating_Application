@@ -8,7 +8,7 @@ import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
 
-from app.util import validate_password, validate_email, validate_score
+from app.util import validate_password, validate_email, validate_score, validate_username
 from app.item_requests import *
 from urllib.parse import parse_qs
 from flask_login import login_user, logout_user, login_required, current_user
@@ -290,6 +290,8 @@ def register():
         db.session.commit()
         flash("Account created successfully", "success")
         return redirect(url_for('login'))
+    if request.method == 'POST':
+        flash("Failed to register. Please check your input.", "danger")
     return render_template("register.html", title="Register", form=form)
 
 @app.route('/validate_user', methods=['POST'])
@@ -305,7 +307,9 @@ def validate_user():
         existing_username = User.query.filter_by(username=username).first()
         if existing_username:
             response['username'] = "Username is already taken."
-        else:
+        elif validate_username(username):
+            response["username"] = "Invalid username. Use letters, numbers, underscores only."
+        else:   
             response['username'] = "Username is available."
 
     if email:
