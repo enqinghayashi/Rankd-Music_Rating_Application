@@ -5,8 +5,9 @@ from app.config import Config
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from app.auth import auth
 from app.models import User, Friend, Score
+from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
+
 from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
@@ -320,6 +321,7 @@ def validate_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     form = LoginForm()
     if form.validate_on_submit():
         username = form.username.data
@@ -337,12 +339,12 @@ def login():
         return redirect(url_for('index'))
     return render_template("login.html", title="Login", form=form)
 
+
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     user = current_user    
     return render_template("profile.html", title="Profile", user=user)
-
 app.config.from_object(Config)
 def allowed_file(filename):
   return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -378,7 +380,9 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 @login_required
 def logout():
+
   logout_user()
+
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
@@ -463,6 +467,7 @@ def delete_account():
 @app.route('/friends', methods = ["GET", "POST"])
 @login_required
 def friends():
+
     my_user_id = int(current_user.user_id)
     search_results = []
     searching_friends = ""
@@ -535,4 +540,5 @@ def friends():
         search_results=search_results,
         searching_friends = searching_friends,
         search_friend_id = search_friend_id
+
     )
