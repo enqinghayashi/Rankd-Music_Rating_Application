@@ -489,8 +489,8 @@ def friends():
     search_someone_in_friendlist = friends
 
     if form.validate_on_submit():
-        search_friend_id = form.search_friend_id.data.strip()
-        searching_friends = form.searching_friends.data.strip()
+        search_friend_id = form.search_friend_id.data.strip() if form.search_friend_id.data else ""
+        searching_friends = form.searching_friends.data.strip() if form.searching_friends.data else ""
         if form.submit_add.data and search_friend_id:
             user = User.query.filter_by(user_id=search_friend_id).first()
             if user:
