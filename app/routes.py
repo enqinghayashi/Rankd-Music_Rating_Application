@@ -520,10 +520,18 @@ def friends():
     searching_friends = ""
     search_friend_id = ""
     form = FriendForm()
+    # Only show accepted friends
     friends = (
         db.session.query(User)
         .join(Friend, Friend.friend_id == User.user_id)
-        .filter(Friend.user_id == my_user_id)
+        .filter(Friend.user_id == my_user_id, Friend.status == 'ACCEPTED')
+        .all()
+    )
+    # Pending requests sent to current user
+    pending_requests = (
+        db.session.query(User)
+        .join(Friend, Friend.user_id == User.user_id)
+        .filter(Friend.friend_id == my_user_id, Friend.status == 'PENDING')
         .all()
     )
     search_someone_in_friendlist = friends
@@ -537,11 +545,16 @@ def friends():
                 if user.user_id != my_user_id:
                     existing_friendship = Friend.query.filter_by(user_id=my_user_id, friend_id=user.user_id).first()
                     if not existing_friendship:
-                        new_friend = Friend(user_id=my_user_id, friend_id=user.user_id)
+                        # Create a pending request
+                        new_friend = Friend(user_id=my_user_id, friend_id=user.user_id, status='PENDING')
                         db.session.add(new_friend)
                         db.session.commit()
-                        flash("Friend added successfully!", "success")
+                        flash("Friend request sent!", "success")
                         return redirect(url_for('friends'))
+                    elif existing_friendship.status == 'PENDING':
+                        flash("Friend request already sent.", "info")
+                    elif existing_friendship.status == 'ACCEPTED':
+                        flash("You are already friends.", "info")
             else:
                 flash("No such user", "warning")
         elif form.submit_search.data and searching_friends:
@@ -555,15 +568,39 @@ def friends():
         else:
             search_someone_in_friendlist = friends
 
-    # Remove friend
-    if request.method == 'POST' and 'remove_friend_id' in request.form:
-        remove_id = int(request.form.get('remove_friend_id'))
-        friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
-        if friend:
-            db.session.delete(friend)
-            db.session.commit()
-            flash("Friend removed.", "info")
-        return redirect(url_for('friends'))
+    # Accept or reject friend requests
+    if request.method == 'POST':
+        if 'remove_friend_id' in request.form:
+            remove_id = int(request.form.get('remove_friend_id'))
+            friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
+            if friend:
+                db.session.delete(friend)
+                db.session.commit()
+                flash("Friend removed.", "info")
+            return redirect(url_for('friends'))
+        elif 'accept_friend_id' in request.form:
+            accept_id = int(request.form.get('accept_friend_id'))
+            # Find the pending request sent to me
+            friend_request = Friend.query.filter_by(user_id=accept_id, friend_id=my_user_id, status='PENDING').first()
+            if friend_request:
+                friend_request.status = 'ACCEPTED'
+                # Also create reciprocal accepted friendship
+                reciprocal = Friend.query.filter_by(user_id=my_user_id, friend_id=accept_id).first()
+                if not reciprocal:
+                    db.session.add(Friend(user_id=my_user_id, friend_id=accept_id, status='ACCEPTED'))
+                else:
+                    reciprocal.status = 'ACCEPTED'
+                db.session.commit()
+                flash("Friend request accepted!", "success")
+            return redirect(url_for('friends'))
+        elif 'reject_friend_id' in request.form:
+            reject_id = int(request.form.get('reject_friend_id'))
+            friend_request = Friend.query.filter_by(user_id=reject_id, friend_id=my_user_id, status='PENDING').first()
+            if friend_request:
+                db.session.delete(friend_request)
+                db.session.commit()
+                flash("Friend request rejected.", "info")
+            return redirect(url_for('friends'))
 
     return render_template(
         'friends.html',
@@ -572,5 +609,6 @@ def friends():
         search_results=search_results,
         searching_friends=searching_friends,
         search_friend_id=search_friend_id,
-        form=form
+        form=form,
+        pending_requests=pending_requests
     )
