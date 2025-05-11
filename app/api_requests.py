@@ -120,7 +120,7 @@ class API:
     
     data = self.api_request(type, params)
     if return_data:
-       return data
+       return data[type]
 
     items = []
     for item in data[type]:
@@ -155,7 +155,7 @@ class API:
 
   Intended to only be used in the analysis section.
   """
-  def getAllTopItems(self, type, limit=100):
+  def getAllTopItems(self, type, limit=1000):
     allowed_types = ["tracks", "artists"]
     if type not in allowed_types:
       raise ValueError("Type is not of allowed types.")

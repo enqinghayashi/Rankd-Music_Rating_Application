@@ -10,6 +10,7 @@ from app.models import User
 from app.util import validate_password, validate_email, validate_score
 from app.item_requests import *
 from urllib.parse import parse_qs
+from app.analysis import *
 
 @app.route('/')
 @app.route('/index')
@@ -192,6 +193,10 @@ graphs = [
 
 @app.route('/stats')
 def stats():
+  db_analysis = DatabaseAnalysis()
+  db_analysis.getTopItemsFromDatabase()
+  db_analysis.trackAnalysis()
+
   return render_template("stats.html",\
                          title="Stats",\
                          item_comparisons=item_comparisons,\
