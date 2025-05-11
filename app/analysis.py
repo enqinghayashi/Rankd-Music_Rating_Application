@@ -175,9 +175,9 @@ class DatabaseStats(AnalysisStats):
   """
   def getTopItemsFromDatabase(self):
     # getDatabaseItems returns a tuple but here we only care about the first item
-    self.top_tracks = getDatabaseItems(search="", type="track")[0]
-    self.top_albums = getDatabaseItems(search="", type="album")[0]
-    self.top_artists = getDatabaseItems(search="", type="artist")[0]
+    self.top_tracks = getDatabaseItems(search="", type="track")
+    self.top_albums = getDatabaseItems(search="", type="album")
+    self.top_artists = getDatabaseItems(search="", type="artist")
   
   def setup(self):
     self.getTopItemsFromDatabase()

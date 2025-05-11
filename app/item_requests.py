@@ -12,6 +12,10 @@ def getDatabaseItems(search, type):
   db_items = []
   for row in db_rows:
     db_items.append(Item(row[0], True))
+  return db_items
+
+def filterDatabaseItems(search, type):
+  db_items = getDatabaseItems(search, type)
   
   # This is used to add scores to the search results
   # Our filter algorithm and spotify's search are different so this ensure we don't miss anything
@@ -39,7 +43,7 @@ def getDatabaseItems(search, type):
   return db_items, db_ids, filtered_items
 
 def getScoreItems(search, type, saved):
-  db_items, db_ids, filtered_items = getDatabaseItems(search, type)
+  db_items, db_ids, filtered_items = filterDatabaseItems(search, type)
   
   # Make search request
   search_items = []
