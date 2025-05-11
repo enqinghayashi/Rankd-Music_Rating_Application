@@ -48,6 +48,7 @@ class Friend(db.Model):
 
   user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
   friend_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
+  status = db.Column(db.String, nullable=False, default='PENDING')  # request status column
 
   __table_args__ = (
     db.PrimaryKeyConstraint('user_id', 'friend_id'), # comma is necessary as table args must be a tuple
