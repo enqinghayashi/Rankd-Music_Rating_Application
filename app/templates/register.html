@@ -20,7 +20,7 @@
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 {{ form.username.label(class="form-label") }}
-                {{ form.username(class="form-control", placeholder="Enter your username") }}
+                {{ form.username(class="form-control", placeholder="Enter your username", id="username") }}
                 {% for error in form.username.errors %}
                     <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
@@ -28,7 +28,7 @@
             </div>
             <div class="mb-3">
                 {{ form.email.label(class="form-label") }}
-                {{ form.email(class="form-control", placeholder="Enter your email") }}
+                {{ form.email(class="form-control", placeholder="Enter your email", id="email") }}
                 {% for error in form.email.errors %}
                     <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
@@ -36,17 +36,19 @@
             </div>
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
-                {{ form.password(class="form-control", placeholder="Enter your password") }}
+                {{ form.password(class="form-control", placeholder="Enter your password", id="password") }}
                 {% for error in form.password.errors %}
                     <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
+                <div id="password-feedback" class="feedback-message small" style="min-height: 20px;"></div>
             </div>
             <div class="mb-3">
                 {{ form.confirm_password.label(class="form-label") }}
-                {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                {{ form.confirm_password(class="form-control", placeholder="Confirm your password", id="confirm_password") }}
                 {% for error in form.confirm_password.errors %}
                     <div class="text-danger small">{{ error }}</div>
                 {% endfor %}
+                <div id="confirm_password-feedback" class="feedback-message small" style="min-height: 20px;"></div>
             </div>
             {{ form.submit(class="btn btn-primary w-100") }}
         </form>
