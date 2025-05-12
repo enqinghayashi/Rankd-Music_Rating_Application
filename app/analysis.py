@@ -5,6 +5,9 @@ from app.item import Item
 from app.api_requests import api
 from app.item_requests import *
 
+from scipy import stats
+import math
+
 """
 REMEMBER TO CHANGE LIMIT ON GETALLTOPITEMS IN API REQUESTS BACK TO 1000 OR WHATEVER FEELS REASONABLE
 """
@@ -212,16 +215,15 @@ class StatsAnalyser:
     self.db_stats.getStats()
     self.api_stats.getStats()
 
-    """
-    Key: Track ID, Value: {"db_score","api_score","difference","item"}
-    """
-    self.track_comparisons = {}
+    self.compared_tracks = {}
     self.common_tracks = {}
-  
+    self.track_correlation = 0
+
   """
   """
   @staticmethod
-  def compareDatasets(setA, setB, output):
+  def compareDatasets(setA, setB):
+    output = {}
     a_ids = list(setA.keys())
     for id in a_ids:
       output[id] = {
@@ -242,55 +244,48 @@ class StatsAnalyser:
           "y": setB[id]["score"],
           "difference": -1,
         }
+    return output
   
   """
   """
   @staticmethod
-  def getCommonItems(setIn, setOut):
+  def getCommonItems(setIn):
+    setOut = {}
     ids = list(setIn.keys())
     for id in ids:
       item = setIn[id]
       if item["x"] >= 0 and item["y"] >= 0:
         setOut[id] = item
+    return setOut
   
   """
   """
   @staticmethod
-  def calculateLineOfBestFit(set):
-    # Get average scores of common tracks
-    total_x = 0
-    total_y = 0
-    ids = list(set.keys())
-    total_ids = len(ids)
-    for id in ids:
-      item = set[id]
-      ex += item["x"]
-      ey += item["y"]
-    
-    ex = total_x/total_ids
-    ey = total_y/total_ids
+  def calculateLinearRegression(setA, setB):
+    compared = StatsAnalyser.compareDatasets(setA, setB)
+    common = StatsAnalyser.getCommonItems(compared)
+    x = []
+    y = []
+    common_ids = list(common.keys())
+    for id in common_ids:
+      item = common[id]
+      x.append(item["x"])
+      y.append(item["y"])
+    slope, intercept, correlation_coefficient, p, std_err = stats.linregress(x, y)
+    return compared, common, correlation_coefficient, slope, intercept, std_err
 
-    # Calculate gradient
-    numerator = 0
-    denominator = 0
-    for id in ids:
-      item = set[id]
-      dx = item["db_score"] - ex
-      dy = item["api_score"] - ey
-      numerator += dx * dy
-      denominator += dx * dx
-    m = numerator/denominator
-
-    # Calculate y-intercept
-    c = ey - m * ex
-
-    return m, c
+  """
+  Calculate the minimum distance of a point from the line of linear regression.
+  """
+  def calculateDistanceFromRegression(self, common, reg_slope, reg_intercept):
+    slope = -1/reg_slope #get the perpendicular slope to the regression line
+    common_ids = list(common.keys())
+    for id in common_ids:
+      intercept = common[id]["y"]
+      x = (reg_intercept - intercept)/(slope - reg_slope)
+      y = slope * x + intercept
+      dx = common[id]["x"] - x
+      dy = common[id]["y"] - y
+      common[id]["distance"] = math.sqrt(dx**2 + dy**2)
   
-  """
-  """
-  def calculateOutliers(self):
-    StatsAnalyser.compareDatasets(self.db_stats.listened_tracks, self.api_stats.listened_tracks, \
-                         self.track_comparisons)
-    StatsAnalyser.getCommonItems(self.track_comparisons, self.common_tracks)
-    m,c = StatsAnalyser.calculateLineOfBestFit(self.common_tracks)
-    
+
