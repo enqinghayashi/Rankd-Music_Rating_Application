@@ -325,7 +325,7 @@ class StatsAnalyser:
     StatsAnalyser.calculateDistanceFromRegression(common, slope, intercept)
     items = list(common.items())
     items.sort(key=lambda item: item[1]["distance"])
-    item_stats["outliers"] = items.copy()
+    item_stats["outlier"] = items[0]
 
     # Extremes
     items.sort(key=lambda item: item[1]["difference"])
@@ -345,10 +345,8 @@ class StatsAnalyser:
     item_stats["high_high"] = items[-1]
     
     return compared, common, item_stats
-    
-  """
-  """
-  def completeAnalysis(self):
+  
+  def analyseTracksAlbumsArtists(self):
     self.compared_tracks, self.common_tracks, self.track_stats\
     = StatsAnalyser.analyseItems(self.db_stats.listened_tracks, self.api_stats.listened_tracks)
 
@@ -359,3 +357,138 @@ class StatsAnalyser:
 
     self.compared_artists, self.common_artists, self.artist_stats\
     = StatsAnalyser.analyseItems(self.db_stats.listened_artists, self.api_stats.listened_artists)
+    
+  """
+  """
+  def fillInItemsSection(self, analysis):
+    self.analyseTracksAlbumsArtists()
+
+    # Get Tracks to display
+    display_track_ids = [self.db_stats.top_tracks[0], self.api_stats.top_tracks[0], self.track_stats["high_high"][0],
+                         self.track_stats["high_low"][0], self.track_stats["low_high"][0],\
+                         self.track_stats["low_low"][0], self.track_stats["outlier"][0]]
+    display_tracks = api.getSeveralItems("tracks", display_track_ids)
+
+    try: # if no common scores the bottom 5 will fail
+      analysis["tracks"]["db_top"] = display_tracks[0]
+      analysis["tracks"]["api_top"] = display_tracks[1]
+      analysis["tracks"]["high_high"] = display_tracks[2]
+      analysis["tracks"]["high_low"] = display_tracks[3]
+      analysis["tracks"]["low_high"] = display_tracks[4]
+      analysis["tracks"]["low_low"] = display_tracks[5]
+      analysis["tracks"]["outlier"] = display_tracks[6]
+    except:
+      pass
+    
+    analysis["track"]["correlation"] = self.track_stats["correlation"]
+
+    # Get Albums to display
+    api_top_albums = list(self.api_stats.listened_albums.items())
+    api_top_albums.sort(key=lambda album: album[1]["score"])
+    api_top_album_id = api_top_albums[0][0]
+
+    display_album_ids = [self.db_stats.top_albums[0], api_top_album_id, self.album_stats["high_high"][0],
+                         self.album_stats["high_low"][0], self.album_stats["low_high"][0],\
+                         self.album_stats["low_low"][0], self.album_stats["outlier"][0]]
+    display_albums = api.getSeveralItems("albums", display_album_ids)
+
+    try: # if no common scores the bottom 5 will fail
+      analysis["albums"]["db_top"] = display_albums[0]
+      analysis["albums"]["api_top"] = display_albums[1]
+      analysis["albums"]["high_high"] = display_albums[2]
+      analysis["albums"]["high_low"] = display_albums[3]
+      analysis["albums"]["low_high"] = display_albums[4]
+      analysis["albums"]["low_low"] = display_albums[5]
+      analysis["albums"]["outlier"] = display_albums[6]
+    except:
+      pass
+
+    analysis["albums"]["correlation"] = self.album_stats["correlation"]
+    
+    # Get Artists to display
+    display_artist_ids = [self.db_stats.top_artists[0], self.api_stats.top_artists[0], self.artist_stats["high_high"][0],
+                         self.artist_stats["high_low"][0], self.artist_stats["low_high"][0],\
+                         self.artist_stats["low_low"][0], self.artist_stats["outlier"][0]]
+    display_artists = api.getSeveralItems("artists", display_artist_ids)
+
+    try: # if no common scores the bottom 5 will fail
+      analysis["artists"]["db_top"] = display_artists[0]
+      analysis["artists"]["api_top"] = display_artists[1]
+      analysis["artists"]["high_high"] = display_artists[2]
+      analysis["artists"]["high_low"] = display_artists[3]
+      analysis["artists"]["low_high"] = display_artists[4]
+      analysis["artists"]["low_low"] = display_artists[5]
+      analysis["artists"]["outlier"] = display_artists[6]
+    except:
+      pass
+  
+    analysis["artists"]["correlation"] = self.artist_stats["correlation"]
+
+  @staticmethod
+  def addAveragesToAggregateData(data):
+    output = []
+    datafields = list(data.keys())
+    for field in datafields:
+      item = data[field]
+      item["average"] = item["score"]/item["tracks"]
+      output.append((field, item["average"], 0, 10)) # for graphing
+    return output
+  
+  """
+  """
+  def fillInGraphsSection(self, analysis):
+    titles = ["Track Length by Average Rating Score", "Track Length by Average Listening Score",\
+              "Years by Average Rating Score", "Years by Average Listening Score",\
+              "Genres by Average Rating Score", "Genres by Average Listening Score"]
+    datasets = [self.db_stats.minute_data, self.api_stats.minute_data, self.db_stats.release_year_data,\
+                self.api_stats.release_year_data, self.db_stats.genre_data self.api_stats.genre_data]
+    total_datasets = len(datasets)
+    for i in range(total_datasets):
+      graph_data = StatsAnalyser.addAveragesToAggregateData(datasets[i])
+      graph_data.sort(key=lambda item: item[0])
+      graph = {
+        "title": titles[i],
+        "data": graph_data
+      }
+      analysis["graphs"].append(graph)
+  
+  """
+  """
+  def completeAnalysis(self):
+    # this is what we are going to fill in and return
+    analysis = {
+      "tracks": {
+        "db_top": None,
+        "api_top": None,
+        "correlation": None,
+        "high_high": None,
+        "high_low": None,
+        "low_high": None,
+        "low_low": None,
+        "outlier": None
+      },
+      "albums": {
+        "db_top": None,
+        "api_top": None,
+        "correlation": None,
+        "high_high": None,
+        "high_low": None,
+        "low_high": None,
+        "low_low": None,
+        "outlier": None,
+      },
+      "artists": {
+        "db_top": None,
+        "api_top": None,
+        "correlation": None,
+        "high_high": None,
+        "high_low": None,
+        "low_high": None,
+        "low_low": None,
+        "outlier": None
+      },
+      "graphs": []
+    }
+    self.fillInItemsSection(analysis)
+    self.fillInGraphsSection(analysis)
+    return analysis
