@@ -1,4 +1,4 @@
-from flask import session, jsonify
+from flask import session # NEEDS TO BE UPDATED TO FLASK LOGIN
 from app import db
 from app.models import *
 from app.item import Item
@@ -189,7 +189,7 @@ class APIStats(AnalysisStats):
   """
   def convertPlacementsToScores(self, items):
     total_items = len(items)
-    item_weight = 10/(total_items - 1)
+    item_weight = 10/(total_items-1) # top song is a 10, bottom song is a 0
     for i in range(total_items):
       items[i].score = 10 - (i * item_weight)
   
@@ -208,3 +208,37 @@ class StatsAnalyser:
     self.api_stats = APIStats()
     self.db_stats.getStats()
     self.api_stats.getStats()
+
+    """
+    Key: Track ID, Value: {"db_score","api_score","difference","item"}
+    """
+    self.trackComparisons = {}
+  
+  """
+  """
+  def compareTracks(self):
+    db_tracks = self.db_stats.listened_tracks
+    api_tracks = self.api_stats.listened_tracks
+    
+    db_ids = list(db_tracks.keys())
+    for id in db_ids:
+      self.trackComparisons[id] = {
+        "db_score": db_tracks[id]["score"],
+        "api_score": -1,
+        "difference": -1,
+        "item": db_tracks[id]["item"]
+      }
+    
+    api_ids = list(api_tracks.keys())
+    for id in api_ids:
+      try:
+        track = self.trackComparisons[id]
+        track["api_score"] = api_tracks[id]["score"]
+        track["difference"] = abs(track["db_score"] - track["api_score"])
+      except KeyError:
+        self.trackComparisons[id] = {
+          "db_score": -1,
+          "api_score": api_tracks[id]["score"],
+          "difference": -1,
+          "item": api_tracks[id]["item"]
+        }
