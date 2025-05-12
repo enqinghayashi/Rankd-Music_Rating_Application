@@ -1,14 +1,17 @@
+import numpy as np
 from flask import session, jsonify
 from app import db
 from app.models import *
 from app.item import Item
 from app.api_requests import api
 from app.item_requests import *
+from scipy.ndimage import gaussian_filter1d
+from sklearn.metrics.pairwise import cosine_similarity
 
 """
 REMEMBER TO CHANGE LIMIT ON GETALLTOPITEMS IN API REQUESTS BACK TO 1000 OR WHATEVER FEELS REASONABLE
 """
-
+YEAR_RANGE = list(range(1950,2026))
 """
 """
 class AnalysisStats:
@@ -208,3 +211,42 @@ class StatsAnalyser:
     self.api_stats = APIStats()
     self.db_stats.getStats()
     self.api_stats.getStats()
+
+  @staticmethod
+  def getYearReleaseScores(release_year_data):
+    return{
+      int(year): data["score"]
+      for year, data in release_year_data.items()if data["tracks"] >0
+    }
+  
+  @staticmethod
+  def createYearScoreVector(score_dict, year_range = YEAR_RANGE):
+    score_vector = np.zeros(len(year_range))
+    for i, year in enumerate(year_range):
+      score_vector[i] = score_dict.get((year),0)
+    
+    return score_vector
+
+  @staticmethod
+  def temporalSmoothingforVector(score_vector, sigma = 2.0):
+    return gaussian_filter1d(score_vector, sigma=sigma)
+
+
+  def get_cosine_similarity(self):
+    db_year_scores = self.getYearReleaseScores(self.db_stats.release_year_data)
+    api_year_scores = self.getYearReleaseScores(self.api_stats.release_year_data)
+
+    if not db_year_scores or not api_year_scores:
+      return None
+
+    db_vector = self.createYearScoreVector(db_year_scores)
+    api_vector = self.createYearScoreVector(api_year_scores)
+
+    db_vector = self.temporalSmoothingforVector(db_vector)
+    api_vector = self.temporalSmoothingforVector(api_vector)
+
+    if np.linalg.norm(db_vector) == 0 or np.linalg.norm(api_vector) == 0:
+      return 0.0
+    
+    return round(cosine_similarity([db_vector],[api_vector])[0][0],4)
+

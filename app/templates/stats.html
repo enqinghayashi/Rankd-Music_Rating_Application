@@ -103,6 +103,21 @@
           </div>
         </div>
 
+        <div class="comparison shadow-sm">
+          <h2 class="comparison-title">Scores vs Listening Temporal Similarity</h2>
+          {% if temporal_similarity is not none %}
+            <div class="percentage-circle mt-2 mb-4" style="background: conic-gradient(gray {{ temporal_similarity }}%, white 0);"></div>
+            <div class="text centre fs-4">
+              <p>{{ temporal_similarity }}%</p>
+            </div>
+          {% else %}
+            <div class="text centre fs-4">
+              Unable to calculate genre similarity percentage - requires more ratings.
+            </div>
+          {% endif %}
+        </div>
+
+
         <h4 class="mt-5 mb-3 text-center">Summary for Sharing</h4>
         <div id="summary-section" class="comparison-table table-responsive mb-4">
           <table class="table table-striped">

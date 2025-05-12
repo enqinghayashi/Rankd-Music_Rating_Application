@@ -194,13 +194,24 @@ graphs = [
 @app.route('/stats')
 def stats():
   analysis = StatsAnalyser()
+  temporal_similarity = analysis.get_cosine_similarity()
+  
+  if temporal_similarity is not None:
+     temporal_similarity_percentage = round(temporal_similarity*100)
+  else:
+     temporal_similarity_percentage = None
+  
   return render_template("stats.html",\
                          title="Stats",\
                          item_comparisons=item_comparisons,\
                          outlier_comparisons=outlier_comparisons,\
                          graphs=graphs,\
-                         similarity_percentage=65\
-  )
+                         similarity_percentage=65,\
+                         temporal_similarity=temporal_similarity_percentage\
+                         
+                       
+
+)
 
 @app.route('/compare_scores')
 def compare_scores():
