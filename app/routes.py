@@ -194,6 +194,9 @@ graphs = [
 @app.route('/stats')
 def stats():
   analysis = StatsAnalyser()
+  analysis.analyseTracks()
+  print(f"Track Correlation: {analysis.track_correlation}")
+  print(f"Track Outlier: {analysis.track_outlier}")
   return render_template("stats.html",\
                          title="Stats",\
                          item_comparisons=item_comparisons,\

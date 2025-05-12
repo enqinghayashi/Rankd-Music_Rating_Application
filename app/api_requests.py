@@ -155,7 +155,7 @@ class API:
 
   Intended to only be used in the analysis section.
   """
-  def getAllTopItems(self, type, limit=250):
+  def getAllTopItems(self, type, limit=50):
     allowed_types = ["tracks", "artists"]
     if type not in allowed_types:
       raise ValueError("Type is not of allowed types.")

@@ -217,8 +217,14 @@ class StatsAnalyser:
 
     self.compared_tracks = {}
     self.common_tracks = {}
-    self.track_correlation = 0
-    self.track_outlier = ()
+    self.track_stats = {
+      "correlation": None,
+      "high_high": None,
+      "low_low": None,
+      "high_low": None,
+      "low_high": None,
+      "outliers": None
+    }
 
   """
   """
@@ -237,7 +243,7 @@ class StatsAnalyser:
     for id in b_ids:
       try:
         item = output[id]
-        item["y"] = item[id]["score"]
+        item["y"] = setB[id]["score"]
         item["difference"] = abs(item["x"] - item["y"])
       except KeyError:
         output[id] = {
@@ -280,6 +286,8 @@ class StatsAnalyser:
   """
   @staticmethod
   def calculateDistanceFromRegression(common, reg_slope, reg_intercept):
+    if common == {}:
+      raise ValueError
     slope = -1/reg_slope #get the perpendicular slope to the regression line
     common_ids = list(common.keys())
     for id in common_ids:
@@ -301,8 +309,14 @@ class StatsAnalyser:
         StatsAnalyser.calculateLinearRegression(self.db_stats.listened_tracks, self.api_stats.listened_tracks)
     self.compared_tracks = compared
     self.common_tracks = common
-    self.track_correlation = correlation
-    StatsAnalyser.calculateDistanceFromRegression(self.common_tracks, slope, intercept)
-    items = list(self.common_tracks.items())
-    items.sort(key=StatsAnalyser.sort_by_distance)
-    self.track_outlier = items[0]
+    self.track_stats["correlation"] = correlation
+    
+    # Outlier
+    try:
+      StatsAnalyser.calculateDistanceFromRegression(self.common_tracks, slope, intercept)
+      items = list(self.common_tracks.items())
+      items.sort(key=StatsAnalyser.sort_by_distance)
+      self.track_stats["outliers"] = items.copy()
+    except ValueError:
+      pass
+    
