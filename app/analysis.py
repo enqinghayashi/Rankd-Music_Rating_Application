@@ -328,22 +328,42 @@ class StatsAnalyser:
     item_stats["outlier"] = items[0]
 
     # Extremes
-    items.sort(key=lambda item: item[1]["difference"])
-    item_stats["high_low"] = items[0] # largest +ve diff is high rank but low listening
-    item_stats["low_high"] = items[-1] # largest -ve diff is low rank but high listening
 
-    # distance from top right corner
+    # This method is commented out because the high_low often produces the same as high_high
+    # and to appear more interested we used a different method
+
+    #items.sort(key=lambda item: item[1]["difference"])
+    #item_stats["high_low"] = items[0] # largest +ve diff is high rank but low listening
+    #print(f"HL {item_stats["high_low"]}")
+    #item_stats["low_high"] = items[-1] # largest -ve diff is low rank but high listening
+    #print(f"LH {item_stats["low_high"]}")
+
 
     # YES I KNOW THIS IS A TERRIBLE WAY OF DOING THIS BUT I DONT HAVE THE TIME TO DO IT BETTER RIGHT NOW
-    items.sort(key=lambda item: item[1]["x"])
-    max_x = items[0][1]["x"]
-    items.sort(key=lambda item: item[1]["y"])
-    max_y = items[0][1]["y"]
+    items.sort(key=lambda item: float(item[1]["x"]))
+    max_x = items[-1][1]["x"]
+    items.sort(key=lambda item: float(item[1]["y"]))
+    max_y = items[-1][1]["y"]
     
-    items.sort(key=lambda item: math.sqrt( (item[1]["x"]-max_x)**2 + (item[1]["y"]-max_y)**2 ) )
+    # distance from top right corner
+    items.sort(key=lambda item: math.sqrt( (max_x-item[1]["x"])**2 + (max_y-item[1]["y"])**2 ) )
+    item_stats["high_high"] = items[0]
+    #distance from bottom right corner
+    items.sort(key=lambda item: math.sqrt( (max_x-item[1]["x"])**2 + (item[1]["y"])**2 ) )
+    item_stats["high_low"] = items[0]
+    # distance from top left corner
+    items.sort(key=lambda item: math.sqrt( (item[1]["x"])**2 + (max_y - item[1]["y"])**2 ) )
+    item_stats["low_high"] = items[0]
+    # distance from bottom right corner
+    items.sort(key=lambda item: math.sqrt( (item[1]["x"])**2 + (item[1]["y"])**2 ) )
     item_stats["low_low"] = items[0]
-    item_stats["high_high"] = items[-1]
-    
+
+
+    print(f"HH: {item_stats['high_high']}")
+    print(f"HL: {item_stats['high_low']}")
+    print(f"LH: {item_stats['low_high']}")
+    print(f"LL: {item_stats['low_low']}")
+
     return compared, common, item_stats
   
   def analyseTracksAlbumsArtists(self):
@@ -431,13 +451,13 @@ class StatsAnalyser:
     for field in datafields:
       item = data[field]
       item["average"] = item["score"]/item["tracks"]
-      output.append((field, item["average"], 0, 10)) # for graphing
+      output.append((field, round(item["average"], 2), 0, 10)) # for graphing
     return output
   
   """
   """
   def fillInGraphsSection(self, analysis):
-    titles = ["Track Length by Average Rating Score", "Track Length by Average Listening Score",\
+    titles = ["Track Length (Minutes) by Average Rating Score", "Track Length (Minutes) by Average Listening Score",\
               "Years by Average Rating Score", "Years by Average Listening Score",\
               "Genres by Average Rating Score", "Genres by Average Listening Score"]
     datasets = [self.db_stats.minute_data, self.api_stats.minute_data, self.db_stats.release_year_data,\

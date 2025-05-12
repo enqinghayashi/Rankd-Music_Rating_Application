@@ -7,10 +7,10 @@
       <h2 class="mt-4 mb-4 text-center">🎵 Your Music Stats</h2>
       <div class="d-flex flex-column gap-4">
         <!-- ITEM SECTION -->
-        {% for section in [analysis["tracks"], analysis["albums"], analysis["artists"]] %}
+        {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
         <!-- TOP ITEMS COMPARISON -->
         <div class="comparison shadow-sm">
-          <h2 class="comparison-title">Top Scores Comparison</h2>
+          <h2 class="comparison-title">Top {{ title }} Comparison</h2>
           
           <div class="comparison-item">
             <div class="comparison-subtitle col-3">
@@ -54,64 +54,83 @@
 
         <!-- EXTREMES SECTION -->
         {% if section['high_high'] != None %}
-        <h2 class="comparison-title">Overrated, Underrated, and Perfectly Rated</h2>
+
+        <div class="comparison shadow-sm">
+          <h2 class="comparison-title">Overrated, Underrated, and Perfectly Rated</h2>
+            
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-3">
+              <p>Highest Rated Most Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['high_high'].type }} col">
+              <img class="item-img" src="{{ section['high_high'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['high_high'].title }}</p>
+                {% if section['high_high'].type != 'artist' %}
+                <p class="item-creator">{{ section['high_high'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
           
-        <h3>Highest Rated, Most Listened To</h3>
-        <div class="item item-lg item-borderless item-type-{{ section['high_high'].type }} col">
-          <img class="item-img" src="{{ section['high_high'].img_url }}" alt="">
-          <div class="item-desc">
-            <p class="item-title">{{ section['high_high'].title }}</p>
-            {% if section['high_high'].type != 'artist' %}
-            <p class="item-creator">{{ section['high_high'].creator }}</p>
-            {% endif %}
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-3">
+              <p>Highest Rated Least Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['high_low'].type }} col">
+              <img class="item-img" src="{{ section['high_low'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['high_low'].title }}</p>
+                {% if section['high_low'].type != 'artist' %}
+                <p class="item-creator">{{ section['high_low'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
           </div>
-        </div>
-        <p>You LOVE this one!!!</p>
-
-        <h3>Highest Rated, Least Listened To</h3>
-        <div class="item item-lg item-borderless item-type-{{ section['high_low'].type }} col">
-          <img class="item-img" src="{{ section['high_low'].img_url }}" alt="">
-          <div class="item-desc">
-            <p class="item-title">{{ section['high_low'].title }}</p>
-            {% if section['high_low'].type != 'artist' %}
-            <p class="item-creator">{{ section['high_low'].creator }}</p>
-            {% endif %}
-          </div>
-        </div>
-        <p>For a special occassion perhaps...</p>
         
-        <h3>Lowest Rated, Most Listened To</h3>
-        <div class="item item-lg item-borderless item-type-{{ section['low_high'].type }} col">
-          <img class="item-img" src="{{ section['low_high'].img_url }}" alt="">
-          <div class="item-desc">
-            <p class="item-title">{{ section['low_high'].title }}</p>
-            {% if section['low_high'].type != 'artist' %}
-            <p class="item-creator">{{ section['low_high'].creator }}</p>
-            {% endif %}
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-3">
+              <p>Lowest Rated Most Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['low_high'].type }} col">
+              <img class="item-img" src="{{ section['low_high'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['low_high'].title }}</p>
+                {% if section['low_high'].type != 'artist' %}
+                <p class="item-creator">{{ section['low_high'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
           </div>
-        </div>
-        <p>Guilty pleasure?</p>
 
-        <h3>Lowest Rated, Least Listened To</h3>
-        <div class="item item-lg item-borderless item-type-{{ section['low_low'].type }} col">
-          <img class="item-img" src="{{ section['low_low'].img_url }}" alt="">
-          <div class="item-desc">
-            <p class="item-title">{{ section['low_low'].title }}</p>
-            {% if section['low_low'].type != 'artist' %}
-            <p class="item-creator">{{ section['low_low'].creator }}</p>
-            {% endif %}
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-3">
+              <p>Lowest Rated Least Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['low_low'].type }} col">
+              <img class="item-img" src="{{ section['low_low'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['low_low'].title }}</p>
+                {% if section['low_low'].type != 'artist' %}
+                <p class="item-creator">{{ section['low_low'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
           </div>
-        </div>
-        <p>Not your favourite...</p>
 
-        <h3>Biggest Outlier</h3>
-        <div class="item item-lg item-borderless item-type-{{ section['outlier'].type }} col">
-          <img class="item-img" src="{{ section['outlier'].img_url }}" alt="">
-          <div class="item-desc">
-            <p class="item-title">{{ section['outlier'].title }}</p>
-            {% if section['outlier'].type != 'artist' %}
-            <p class="item-creator">{{ section['outlier'].creator }}</p>
-            {% endif %}
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-3">
+              <p>Biggest Outlier</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['outlier'].type }} col">
+              <img class="item-img" src="{{ section['outlier'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['outlier'].title }}</p>
+                {% if section['outlier'].type != 'artist' %}
+                <p class="item-creator">{{ section['outlier'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
         {% else %}
@@ -121,7 +140,7 @@
         {% endfor %}
         
         <!-- GRAPH SECTION -->
-        {% for graph in analysis['graphs'] %}
+        {% for graph in analysis['graphs'][0:4] %} <!-- Genres doesn't look good so removed for now -->
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">{{ graph.title }}</h2>
           <div class="bar-graph">
