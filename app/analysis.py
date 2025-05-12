@@ -364,7 +364,7 @@ class StatsAnalyser:
     self.analyseTracksAlbumsArtists()
 
     # Get Tracks to display
-    display_track_ids = [self.db_stats.top_tracks[0], self.api_stats.top_tracks[0], self.track_stats["high_high"][0],
+    display_track_ids = [self.db_stats.top_tracks[0].id, self.api_stats.top_tracks[0].id, self.track_stats["high_high"][0],
                          self.track_stats["high_low"][0], self.track_stats["low_high"][0],\
                          self.track_stats["low_low"][0], self.track_stats["outlier"][0]]
     display_tracks = api.getSeveralItems("tracks", display_track_ids)
@@ -380,14 +380,14 @@ class StatsAnalyser:
     except:
       pass
     
-    analysis["track"]["correlation"] = self.track_stats["correlation"]
+    analysis["tracks"]["correlation"] = self.track_stats["correlation"]
 
     # Get Albums to display
     api_top_albums = list(self.api_stats.listened_albums.items())
     api_top_albums.sort(key=lambda album: album[1]["score"])
     api_top_album_id = api_top_albums[0][0]
 
-    display_album_ids = [self.db_stats.top_albums[0], api_top_album_id, self.album_stats["high_high"][0],
+    display_album_ids = [self.db_stats.top_albums[0].id, api_top_album_id, self.album_stats["high_high"][0],
                          self.album_stats["high_low"][0], self.album_stats["low_high"][0],\
                          self.album_stats["low_low"][0], self.album_stats["outlier"][0]]
     display_albums = api.getSeveralItems("albums", display_album_ids)
@@ -406,7 +406,7 @@ class StatsAnalyser:
     analysis["albums"]["correlation"] = self.album_stats["correlation"]
     
     # Get Artists to display
-    display_artist_ids = [self.db_stats.top_artists[0], self.api_stats.top_artists[0], self.artist_stats["high_high"][0],
+    display_artist_ids = [self.db_stats.top_artists[0].id, self.api_stats.top_artists[0].id, self.artist_stats["high_high"][0],
                          self.artist_stats["high_low"][0], self.artist_stats["low_high"][0],\
                          self.artist_stats["low_low"][0], self.artist_stats["outlier"][0]]
     display_artists = api.getSeveralItems("artists", display_artist_ids)
@@ -441,7 +441,7 @@ class StatsAnalyser:
               "Years by Average Rating Score", "Years by Average Listening Score",\
               "Genres by Average Rating Score", "Genres by Average Listening Score"]
     datasets = [self.db_stats.minute_data, self.api_stats.minute_data, self.db_stats.release_year_data,\
-                self.api_stats.release_year_data, self.db_stats.genre_data self.api_stats.genre_data]
+                self.api_stats.release_year_data, self.db_stats.genre_data, self.api_stats.genre_data]
     total_datasets = len(datasets)
     for i in range(total_datasets):
       graph_data = StatsAnalyser.addAveragesToAggregateData(datasets[i])
