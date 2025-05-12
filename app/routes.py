@@ -394,7 +394,7 @@ app.secret_key = Config.SECRET_KEY
 def logout():
 
   logout_user()
-
+  session.clear()
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
