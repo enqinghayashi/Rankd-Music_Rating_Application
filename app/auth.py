@@ -232,7 +232,7 @@ class Auth:
   def restoreDatabaseToken(self):
     print("DEBUG: Attemping to restore token from database")
     try:
-      user_id = session["user"]["id"]
+      user_id = current_user.user_id
       user = User.query.get(user_id)
     except KeyError:
       print("DEBUG: No user session token")
