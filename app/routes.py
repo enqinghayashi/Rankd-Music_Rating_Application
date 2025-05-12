@@ -196,6 +196,8 @@ def stats():
   analysis = StatsAnalyser()
   analysis.completeAnalysis()
   print(f"Track Correlation: {analysis.track_stats["correlation"]}")
+  print(f"Track Correlation: {analysis.album_stats["correlation"]}")
+  print(f"Track Correlation: {analysis.artist_stats["correlation"]}")
   return render_template("stats.html",\
                          title="Stats",\
                          item_comparisons=item_comparisons,\

@@ -219,6 +219,14 @@ class StatsAnalyser:
     self.common_tracks = {}
     self.track_stats = {}
 
+    self.compared_albums = {}
+    self.common_albums = {}
+    self.album_stats = {}
+
+    self.compared_artists = {}
+    self.common_artists = {}
+    self.artist_stats = {}
+
   """
   """
   @staticmethod
@@ -325,7 +333,14 @@ class StatsAnalyser:
     item_stats["low_high"] = items[-1] # largest -ve diff is low rank but high listening
 
     # distance from top right corner
-    items.sort(key=lambda item: math.sqrt( (item[1]["x"]-10)**2 + (item[1]["y"]**2) ) ) 
+
+    # YES I KNOW THIS IS A TERRIBLE WAY OF DOING THIS BUT I DONT HAVE THE TIME TO DO IT BETTER RIGHT NOW
+    items.sort(key=lambda item: item[1]["x"])
+    max_x = items[0][1]["x"]
+    items.sort(key=lambda item: item[1]["y"])
+    max_y = items[0][1]["y"]
+    
+    items.sort(key=lambda item: math.sqrt( (item[1]["x"]-max_x)**2 + (item[1]["y"]-max_y)**2 ) )
     item_stats["low_low"] = items[0]
     item_stats["high_high"] = items[-1]
     
@@ -336,3 +351,11 @@ class StatsAnalyser:
   def completeAnalysis(self):
     self.compared_tracks, self.common_tracks, self.track_stats\
     = StatsAnalyser.analyseItems(self.db_stats.listened_tracks, self.api_stats.listened_tracks)
+
+    # These bottom two aren't exactly accurate to the db scores but they are calculated from the
+    # db score on tracks so close enough for now
+    self.compared_albums, self.common_albums, self.album_stats\
+    = StatsAnalyser.analyseItems(self.db_stats.listened_albums, self.api_stats.listened_albums)
+
+    self.compared_artists, self.common_artists, self.artist_stats\
+    = StatsAnalyser.analyseItems(self.db_stats.listened_artists, self.api_stats.listened_artists)
