@@ -217,14 +217,7 @@ class StatsAnalyser:
 
     self.compared_tracks = {}
     self.common_tracks = {}
-    self.track_stats = {
-      "correlation": None,
-      "high_high": None,
-      "low_low": None,
-      "high_low": None,
-      "low_high": None,
-      "outliers": None
-    }
+    self.track_stats = {}
 
   """
   """
@@ -244,7 +237,7 @@ class StatsAnalyser:
       try:
         item = output[id]
         item["y"] = setB[id]["score"]
-        item["difference"] = abs(item["x"] - item["y"])
+        item["difference"] = item["x"] - item["y"]
       except KeyError:
         output[id] = {
           "x": -1,
@@ -268,18 +261,18 @@ class StatsAnalyser:
   """
   """
   @staticmethod
-  def calculateLinearRegression(setA, setB):
-    compared = StatsAnalyser.compareDatasets(setA, setB)
-    common = StatsAnalyser.getCommonItems(compared)
+  def calculateLinearRegression(data):
     x = []
     y = []
-    common_ids = list(common.keys())
-    for id in common_ids:
-      item = common[id]
+    ids = list(data.keys())
+    for id in ids:
+      item = data[id]
       x.append(item["x"])
       y.append(item["y"])
+    if x == []:
+      raise ValueError
     slope, intercept, correlation_coefficient, p, std_err = stats.linregress(x, y)
-    return compared, common, correlation_coefficient, slope, intercept
+    return correlation_coefficient, slope, intercept
 
   """
   Calculate the minimum distance of a point from the line of linear regression.
@@ -297,26 +290,49 @@ class StatsAnalyser:
       dx = common[id]["x"] - x
       dy = common[id]["y"] - y
       common[id]["distance"] = math.sqrt(dx**2 + dy**2)
-  
+
+  """
+  """
   @staticmethod
-  def sort_by_distance(item):
-    return item[1]["distance"]
-  
+  def analyseItems(setA, setB):
+    compared = StatsAnalyser.compareDatasets(setA, setB)
+    common = StatsAnalyser.getCommonItems(compared)
+    item_stats = {
+      "correlation": None,
+      "high_high": None,
+      "low_low": None,
+      "high_low": None,
+      "low_high": None,
+      "outliers": None
+    }
+
+    if (common == {}):
+      return compared, common, item_stats
+    
+    # Correlation
+    correlation, slope, intercept =  StatsAnalyser.calculateLinearRegression(common)
+    item_stats["correlation"] = correlation
+      
+    # Outliers
+    StatsAnalyser.calculateDistanceFromRegression(common, slope, intercept)
+    items = list(common.items())
+    items.sort(key=lambda item: item[1]["distance"])
+    item_stats["outliers"] = items.copy()
+
+    # Extremes
+    items.sort(key=lambda item: item[1]["difference"])
+    item_stats["high_low"] = items[0] # largest +ve diff is high rank but low listening
+    item_stats["low_high"] = items[-1] # largest -ve diff is low rank but high listening
+
+    # distance from top right corner
+    items.sort(key=lambda item: math.sqrt( (item[1]["x"]-10)**2 + (item[1]["y"]**2) ) ) 
+    item_stats["low_low"] = items[0]
+    item_stats["high_high"] = items[-1]
+    
+    return compared, common, item_stats
+    
   """
   """
-  def analyseTracks(self):
-    compared, common, correlation, slope, intercept =\
-        StatsAnalyser.calculateLinearRegression(self.db_stats.listened_tracks, self.api_stats.listened_tracks)
-    self.compared_tracks = compared
-    self.common_tracks = common
-    self.track_stats["correlation"] = correlation
-    
-    # Outlier
-    try:
-      StatsAnalyser.calculateDistanceFromRegression(self.common_tracks, slope, intercept)
-      items = list(self.common_tracks.items())
-      items.sort(key=StatsAnalyser.sort_by_distance)
-      self.track_stats["outliers"] = items.copy()
-    except ValueError:
-      pass
-    
+  def completeAnalysis(self):
+    self.compared_tracks, self.common_tracks, self.track_stats\
+    = StatsAnalyser.analyseItems(self.db_stats.listened_tracks, self.api_stats.listened_tracks)
