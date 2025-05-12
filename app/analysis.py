@@ -246,7 +246,7 @@ class StatsAnalyser:
   """
   """
   @staticmethod
-  def getCommonTracks(setIn, setOut):
+  def getCommonItems(setIn, setOut):
     ids = list(setIn.keys())
     for id in ids:
       item = setIn[id]
@@ -291,6 +291,6 @@ class StatsAnalyser:
   def calculateOutliers(self):
     StatsAnalyser.compareDatasets(self.db_stats.listened_tracks, self.api_stats.listened_tracks, \
                          self.track_comparisons)
-    StatsAnalyser.getCommonTracks(self.track_comparisons, self.common_tracks)
+    StatsAnalyser.getCommonItems(self.track_comparisons, self.common_tracks)
     m,c = StatsAnalyser.calculateLineOfBestFit(self.common_tracks)
     
