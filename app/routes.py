@@ -283,15 +283,16 @@ def register():
     if form.validate_on_submit():
         username = form.username.data
         email = form.email.data
-        password = form.password.data
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, email=email, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        flash("Account created successfully", "success")
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        flash("Failed to register. Please check your input.", "danger")
+        if not validate_password(form.password.data):
+          password = form.password.data
+          hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+          new_user = User(username=username, email=email, password=hashed_password)
+          db.session.add(new_user)
+          db.session.commit()
+          flash("Account created successfully", "success")
+          return redirect(url_for('login'))
+        elif request.method == 'POST':
+          flash("Failed to register. Please check your input.", "danger")
     return render_template("register.html", title="Register", form=form)
 
 @app.route('/validate_user', methods=['POST'])
