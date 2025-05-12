@@ -9,6 +9,7 @@ from app.item_requests import *
 REMEMBER TO CHANGE LIMIT ON GETALLTOPITEMS IN API REQUESTS BACK TO 1000 OR WHATEVER FEELS REASONABLE
 """
 
+#region DataCollection
 """
 """
 class AnalysisStats:
@@ -198,7 +199,9 @@ class APIStats(AnalysisStats):
     self.convertPlacementsToScores(self.top_tracks)
     self.convertPlacementsToScores(self.top_artists)
     self.calculateListenedItems()
+#endregion
 
+#region Analysis
 """
 Performs the analysis on the data found above.
 """
@@ -212,33 +215,82 @@ class StatsAnalyser:
     """
     Key: Track ID, Value: {"db_score","api_score","difference","item"}
     """
-    self.trackComparisons = {}
+    self.track_comparisons = {}
+    self.common_tracks = {}
   
   """
   """
-  def compareTracks(self):
-    db_tracks = self.db_stats.listened_tracks
-    api_tracks = self.api_stats.listened_tracks
-    
-    db_ids = list(db_tracks.keys())
-    for id in db_ids:
-      self.trackComparisons[id] = {
-        "db_score": db_tracks[id]["score"],
-        "api_score": -1,
+  @staticmethod
+  def compareDatasets(setA, setB, output):
+    a_ids = list(setA.keys())
+    for id in a_ids:
+      output[id] = {
+        "x": setA[id]["score"],
+        "y": -1,
         "difference": -1,
-        "item": db_tracks[id]["item"]
       }
     
-    api_ids = list(api_tracks.keys())
-    for id in api_ids:
+    b_ids = list(setB.keys())
+    for id in b_ids:
       try:
-        track = self.trackComparisons[id]
-        track["api_score"] = api_tracks[id]["score"]
-        track["difference"] = abs(track["db_score"] - track["api_score"])
+        item = output[id]
+        item["y"] = item[id]["score"]
+        item["difference"] = abs(item["x"] - item["y"])
       except KeyError:
-        self.trackComparisons[id] = {
-          "db_score": -1,
-          "api_score": api_tracks[id]["score"],
+        output[id] = {
+          "x": -1,
+          "y": setB[id]["score"],
           "difference": -1,
-          "item": api_tracks[id]["item"]
         }
+  
+  """
+  """
+  @staticmethod
+  def getCommonTracks(setIn, setOut):
+    ids = list(setIn.keys())
+    for id in ids:
+      item = setIn[id]
+      if item["x"] >= 0 and item["y"] >= 0:
+        setOut[id] = item
+  
+  """
+  """
+  @staticmethod
+  def calculateLineOfBestFit(set):
+    # Get average scores of common tracks
+    total_x = 0
+    total_y = 0
+    ids = list(set.keys())
+    total_ids = len(ids)
+    for id in ids:
+      item = set[id]
+      ex += item["x"]
+      ey += item["y"]
+    
+    ex = total_x/total_ids
+    ey = total_y/total_ids
+
+    # Calculate gradient
+    numerator = 0
+    denominator = 0
+    for id in ids:
+      item = set[id]
+      dx = item["db_score"] - ex
+      dy = item["api_score"] - ey
+      numerator += dx * dy
+      denominator += dx * dx
+    m = numerator/denominator
+
+    # Calculate y-intercept
+    c = ey - m * ex
+
+    return m, c
+  
+  """
+  """
+  def calculateOutliers(self):
+    StatsAnalyser.compareDatasets(self.db_stats.listened_tracks, self.api_stats.listened_tracks, \
+                         self.track_comparisons)
+    StatsAnalyser.getCommonTracks(self.track_comparisons, self.common_tracks)
+    m,c = StatsAnalyser.calculateLineOfBestFit(self.common_tracks)
+    
