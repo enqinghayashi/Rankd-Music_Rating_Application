@@ -36,8 +36,8 @@ class AnalysisStats:
     self.listened_albums = {} # used for release date analysis
     self.listened_artists = {} # used for genre analysis
     
-    self.minute_data = {}
-    self.duration_data = {} # finer version of the above, better for analysis
+    self.duration_data = {} 
+    self.minute_data = {} # more broad version of duration data, better for display
     self.release_year_data = {}
     self.genre_data = {}
 
@@ -218,6 +218,7 @@ class StatsAnalyser:
     self.compared_tracks = {}
     self.common_tracks = {}
     self.track_correlation = 0
+    self.track_outlier = ()
 
   """
   """
@@ -272,12 +273,13 @@ class StatsAnalyser:
       x.append(item["x"])
       y.append(item["y"])
     slope, intercept, correlation_coefficient, p, std_err = stats.linregress(x, y)
-    return compared, common, correlation_coefficient, slope, intercept, std_err
+    return compared, common, correlation_coefficient, slope, intercept
 
   """
   Calculate the minimum distance of a point from the line of linear regression.
   """
-  def calculateDistanceFromRegression(self, common, reg_slope, reg_intercept):
+  @staticmethod
+  def calculateDistanceFromRegression(common, reg_slope, reg_intercept):
     slope = -1/reg_slope #get the perpendicular slope to the regression line
     common_ids = list(common.keys())
     for id in common_ids:
@@ -288,4 +290,19 @@ class StatsAnalyser:
       dy = common[id]["y"] - y
       common[id]["distance"] = math.sqrt(dx**2 + dy**2)
   
-
+  @staticmethod
+  def sort_by_distance(item):
+    return item[1]["distance"]
+  
+  """
+  """
+  def analyseTracks(self):
+    compared, common, correlation, slope, intercept =\
+        StatsAnalyser.calculateLinearRegression(self.db_stats.listened_tracks, self.api_stats.listened_tracks)
+    self.compared_tracks = compared
+    self.common_tracks = common
+    self.track_correlation = correlation
+    StatsAnalyser.calculateDistanceFromRegression(self.common_tracks, slope, intercept)
+    items = list(self.common_tracks.items())
+    items.sort(key=StatsAnalyser.sort_by_distance)
+    self.track_outlier = items[0]
