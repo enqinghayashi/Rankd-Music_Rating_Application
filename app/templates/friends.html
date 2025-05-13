@@ -16,10 +16,10 @@
                 </form>
             </div>
         </div>
-        <!-- Add Friend by User ID -->
+        <!-- Send Friend Request by User ID -->
         <div class="col-12 col-md-4">
             <div class="bg-primary text-white p-3 rounded h-100">
-                <h5>Add Friend by User ID</h5>
+                <h5>Send Friend Request by User ID</h5>
                 <form method="POST" action="{{ url_for('friends') }}">
                     {{ form.hidden_tag() }}
                     {{ form.search_friend_id(class="form-control mb-2", placeholder="Enter friend's User ID") }}
@@ -50,6 +50,32 @@ document.getElementById('copy-link-btn').onclick = function() {
     document.execCommand('copy');
 };
 </script>
+{% if pending_requests %}
+<h4 class="mt-4">Pending Friend Requests</h4>
+<div class="container">
+    {% for user in pending_requests %}
+        <div class="card mb-3 p-3">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                     alt="Profile" class="rounded-circle me-3" width="48" height="48">
+                <div>
+                    <strong>{{ user.name or user.username }}</strong>
+                    <div class="text-muted small">User ID: {{ user.user_id }}</div>
+                </div>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto d-flex gap-2">
+                    <input type="hidden" name="accept_friend_id" value="{{ user.user_id }}">
+                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                </form>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-2">
+                    <input type="hidden" name="reject_friend_id" value="{{ user.user_id }}">
+                    <button type="submit" class="btn btn-secondary btn-sm">Reject</button>
+                </form>
+            </div>
+            <div class="mt-2 text-secondary small">{{ user.bio }}</div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% if search_results %}
 <h4 class="mt-4">Searching...</h4>
 <div class="container">

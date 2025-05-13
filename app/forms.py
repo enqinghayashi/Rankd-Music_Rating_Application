@@ -17,7 +17,7 @@ class LoginForm(FlaskForm):
 class ChangePasswordForm(FlaskForm):
     password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
-    confirm_new_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('New Password')])
+    confirm_new_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Confirm')
 
 class ChangeEmailForm(FlaskForm):
@@ -35,3 +35,6 @@ class FriendForm(FlaskForm):
     search_friend_id = StringField("Enter friend's User ID")
     submit_search = SubmitField('Search')
     submit_add = SubmitField('Add')
+
+class DeleteAccountForm(FlaskForm):
+    submit = SubmitField('Delete Your Account')

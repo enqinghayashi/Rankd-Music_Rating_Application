@@ -7,72 +7,19 @@
     <div class="row justify-content-center mt-3">
         <div class = "card w-100" style ="max-width: 800px; max-height: 800px ; margin: 20px;">
             <h3 class="text-center">My Email</h3>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+            <div class="mb-3">
+                <label class="form-label">Current Email</label>
+                <input type="text" class="form-control" value="{{ current_user.email }}" readonly>
+            </div>
             <form action="{{ url_for('change_email') }}" method="POST">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    {{ form.hidden_tag() }}
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+
                     <div id="email-feedback" class="feedback-message small" style="min-height: 20px;"></div>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Save Changes</button>
+                {{ form.submit(class="btn btn-success w-100") }}
                 <a href="{{ url_for('account_settings') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
             </form>
         </div>
-        <script>
-            function debounce(func, delay) {
-                let timeoutId;
-                return function (...args) {
-                    clearTimeout(timeoutId);
-                    timeoutId = setTimeout(() => func.apply(this, args), delay);
-                };
-            }
-        
-            async function validateEmailField(value) {
-                const payload = { email: value };
-                try {
-                    const response = await fetch('{{ url_for("validate_user") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await response.json();
-                    const feedback = document.getElementById('email-feedback');
-                    if (data.email) {
-                        feedback.textContent = data.email;
-                        feedback.classList.remove('text-success', 'text-danger');
-                        if (data.email.includes('available')) {
-                            feedback.classList.add('text-success');
-                        } else {
-                            feedback.classList.add('text-danger');
-                        }
-                    } else {
-                        feedback.textContent = '';
-                        feedback.classList.remove('text-success', 'text-danger');
-                    }
-                } catch (error) {
-                    console.error('Error validating email:', error);
-                    const feedback = document.getElementById('email-feedback');
-                    feedback.textContent = 'Error validating. Please try again.';
-                    feedback.classList.remove('text-success');
-                    feedback.classList.add('text-danger');
-                }
-            }
-        
-            const validateEmailDebounced = debounce((value) => validateEmailField(value), 500);
-        
-            document.getElementById('email').addEventListener('input', function () {
-                validateEmailDebounced(this.value);
-            });
-        </script>   
+
 {% endblock %}
