@@ -1,5 +1,8 @@
 import re
 from flask import flash, redirect, url_for
+from flask_login import current_user
+from app import db
+from app.models import *
 
 def validate_password(password, confirm_password=None, route_name=None):
 
@@ -44,5 +47,12 @@ def validate_score(score):
     else:
         raise ValueError("Score contains more than one decimal place.")# More than one decimal
 
-
-
+def getFriends():
+    my_user_id = int(current_user.user_id)
+    friends = (
+        db.session.query(User)
+        .join(Friend, Friend.friend_id == User.user_id)
+        .filter(Friend.user_id == my_user_id, Friend.status == 'ACCEPTED')
+        .all()
+    )
+    return friends

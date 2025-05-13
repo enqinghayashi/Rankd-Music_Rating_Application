@@ -15,9 +15,13 @@
       <div class="friend-select-group input-group">
         <label class="input-group-text" for="friend-select">View Friend</label>
         <select class="form-select" id="friend-select">
-          <option value="Friend 1">Friend 1</option>
-          <option value="Friend 2">Friend 2</option>
-          <option value="Friend 3">Friend 3</option>
+          {% if friends == [] %}
+          <option value="None">No friends</option>
+          {% else %}
+          {% for friend in friends %}
+          <option value="friend.user_id">friend.name</option>
+          {% endfor %}
+          {% endif %}
         </select>
       </div>
     </div>

@@ -172,9 +172,9 @@ class DatabaseStats(AnalysisStats):
   """
   def getTopItemsFromDatabase(self):
     # getDatabaseItems returns a tuple but here we only care about the first item
-    self.top_tracks = getDatabaseItems(search="", type="track")
-    self.top_albums = getDatabaseItems(search="", type="album")
-    self.top_artists = getDatabaseItems(search="", type="artist")
+    self.top_tracks = getDatabaseItems(type="track")
+    self.top_albums = getDatabaseItems(type="album")
+    self.top_artists = getDatabaseItems(type="artist")
   
   def setup(self):
     self.getTopItemsFromDatabase()
@@ -382,14 +382,17 @@ class StatsAnalyser:
     self.analyseTracksAlbumsArtists()
 
     # Get Tracks to display
-    display_track_ids = [self.db_stats.top_tracks[0].id, self.api_stats.top_tracks[0].id, self.track_stats["high_high"][0],
-                         self.track_stats["high_low"][0], self.track_stats["low_high"][0],\
-                         self.track_stats["low_low"][0], self.track_stats["outlier"][0]]
-    display_tracks = api.getSeveralItems("tracks", display_track_ids)
+    try: # will continue until error, in which values will remain at default
+      display_track_ids = [self.db_stats.top_tracks[0].id, self.api_stats.top_tracks[0].id, self.track_stats["high_high"][0],
+                           self.track_stats["high_low"][0], self.track_stats["low_high"][0],\
+                           self.track_stats["low_low"][0], self.track_stats["outlier"][0]]
+      display_tracks = api.getSeveralItems("tracks", display_track_ids)
 
-    try: # if no common scores the bottom 5 will fail
+      # organised (roughly) by likelyhood to cause error
       analysis["tracks"]["db_top"] = display_tracks[0]
       analysis["tracks"]["api_top"] = display_tracks[1]
+      analysis["tracks"]["correlation"] = self.track_stats["correlation"]
+      analysis["tracks"]["similarity"] = round(self.track_stats["correlation"]*50 + 50)
       analysis["tracks"]["high_high"] = display_tracks[2]
       analysis["tracks"]["high_low"] = display_tracks[3]
       analysis["tracks"]["low_high"] = display_tracks[4]
@@ -398,22 +401,22 @@ class StatsAnalyser:
     except:
       pass
     
-    analysis["tracks"]["correlation"] = self.track_stats["correlation"]
-    analysis["tracks"]["similarity"] = round(self.track_stats["correlation"]*50 + 50)
+    try: # will continue until error, in which values will remain at default
+      # Get Albums to display
+      api_top_albums = list(self.api_stats.listened_albums.items())
+      api_top_albums.sort(key=lambda album: album[1]["score"])
+      api_top_album_id = api_top_albums[0][0]
 
-    # Get Albums to display
-    api_top_albums = list(self.api_stats.listened_albums.items())
-    api_top_albums.sort(key=lambda album: album[1]["score"])
-    api_top_album_id = api_top_albums[0][0]
+      display_album_ids = [self.db_stats.top_albums[0].id, api_top_album_id, self.album_stats["high_high"][0],
+                           self.album_stats["high_low"][0], self.album_stats["low_high"][0],\
+                           self.album_stats["low_low"][0], self.album_stats["outlier"][0]]
+      display_albums = api.getSeveralItems("albums", display_album_ids)
 
-    display_album_ids = [self.db_stats.top_albums[0].id, api_top_album_id, self.album_stats["high_high"][0],
-                         self.album_stats["high_low"][0], self.album_stats["low_high"][0],\
-                         self.album_stats["low_low"][0], self.album_stats["outlier"][0]]
-    display_albums = api.getSeveralItems("albums", display_album_ids)
-
-    try: # if no common scores the bottom 5 will fail
+      # organised (roughly) by likelyhood to cause error
       analysis["albums"]["db_top"] = display_albums[0]
       analysis["albums"]["api_top"] = display_albums[1]
+      analysis["albums"]["correlation"] = self.album_stats["correlation"]
+      analysis["albums"]["similarity"] = round(self.album_stats["correlation"]*50 + 50)
       analysis["albums"]["high_high"] = display_albums[2]
       analysis["albums"]["high_low"] = display_albums[3]
       analysis["albums"]["low_high"] = display_albums[4]
@@ -422,18 +425,18 @@ class StatsAnalyser:
     except:
       pass
 
-    analysis["albums"]["correlation"] = self.album_stats["correlation"]
-    analysis["albums"]["similarity"] = round(self.album_stats["correlation"]*50 + 50)
-    
-    # Get Artists to display
-    display_artist_ids = [self.db_stats.top_artists[0].id, self.api_stats.top_artists[0].id, self.artist_stats["high_high"][0],
-                         self.artist_stats["high_low"][0], self.artist_stats["low_high"][0],\
-                         self.artist_stats["low_low"][0], self.artist_stats["outlier"][0]]
-    display_artists = api.getSeveralItems("artists", display_artist_ids)
+        
+    try: # will continue until error, in which values will remain at default
+      # Get Artists to display
+      display_artist_ids = [self.db_stats.top_artists[0].id, self.api_stats.top_artists[0].id, self.artist_stats["high_high"][0],
+                           self.artist_stats["high_low"][0], self.artist_stats["low_high"][0],\
+                           self.artist_stats["low_low"][0], self.artist_stats["outlier"][0]]
+      display_artists = api.getSeveralItems("artists", display_artist_ids)
 
-    try: # if no common scores the bottom 5 will fail
       analysis["artists"]["db_top"] = display_artists[0]
       analysis["artists"]["api_top"] = display_artists[1]
+      analysis["artists"]["correlation"] = self.artist_stats["correlation"]
+      analysis["artists"]["similarity"] = round(self.artist_stats["correlation"]*50 + 50)
       analysis["artists"]["high_high"] = display_artists[2]
       analysis["artists"]["high_low"] = display_artists[3]
       analysis["artists"]["low_high"] = display_artists[4]
@@ -441,10 +444,7 @@ class StatsAnalyser:
       analysis["artists"]["outlier"] = display_artists[6]
     except:
       pass
-  
-    analysis["artists"]["correlation"] = self.artist_stats["correlation"]
-    analysis["artists"]["similarity"] = round(self.artist_stats["correlation"]*50 + 50)
-
+    
   @staticmethod
   def addAveragesToAggregateData(data):
     output = []
@@ -525,6 +525,7 @@ class StatsAnalyser:
         "db_top": "",
         "api_top": "",
         "correlation": "",
+        "similarity": "",
         "high_high": "",
         "high_low": "",
         "low_high": "",
@@ -535,6 +536,7 @@ class StatsAnalyser:
         "db_top": "",
         "api_top": "",
         "correlation": "",
+        "similarity": "",
         "high_high": "",
         "high_low": "",
         "low_high": "",
@@ -545,6 +547,7 @@ class StatsAnalyser:
         "db_top": "",
         "api_top": "",
         "correlation": "",
+        "similarity": "",
         "high_high": "",
         "high_low": "",
         "low_high": "",
@@ -563,15 +566,15 @@ class StatsAnalyser:
   """
   """
   def saveAnalysis(self, analysis):
-    print("DEBUG ATTEMPTING TO SAVE ANALYSIS")
     saveable = analysis.copy() 
     for section in ["tracks", "albums", "artists"]:
       for stat in ["db_top", "api_top", "high_high", "high_low",\
                   "low_high", "low_low", "outlier"]:
-        saveable[section][stat] = saveable[section][stat].to_dict()
+        item = saveable[section][stat]
+        if item != "":
+          saveable[section][stat] = item.to_dict()
     
     json_analysis = json.dumps(saveable)
-    print(json_analysis)
     
     user_id = current_user.user_id
 
@@ -592,6 +595,8 @@ class StatsAnalyser:
       db_analysis.analysis = new_analysis.analysis
     db.session.commit()
 
+  """
+  """
   @staticmethod
   def getAnalysisFromDB():
     # Get user's saved scores
@@ -602,12 +607,13 @@ class StatsAnalyser:
       return None
 
     analysis = db_row[0][0].analysis # Gets the analysis
-    print(analysis)
     analysis = json.loads(analysis)
 
     for section in ["tracks", "albums", "artists"]:
       for stat in ["db_top", "api_top", "high_high", "high_low",\
                   "low_high", "low_low", "outlier"]:
-        analysis[section][stat] = Item(analysis[section][stat], from_analysis=True)
+        item_data = analysis[section][stat]
+        if item_data != "":
+          analysis[section][stat] = Item(item_data, from_analysis=True)
     
     return analysis

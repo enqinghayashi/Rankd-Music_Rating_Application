@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
-from app.util import validate_password, validate_email, validate_score, validate_username
+from app.util import validate_password, validate_email, validate_score, validate_username, getFriends
 from app.item_requests import *
 from urllib.parse import parse_qs
 from app.analysis import *
@@ -93,6 +93,7 @@ def stats():
   
   return render_template("stats.html", title="Stats", analysis=analysis)
 
+# region SCORES COMPARE
 @app.route('/compare_scores')
 @login_required
 def compare_scores():
@@ -148,18 +149,13 @@ def compare_scores():
       "score": ""
     }
   ]
-  return render_template("compare_scores.html", title="Compare Scores", my_items=my_items, friend_items=friend_items)
+  return render_template("compare_scores.html", title="Compare Scores", friends=getFriends())
 
+#region STATS COMPARE
 @app.route('/compare_stats')
 @login_required
 def compare_stats():
-  return render_template("compare_stats.html",\
-                         title="Compare Stats",\
-                         item_comparisons=item_comparisons,\
-                         outlier_comparisons=outlier_comparisons,\
-                         graphs=graphs,\
-                         similarity_percentage=65\
-  )
+  return render_template("compare_stats.html", title="Compare Stats", friends=getFriends())
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

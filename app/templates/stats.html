@@ -9,6 +9,11 @@
         <!-- ITEM SECTION -->
         {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
         <!-- TOP ITEMS COMPARISON -->
+        {% if section['db_top'] == "" %}
+        <p>Please rate more {{title.lower()}} to see your analysis.</p>
+        {% elif section['api_top'] == "" %}
+        <p>It seems that you don't have any listening history on this acocunt. There is nothing to analyse.</p>
+        {% else %}
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">Top {{ title }} Comparison</h2>
           
@@ -49,9 +54,8 @@
               <span class="comparison-badge badge bg-danger"><i class="bi bi-x-circle"></i> No Match</span>                       
             {% endif %}                                                                                                            
           </div>
-
+        {% endif %}
         </div>
-
         <!-- EXTREMES SECTION -->
         {% if section['high_high'] != "" %}
         <div class="comparison shadow-sm">
@@ -135,7 +139,8 @@
         {% else %}
         <p>Not enough data to find outliers...</p>
         {% endif %}
-
+        
+        {% if section['similarity'] != "" %}
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">Scores vs Listening Similarity</h2>
           <p>How much your scores match your top {{ title.lower() }}.</p>
@@ -149,7 +154,7 @@
           <p>You listen to your lowest rated {{ title.lower() }} more than your highest!</p>
           {% endif %}
         </div>
-
+        {% endif %}
         
         {% endfor %}
         

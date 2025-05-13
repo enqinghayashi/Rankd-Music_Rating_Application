@@ -6,7 +6,7 @@ from app.item import Item
 from app.api_requests import api
 import re
 
-def getDatabaseItems(search, type):
+def getDatabaseItems(type):
   # Get user's saved scores
   user_id = current_user.user_id
   db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score.desc())).all()
@@ -16,7 +16,7 @@ def getDatabaseItems(search, type):
   return db_items
 
 def filterDatabaseItems(search, type):
-  db_items = getDatabaseItems(search, type)
+  db_items = getDatabaseItems(type)
   
   # This is used to add scores to the search results
   # Our filter algorithm and spotify's search are different so this ensure we don't miss anything
