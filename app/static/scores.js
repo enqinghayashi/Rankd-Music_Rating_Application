@@ -41,6 +41,10 @@ function getSearchParameters() {
 
 // Make a request to the server for the items
 function getItems() {
+  $("#search-results").empty()
+  $("#db-results").empty()
+  $("#placeholders").show()
+  
   const params = getSearchParameters();
   $.ajax({
     url: "",
@@ -58,10 +62,9 @@ function renderItems(response) {
   const search_container = document.getElementById("search-results");
   const db_container = document.getElementById("db-results");
   
+  $("#placeholders").hide()
   // We don't want to empty the containers every time, this will be specified in the response
-  $("#search-results").empty()
-  $("#db-results").empty()
-
+  
   renderContainer(search_container, response.search_results);
   renderContainer(db_container, response.db_results);
 

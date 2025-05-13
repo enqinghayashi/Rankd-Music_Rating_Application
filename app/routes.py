@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
-
 from app.util import validate_password, validate_email, validate_score, validate_username
 from app.item_requests import *
 from urllib.parse import parse_qs
