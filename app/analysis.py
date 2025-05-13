@@ -1,5 +1,5 @@
 import numpy as np
-from flask import session # NEEDS TO BE UPDATED TO FLASK LOGIN
+from flask import jsonify 
 from app import db
 from app.models import *
 from app.item import Item
@@ -7,9 +7,10 @@ from app.api_requests import api
 from app.item_requests import *
 from scipy.ndimage import gaussian_filter1d
 from sklearn.metrics.pairwise import cosine_similarity
-
 from scipy import stats
 import math
+from flask_login import current_user
+import json
 
 """
 REMEMBER TO CHANGE LIMIT ON GETALLTOPITEMS IN API REQUESTS BACK TO 1000 OR WHATEVER FEELS REASONABLE
@@ -309,12 +310,12 @@ class StatsAnalyser:
     compared = StatsAnalyser.compareDatasets(setA, setB)
     common = StatsAnalyser.getCommonItems(compared)
     item_stats = {
-      "correlation": None,
-      "high_high": None,
-      "low_low": None,
-      "high_low": None,
-      "low_high": None,
-      "outliers": None
+      "correlation": "",
+      "high_high": "",
+      "low_low": "",
+      "high_low": "",
+      "low_high": "",
+      "outliers": ""
     }
 
     if (common == {}):
@@ -497,7 +498,7 @@ class StatsAnalyser:
     api_year_scores = self.getYearReleaseScores(self.api_stats.release_year_data)
 
     if not db_year_scores or not api_year_scores:
-      return None
+      return ""
 
     db_vector = self.createYearScoreVector(db_year_scores)
     api_vector = self.createYearScoreVector(api_year_scores)
@@ -512,49 +513,101 @@ class StatsAnalyser:
   
   def fillInSimilarity(self, analysis):
     similarity = self.getCosineSimilarity()
-    if similarity is not None:
+    if similarity != "":
       analysis["similarity"] = round(similarity*100)
-
+  
   """
   """
   def completeAnalysis(self):
     # this is what we are going to fill in and return
     analysis = {
       "tracks": {
-        "db_top": None,
-        "api_top": None,
-        "correlation": None,
-        "high_high": None,
-        "high_low": None,
-        "low_high": None,
-        "low_low": None,
-        "outlier": None
+        "db_top": "",
+        "api_top": "",
+        "correlation": "",
+        "high_high": "",
+        "high_low": "",
+        "low_high": "",
+        "low_low": "",
+        "outlier": ""
       },
       "albums": {
-        "db_top": None,
-        "api_top": None,
-        "correlation": None,
-        "high_high": None,
-        "high_low": None,
-        "low_high": None,
-        "low_low": None,
-        "outlier": None,
+        "db_top": "",
+        "api_top": "",
+        "correlation": "",
+        "high_high": "",
+        "high_low": "",
+        "low_high": "",
+        "low_low": "",
+        "outlier": "",
       },
       "artists": {
-        "db_top": None,
-        "api_top": None,
-        "correlation": None,
-        "high_high": None,
-        "high_low": None,
-        "low_high": None,
-        "low_low": None,
-        "outlier": None
+        "db_top": "",
+        "api_top": "",
+        "correlation": "",
+        "high_high": "",
+        "high_low": "",
+        "low_high": "",
+        "low_low": "",
+        "outlier": ""
       },
       "graphs": [],
-      "similarity": None
+      "similarity": ""
     }
     self.fillInItemsSection(analysis)
     self.fillInGraphsSection(analysis)
     self.fillInSimilarity(analysis)
+    self.saveAnalysis(analysis)
     return analysis
 
+  """
+  """
+  def saveAnalysis(self, analysis):
+    print("DEBUG ATTEMPTING TO SAVE ANALYSIS")
+    saveable = analysis.copy() 
+    for section in ["tracks", "albums", "artists"]:
+      for stat in ["db_top", "api_top", "high_high", "high_low",\
+                  "low_high", "low_low", "outlier"]:
+        saveable[section][stat] = saveable[section][stat].to_dict()
+    
+    json_analysis = json.dumps(saveable)
+    print(json_analysis)
+    
+    user_id = current_user.user_id
+
+    db_analysis = db.session.execute(db.select(Analysis).filter_by(user_id=user_id)).all()
+    if db_analysis != []:
+      db_analysis = Analysis.query.get({
+        "user_id": user_id
+      })
+    
+    new_analysis = Analysis(
+      user_id = user_id,
+      analysis = json_analysis
+    )
+
+    if db_analysis == []:
+      db.session.add(new_analysis)
+    else:
+      db_analysis.analysis = new_analysis.analysis
+    db.session.commit()
+
+  @staticmethod
+  def getAnalysisFromDB():
+    # Get user's saved scores
+    user_id = current_user.user_id
+    db_row = db.session.execute(db.select(Analysis).filter_by(user_id=user_id)).all()
+
+    if db_row == []:
+      return None
+
+    analysis = db_row[0][0].analysis # Gets the analysis
+    print(analysis)
+    analysis = json.loads(analysis)
+
+    for section in ["tracks", "albums", "artists"]:
+      for stat in ["db_top", "api_top", "high_high", "high_low",\
+                  "low_high", "low_low", "outlier"]:
+        analysis[section][stat] = Item(analysis[section][stat], from_analysis=True)
+    
+    return analysis

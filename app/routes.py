@@ -16,8 +16,6 @@ from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEma
 from wtforms import StringField, SubmitField
 from flask_wtf import FlaskForm
 
-
-
 @app.route('/')
 @app.route('/index')
 @app.route('/home')
@@ -88,12 +86,9 @@ def scores():
 @app.route('/stats')
 @login_required
 def stats():
-  user_id = current_user.user_id
-  analysis = db.session.execute(db.select(Analysis).filter_by(user_id=user_id)).all()
-  
-  if analysis != []:
-    analysis = analysis.json()
-  else:
+
+  analysis = StatsAnalyser.getAnalysisFromDB()
+  if analysis is None:
     analysis = StatsAnalyser().completeAnalysis()
   
   return render_template("stats.html", title="Stats", analysis=analysis)

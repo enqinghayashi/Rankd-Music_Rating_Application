@@ -53,7 +53,7 @@
         </div>
 
         <!-- EXTREMES SECTION -->
-        {% if section['high_high'] is not none %}
+        {% if section['high_high'] != "" %}
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">Overrated, Underrated, and Perfectly Rated</h2>
           <p>We looked at your scores and your top {{ title.lower() }} and these were the most extreme results.</p> 
@@ -174,7 +174,7 @@
         <!-- SIMILARITY SECTION -->
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">Scores vs Listening Temporal Similarity</h2>
-          {% if analysis['similarity'] is not none %}
+          {% if analysis['similarity'] != "" %}
             <div class="percentage-circle mt-2 mb-4" style="background: conic-gradient(gray {{ analysis['similarity'] }}%, white 0);"></div>
             <div class="text centre fs-4">
               <p>{{ analysis['similarity'] }}%</p>
