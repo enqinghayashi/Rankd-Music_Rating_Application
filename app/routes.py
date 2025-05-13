@@ -88,8 +88,14 @@ def scores():
 @app.route('/stats')
 @login_required
 def stats():
-  stats_analysis = StatsAnalyser()
-  analysis = stats_analysis.completeAnalysis()
+  user_id = current_user.user_id
+  analysis = db.session.execute(db.select(Analysis).filter_by(user_id=user_id)).all()
+  
+  if analysis != []:
+    analysis = analysis.json()
+  else:
+    analysis = StatsAnalyser().completeAnalysis()
+  
   return render_template("stats.html", title="Stats", analysis=analysis)
 
 @app.route('/compare_scores')
