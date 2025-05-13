@@ -107,7 +107,7 @@ def compare_scores():
     user_results = filterDatabaseItems(user_results, search)[1]
 
     friend_id = request.args.get("friend_id")
-    if validateFriend(friend_id):
+    if validateFriend(friend_id) >= 0:
       friend_results = getDatabaseItems(type, friend_id)
       friend_results = filterDatabaseItems(friend_results, search)[1]
     else:
@@ -126,10 +126,19 @@ def compare_scores():
 @login_required
 def compare_stats():
   analysis = None
+  friends = getFriends()
+
   friend_id = request.args.get("friend_id")
-  if (friend_id is not None) and (validateFriend(friend_id)):
-    analysis = StatsAnalyser.getAnalysisFromDB(friend_id)
-  return render_template("compare_stats.html", title="Compare Stats", friends=getFriends(), analysis=analysis)
+  if friend_id is None and len(friends) > 0:
+    friend_id = friends[0].user_id
+  
+  if (friend_id is not None):
+    i = validateFriend(friend_id)
+    if i >= 0:
+      friends = [friends[i]] + friends # puts the selected friend at the top of the selected box
+      analysis = StatsAnalyser.getAnalysisFromDB(friend_id)
+
+  return render_template("compare_stats.html", title="Compare Stats", friends=friends, analysis=analysis)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

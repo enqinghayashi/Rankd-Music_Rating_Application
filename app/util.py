@@ -59,7 +59,8 @@ def getFriends():
 
 def validateFriend(friend_id):
     friends = getFriends()
-    for friend in friends:
-      if int(friend.user_id) == int(friend_id):
-        return True
-    return False
+    friend_len = len(friends)
+    for i in range(friend_len):
+      if int(friends[i].user_id) == int(friend_id):
+        return i
+    return -1

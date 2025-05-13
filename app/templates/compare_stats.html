@@ -18,8 +18,9 @@
           {% if friends == [] %}
           <option value="-1">No friends</option>
           {% else %}
-          {% for friend in friends %}
-          <a href="/compare_stats?friend_id={{ friend.user_id }}"><option value="{{ friend.user_id }}">{{ friend.username }}</option></a>
+          <option value="{{ friends[0].user_id }}" selected disabled hidden>{{ friends[0].username }}</option>
+          {% for friend in friends[1:] %}
+          <option value="{{ friend.user_id }}">{{ friend.username }}</option>
           {% endfor %}
           {% endif %}
         </select>
