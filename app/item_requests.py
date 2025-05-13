@@ -6,18 +6,17 @@ from app.item import Item
 from app.api_requests import api
 import re
 
-def getDatabaseItems(type):
+def getDatabaseItems(type, user_id=""):
   # Get user's saved scores
-  user_id = current_user.user_id
+  if user_id == "":
+    user_id = current_user.user_id
   db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score.desc())).all()
   db_items = []
   for row in db_rows:
     db_items.append(Item(row[0], True))
   return db_items
 
-def filterDatabaseItems(search, type):
-  db_items = getDatabaseItems(type)
-  
+def filterDatabaseItems(db_items, search):
   # This is used to add scores to the search results
   # Our filter algorithm and spotify's search are different so this ensure we don't miss anything
   db_ids = []
@@ -41,10 +40,11 @@ def filterDatabaseItems(search, type):
   for i in range(0, total):
     filtered_items[i] = filtered_items[i].to_dict()
 
-  return db_items, db_ids, filtered_items
+  return db_ids, filtered_items
 
-def getScoreItems(search, type, saved):
-  db_items, db_ids, filtered_items = filterDatabaseItems(search, type)
+def getScoreItems(search, type, saved, user_id=""):
+  db_items = getDatabaseItems(type, user_id)
+  db_ids, filtered_items = filterDatabaseItems(db_items, search)
   
   # Make search request
   search_items = []

@@ -97,59 +97,36 @@ def stats():
 @app.route('/compare_scores')
 @login_required
 def compare_scores():
-  my_items = [
-    {
-      "id": "",
-      "type": "track",
-      "title": "Welcome To The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "10"
-    },
-    {
-      "id": "",
-      "type": "album",
-      "title": "The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "9.9"
-    },
-    {
-      "id": "",
-      "type": "artist",
-      "title": "My Chemical Romance", 
-      "creator": "My Chemical Romance", 
-      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
-      "score": ""
+  friends = getFriends()
+
+  if request.is_json:
+    search = request.args.get("search")
+    type = request.args.get("type")
+    
+    # Validate that friend id is actually a friend of the current user
+    friend_id = request.args.get("friend_id")
+    friend_found = False
+    for friend in friends:
+       if friend.user_id == friend_id:
+          friend_found = True
+          break
+    
+    user_results = getDatabaseItems(type)
+    user_results = filterDatabaseItems(user_results, search)[1]
+    
+    if friend_found:
+      friend_results = getDatabaseItems(type, friend_id)
+      friend_results = filterDatabaseItems(friend_results, search)[1]
+    else:
+       friend_results = []
+
+    response = {
+       "user_results": user_results,
+       "friend_results": friend_results
     }
-  ]
-  friend_items = [
-    {
-      "id": "",
-      "type": "track",
-      "title": "Welcome To The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "9"
-    },
-    {
-      "id": "",
-      "type": "album",
-      "title": "The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "8"
-    },
-    {
-      "id": "",
-      "type": "artist",
-      "title": "My Chemical Romance", 
-      "creator": "My Chemical Romance", 
-      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
-      "score": ""
-    }
-  ]
-  return render_template("compare_scores.html", title="Compare Scores", friends=getFriends())
+    return jsonify(response)
+
+  return render_template("compare_scores.html", title="Compare Scores", friends=friends)
 
 #region STATS COMPARE
 @app.route('/compare_stats')
