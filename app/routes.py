@@ -82,14 +82,6 @@ def scores():
 def stats():
   stats_analysis = StatsAnalyser()
   analysis = stats_analysis.completeAnalysis()
-  analysis = StatsAnalyser()
-  temporal_similarity = analysis.get_cosine_similarity()
-  
-  if temporal_similarity is not None:
-     temporal_similarity_percentage = round(temporal_similarity*100)
-  else:
-     temporal_similarity_percentage = None
-  
   return render_template("stats.html", title="Stats", analysis=analysis)
 
 @app.route('/compare_scores')

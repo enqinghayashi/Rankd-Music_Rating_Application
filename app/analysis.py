@@ -361,12 +361,6 @@ class StatsAnalyser:
     items.sort(key=lambda item: math.sqrt( (item[1]["x"])**2 + (item[1]["y"])**2 ) )
     item_stats["low_low"] = items[0]
 
-
-    print(f"HH: {item_stats['high_high']}")
-    print(f"HL: {item_stats['high_low']}")
-    print(f"LH: {item_stats['low_high']}")
-    print(f"LL: {item_stats['low_low']}")
-
     return compared, common, item_stats
   
   def analyseTracksAlbumsArtists(self):
@@ -404,6 +398,7 @@ class StatsAnalyser:
       pass
     
     analysis["tracks"]["correlation"] = self.track_stats["correlation"]
+    analysis["tracks"]["similarity"] = round(self.track_stats["correlation"]*50 + 50)
 
     # Get Albums to display
     api_top_albums = list(self.api_stats.listened_albums.items())
@@ -427,6 +422,7 @@ class StatsAnalyser:
       pass
 
     analysis["albums"]["correlation"] = self.album_stats["correlation"]
+    analysis["albums"]["similarity"] = round(self.album_stats["correlation"]*50 + 50)
     
     # Get Artists to display
     display_artist_ids = [self.db_stats.top_artists[0].id, self.api_stats.top_artists[0].id, self.artist_stats["high_high"][0],
@@ -446,6 +442,7 @@ class StatsAnalyser:
       pass
   
     analysis["artists"]["correlation"] = self.artist_stats["correlation"]
+    analysis["artists"]["similarity"] = round(self.artist_stats["correlation"]*50 + 50)
 
   @staticmethod
   def addAveragesToAggregateData(data):
@@ -460,8 +457,8 @@ class StatsAnalyser:
   """
   """
   def fillInGraphsSection(self, analysis):
-    titles = ["Track Length (Minutes) by Average Rating Score", "Track Length (Minutes) by Average Listening Score",\
-              "Years by Average Rating Score", "Years by Average Listening Score",\
+    titles = ["Track Length (Minutes) Average Scores", "Track Length (Minutes) Average Listening Scores",\
+              "Years Average Rating Scores", "Years Average Listening Scores",\
               "Genres by Average Rating Score", "Genres by Average Listening Score"]
     datasets = [self.db_stats.minute_data, self.api_stats.minute_data, self.db_stats.release_year_data,\
                 self.api_stats.release_year_data, self.db_stats.genre_data, self.api_stats.genre_data]
@@ -475,6 +472,49 @@ class StatsAnalyser:
       }
       analysis["graphs"].append(graph)
   
+  @staticmethod
+  def getYearReleaseScores(release_year_data):
+    return{
+      int(year): data["score"]
+      for year, data in release_year_data.items()if data["tracks"] >0
+    }
+  
+  @staticmethod
+  def createYearScoreVector(score_dict, year_range = YEAR_RANGE):
+    score_vector = np.zeros(len(year_range))
+    for i, year in enumerate(year_range):
+      score_vector[i] = score_dict.get((year),0)
+    
+    return score_vector
+
+  @staticmethod
+  def temporalSmoothingforVector(score_vector, sigma = 2.0):
+    return gaussian_filter1d(score_vector, sigma=sigma)
+
+
+  def getCosineSimilarity(self):
+    db_year_scores = self.getYearReleaseScores(self.db_stats.release_year_data)
+    api_year_scores = self.getYearReleaseScores(self.api_stats.release_year_data)
+
+    if not db_year_scores or not api_year_scores:
+      return None
+
+    db_vector = self.createYearScoreVector(db_year_scores)
+    api_vector = self.createYearScoreVector(api_year_scores)
+
+    db_vector = self.temporalSmoothingforVector(db_vector)
+    api_vector = self.temporalSmoothingforVector(api_vector)
+
+    if np.linalg.norm(db_vector) == 0 or np.linalg.norm(api_vector) == 0:
+      return 0.0
+    
+    return round(cosine_similarity([db_vector],[api_vector])[0][0],4)
+  
+  def fillInSimilarity(self, analysis):
+    similarity = self.getCosineSimilarity()
+    if similarity is not None:
+      analysis["similarity"] = round(similarity*100)
+
   """
   """
   def completeAnalysis(self):
@@ -510,47 +550,11 @@ class StatsAnalyser:
         "low_low": None,
         "outlier": None
       },
-      "graphs": []
+      "graphs": [],
+      "similarity": None
     }
     self.fillInItemsSection(analysis)
     self.fillInGraphsSection(analysis)
+    self.fillInSimilarity(analysis)
     return analysis
-
-  @staticmethod
-  def getYearReleaseScores(release_year_data):
-    return{
-      int(year): data["score"]
-      for year, data in release_year_data.items()if data["tracks"] >0
-    }
-  
-  @staticmethod
-  def createYearScoreVector(score_dict, year_range = YEAR_RANGE):
-    score_vector = np.zeros(len(year_range))
-    for i, year in enumerate(year_range):
-      score_vector[i] = score_dict.get((year),0)
-    
-    return score_vector
-
-  @staticmethod
-  def temporalSmoothingforVector(score_vector, sigma = 2.0):
-    return gaussian_filter1d(score_vector, sigma=sigma)
-
-
-  def get_cosine_similarity(self):
-    db_year_scores = self.getYearReleaseScores(self.db_stats.release_year_data)
-    api_year_scores = self.getYearReleaseScores(self.api_stats.release_year_data)
-
-    if not db_year_scores or not api_year_scores:
-      return None
-
-    db_vector = self.createYearScoreVector(db_year_scores)
-    api_vector = self.createYearScoreVector(api_year_scores)
-
-    db_vector = self.temporalSmoothingforVector(db_vector)
-    api_vector = self.temporalSmoothingforVector(api_vector)
-
-    if np.linalg.norm(db_vector) == 0 or np.linalg.norm(api_vector) == 0:
-      return 0.0
-    
-    return round(cosine_similarity([db_vector],[api_vector])[0][0],4)
 
