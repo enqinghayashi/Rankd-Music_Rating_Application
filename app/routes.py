@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
-from app.util import validate_password, validate_email, validate_score, validate_username, getFriends
+from app.util import *
 from app.item_requests import *
 from urllib.parse import parse_qs
 from app.analysis import *
@@ -102,19 +102,12 @@ def compare_scores():
   if request.is_json:
     search = request.args.get("search")
     type = request.args.get("type")
-    
-    # Validate that friend id is actually a friend of the current user
-    friend_id = request.args.get("friend_id")
-    friend_found = False
-    for friend in friends:
-      if int(friend.user_id) == int(friend_id):
-        friend_found = True
-        break
-    
+        
     user_results = getDatabaseItems(type)
     user_results = filterDatabaseItems(user_results, search)[1]
-    
-    if friend_found:
+
+    friend_id = request.args.get("friend_id")
+    if validateFriend(friend_id):
       friend_results = getDatabaseItems(type, friend_id)
       friend_results = filterDatabaseItems(friend_results, search)[1]
     else:
@@ -132,7 +125,11 @@ def compare_scores():
 @app.route('/compare_stats')
 @login_required
 def compare_stats():
-  return render_template("compare_stats.html", title="Compare Stats", friends=getFriends())
+  analysis = None
+  friend_id = request.args.get("friend_id")
+  if (friend_id is not None) and (validateFriend(friend_id)):
+    analysis = StatsAnalyser.getAnalysisFromDB(friend_id)
+  return render_template("compare_stats.html", title="Compare Stats", friends=getFriends(), analysis=analysis)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

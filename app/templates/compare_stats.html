@@ -16,10 +16,10 @@
         <label class="input-group-text" for="friend-select">View Friend</label>
         <select class="form-select" id="friend-select">
           {% if friends == [] %}
-          <option value="None">No friends</option>
+          <option value="-1">No friends</option>
           {% else %}
           {% for friend in friends %}
-          <option value="friend.user_id">friend.name</option>
+          <a href="/compare_stats?friend_id={{ friend.user_id }}"><option value="{{ friend.user_id }}">{{ friend.username }}</option></a>
           {% endfor %}
           {% endif %}
         </select>
@@ -27,13 +27,14 @@
     </div>
   </div>
 </div>
-<!-- COPY OF STATS.HTML THIS IS A STUPID WAY OF DOING THIS I KNOW-->
+<!-- MOSTLY A COPY OF STATS.HTML THIS IS A STUPID WAY OF DOING THIS I KNOW-->
 <div class="page-content container-fluid">
   <div class="row justify-content-center">
     <div class="col col-lg-9 col-xxl-6">
-      <h2 class="mt-4 mb-4 text-center">🎵 Your Music Stats</h2>
+      <h2 class="mt-4 mb-4 text-center">🎵 Rankd Music Stats</h2>
       <div class="d-flex flex-column gap-4">
         <!-- ITEM SECTION -->
+        {% if analysis is not none %}
         {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
         <!-- TOP ITEMS COMPARISON -->
         <div class="comparison shadow-sm">
@@ -210,8 +211,13 @@
             </div>
         </div>
         {% endif %}
+        
+        {% else %} <!-- This is the else from the top of the page -->
+        <p>This friend has no available analysis.</p>
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
+<script src="{{ url_for('static', filename='compare_stats.js') }}" type="module"></script>
 {% endblock %}

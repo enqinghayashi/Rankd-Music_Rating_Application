@@ -598,9 +598,11 @@ class StatsAnalyser:
   """
   """
   @staticmethod
-  def getAnalysisFromDB():
+  def getAnalysisFromDB(user_id=""):
     # Get user's saved scores
-    user_id = current_user.user_id
+    if user_id == "":
+      user_id = current_user.user_id
+    
     db_row = db.session.execute(db.select(Analysis).filter_by(user_id=user_id)).all()
 
     if db_row == []:

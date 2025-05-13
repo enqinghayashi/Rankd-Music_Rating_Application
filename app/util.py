@@ -56,3 +56,10 @@ def getFriends():
         .all()
     )
     return friends
+
+def validateFriend(friend_id):
+    friends = getFriends()
+    for friend in friends:
+      if int(friend.user_id) == int(friend_id):
+        return True
+    return False

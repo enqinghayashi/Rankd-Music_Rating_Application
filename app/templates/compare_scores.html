@@ -16,7 +16,7 @@
         <label class="input-group-text" for="friend-select">View Friend</label>
         <select class="form-select" id="friend-select">
           {% if friends == [] %}
-            <option value="None">No friends</option>
+            <option value="-1">No friends</option>
           {% else %}
             {% for friend in friends %}
             <option value="{{ friend.user_id }}">{{ friend.username }}</option>

@@ -23,7 +23,6 @@ $(document).ready(function() {
 });
 
 function getItems() {
-  console.log("TESTING")
   $("#user-items").empty();
   $("#friend-items").empty();
   
