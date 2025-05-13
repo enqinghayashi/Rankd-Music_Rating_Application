@@ -107,9 +107,9 @@ def compare_scores():
     friend_id = request.args.get("friend_id")
     friend_found = False
     for friend in friends:
-       if friend.user_id == friend_id:
-          friend_found = True
-          break
+      if int(friend.user_id) == int(friend_id):
+        friend_found = True
+        break
     
     user_results = getDatabaseItems(type)
     user_results = filterDatabaseItems(user_results, search)[1]
@@ -118,7 +118,7 @@ def compare_scores():
       friend_results = getDatabaseItems(type, friend_id)
       friend_results = filterDatabaseItems(friend_results, search)[1]
     else:
-       friend_results = []
+      friend_results = []
 
     response = {
        "user_results": user_results,

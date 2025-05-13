@@ -26,8 +26,6 @@ function getItems() {
   console.log("TESTING")
   $("#user-items").empty();
   $("#friend-items").empty();
-  $("#user-placeholders").show();
-  $("#friend-placeholders").show();
   
   const params = getSearchParameters();
   params["friend_id"] = getSelectedFriend();
@@ -50,9 +48,6 @@ function requestItems(params) {
 function renderItems(response) {
   const user_container = document.getElementById("user-items")
   const friend_container = document.getElementById("friend-items")
-
-  $("#user-placeholders").hide();
-  $("#friend-placeholders").hide();
 
   renderContainer(user_container, response.user_results);
   renderContainer(friend_container, response.friend_results);
