@@ -49,6 +49,7 @@
 .item-desc p {
   white-space: nowrap;
   margin-bottom: 0px;
+  overflow: hidden;
 }
 
 .item-lg {
