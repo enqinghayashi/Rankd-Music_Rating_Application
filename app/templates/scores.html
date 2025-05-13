@@ -6,7 +6,7 @@
     <div class="col col-lg-9 col-xxl-7"> 
       <div class="search-bar input-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="text" class="form-control" id="search-bar-input" onkeydown="handleKeyDown(event)" placeholder="Search for something...">
+        <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
       </div>
       <div class="search-options d-flex flex-row mb-3">
         <input type="radio" class="btn-check" name="filter" id="track" autocomplete="off" checked>
@@ -39,5 +39,5 @@
     </div>
   </div>
 </div>
-<script src="{{ url_for('static', filename='scores.js') }}"></script>
+<script src="{{ url_for('static', filename='scores.js') }}" type="module"></script>
 {% endblock %}
