@@ -6,24 +6,23 @@ def validate_password(password, confirm_password=None, route_name=None):
     regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@!#$%^&*])[A-Za-z\d@!#$%^&*]{8,}$'
 
     if not re.match(regex, password):
-        flash("Password must contain at least 1 letter, 1 number, and 1 special character.", "danger")
-        return "Password does not meet the requirement"
-
-
-    if len(password) < 8:
-        flash("Password must be at least 8 characters long.", "danger")
-        return "Password is too short"
+        return "Password must contain at least 1 letter, 1 number, and 1 special character."
 
     if confirm_password and password != confirm_password:
-        flash("Confirmed passwords do not match.", "danger")
-        return "Password does not match"
+        return "Confirmed passwords do not match."
+
     return None 
+
+def validate_username(username):
+    username_regex = r'^[a-zA-Z0-9_]{3,100}$'
+    if not re.match(username_regex, username):
+        return "Invalid username. Use letters, numbers, underscores only."
+    return None
 
 def validate_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(email_regex, email):
-        flash("Invalid email address", "danger")
-        return "Email address seems fake"
+        return "Invalid email address"
     return None
 
 def validate_score(score):
@@ -44,6 +43,6 @@ def validate_score(score):
         return str(score)
     else:
         raise ValueError("Score contains more than one decimal place.")# More than one decimal
-    
+
 
 

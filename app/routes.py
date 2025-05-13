@@ -8,11 +8,11 @@ import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
 
-from app.util import validate_password, validate_email, validate_score
+from app.util import validate_password, validate_email, validate_score, validate_username
 from app.item_requests import *
 from urllib.parse import parse_qs
 from flask_login import login_user, logout_user, login_required, current_user
-from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm
+from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm, DeleteAccountForm
 from wtforms import StringField, SubmitField
 from flask_wtf import FlaskForm
 
@@ -283,19 +283,16 @@ def register():
     if form.validate_on_submit():
         username = form.username.data
         email = form.email.data
-        password = form.password.data
-        # Additional validation if needed
-        if User.query.filter_by(username=username).first():
-            flash("Username is already taken. Please choose a different one.", "danger")
-            return redirect(url_for('register'))
-        if User.query.filter_by(email=email).first():
-            return redirect(url_for('register'))
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, email=email, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        flash("Account created successfully", "success")
-        return redirect(url_for('login'))
+        if not validate_password(form.password.data):
+          password = form.password.data
+          hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+          new_user = User(username=username, email=email, password=hashed_password)
+          db.session.add(new_user)
+          db.session.commit()
+          flash("Account created successfully", "success")
+          return redirect(url_for('login'))
+        elif request.method == 'POST':
+          flash("Failed to register. Please check your input.", "danger")
     return render_template("register.html", title="Register", form=form)
 
 @app.route('/validate_user', methods=['POST'])
@@ -311,7 +308,9 @@ def validate_user():
         existing_username = User.query.filter_by(username=username).first()
         if existing_username:
             response['username'] = "Username is already taken."
-        else:
+        elif validate_username(username):
+            response["username"] = "Invalid username. Use letters, numbers, underscores only."
+        else:   
             response['username'] = "Username is available."
 
     if email:
@@ -346,7 +345,9 @@ def login():
         login_user(user)
         flash("Log in successfully", "success")
         try:
+            print("DEBUG: Attempting to get current token")
             auth.getCurrentToken()
+            print(f"DEBUG: Current token restored")
         except:
             return redirect(url_for('link_to_spotify'))
         return redirect(url_for('index'))
@@ -393,9 +394,9 @@ app.secret_key = Config.SECRET_KEY
 @app.route('/logout')
 @login_required
 def logout():
-
+  auth.clear()
   logout_user()
-
+  session.clear()
   flash("Logged out successfully", "info")
   return redirect(url_for('index'))
 
@@ -425,7 +426,8 @@ def link_to_spotify():
 @app.route('/account_settings')
 @login_required
 def account_settings():
-  return render_template("account_settings.html", title = "Account Setting")
+    form = DeleteAccountForm()
+    return render_template("account_settings.html", title="Account Setting", form=form)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
@@ -444,10 +446,37 @@ def change_password():
             flash(validation_error, "danger")
             return redirect(url_for('change_password'))
         user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+
         db.session.commit()
         flash("Password updated successfully", "success")
         return redirect(url_for('account_settings'))
+    elif request.method == 'POST':
+        flash("Failed to update password. Please check your input.", "danger")
     return render_template('change_password.html', form=form)
+
+@app.route('/validate_password_change', methods=['POST'])
+@login_required
+def validate_password_change():
+    user = current_user
+    current_password = request.json.get('current_password')
+    new_password = request.json.get('new_password')
+    confirm_new_password = request.json.get('confirm_new_password')
+    response = {}
+
+    if current_password is not None:
+        if not check_password_hash(user.password, current_password):
+            response['current_password'] = "Current password is incorrect."
+        else:
+            response['current_password'] = "Current password is correct."
+
+    if new_password is not None and confirm_new_password is not None:
+        validation_error = validate_password(new_password, confirm_new_password)
+        if validation_error:
+            response['new_password'] = validation_error
+        else:
+            response['new_password'] = "Password is valid."
+
+    return jsonify(response)
 
 @app.route('/change_email', methods=['GET', 'POST'])
 @login_required
@@ -457,25 +486,34 @@ def change_email():
     if form.validate_on_submit():
         new_email = form.email.data
         if User.query.filter_by(email=new_email).first():
+            flash("Email is already registered with another account.", "danger")
             return redirect(url_for('change_email'))
-        email_invalid = validate_email(new_email)
-        if email_invalid:
+        if validate_email(new_email) is not None:
+            flash("Invalid email address. Please enter a valid email.", "danger")
             return redirect(url_for('change_email'))
         user.email = new_email
         db.session.commit()
         flash("Email updated successfully", "success")
         return redirect(url_for('account_settings'))
+
+    elif request.method == 'POST':
+        flash("Failed to update email. Please check your input.", "danger")
     return render_template("change_email.html", title="change email", user=user, form=form)
 
 @app.route('/delete_account', methods=['POST'])
 @login_required
 def delete_account():
-    user = current_user
-    db.session.delete(user)
-    db.session.commit()
-    logout_user()
-    flash('Your account has been deleted. See ya', 'info')
-    return redirect(url_for('index'))
+    form = DeleteAccountForm()
+    if form.validate_on_submit():
+        user = current_user
+        db.session.delete(user)
+        db.session.commit()
+        logout_user()
+        flash('Your account has been deleted. See ya', 'info')
+        return redirect(url_for('index'))
+    else:
+        flash('Your account cannot be delete, please contact admin', 'danger')
+        return redirect(url_for('account_settings'))
 
 @app.route('/friends', methods=["GET", "POST"])
 @login_required
@@ -485,10 +523,18 @@ def friends():
     searching_friends = ""
     search_friend_id = ""
     form = FriendForm()
+    # Only show accepted friends
     friends = (
         db.session.query(User)
         .join(Friend, Friend.friend_id == User.user_id)
-        .filter(Friend.user_id == my_user_id)
+        .filter(Friend.user_id == my_user_id, Friend.status == 'ACCEPTED')
+        .all()
+    )
+    # Pending requests sent to current user
+    pending_requests = (
+        db.session.query(User)
+        .join(Friend, Friend.user_id == User.user_id)
+        .filter(Friend.friend_id == my_user_id, Friend.status == 'PENDING')
         .all()
     )
     search_someone_in_friendlist = friends
@@ -502,11 +548,16 @@ def friends():
                 if user.user_id != my_user_id:
                     existing_friendship = Friend.query.filter_by(user_id=my_user_id, friend_id=user.user_id).first()
                     if not existing_friendship:
-                        new_friend = Friend(user_id=my_user_id, friend_id=user.user_id)
+                        # Create a pending request
+                        new_friend = Friend(user_id=my_user_id, friend_id=user.user_id, status='PENDING')
                         db.session.add(new_friend)
                         db.session.commit()
-                        flash("Friend added successfully!", "success")
+                        flash("Friend request sent!", "success")
                         return redirect(url_for('friends'))
+                    elif existing_friendship.status == 'PENDING':
+                        flash("Friend request already sent.", "info")
+                    elif existing_friendship.status == 'ACCEPTED':
+                        flash("You are already friends.", "info")
             else:
                 flash("No such user", "warning")
         elif form.submit_search.data and searching_friends:
@@ -520,15 +571,39 @@ def friends():
         else:
             search_someone_in_friendlist = friends
 
-    # Remove friend
-    if request.method == 'POST' and 'remove_friend_id' in request.form:
-        remove_id = int(request.form.get('remove_friend_id'))
-        friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
-        if friend:
-            db.session.delete(friend)
-            db.session.commit()
-            flash("Friend removed.", "info")
-        return redirect(url_for('friends'))
+    # Accept or reject friend requests
+    if request.method == 'POST':
+        if 'remove_friend_id' in request.form:
+            remove_id = int(request.form.get('remove_friend_id'))
+            friend = Friend.query.filter_by(user_id=my_user_id, friend_id=remove_id).first()
+            if friend:
+                db.session.delete(friend)
+                db.session.commit()
+                flash("Friend removed.", "info")
+            return redirect(url_for('friends'))
+        elif 'accept_friend_id' in request.form:
+            accept_id = int(request.form.get('accept_friend_id'))
+            # Find the pending request sent to me
+            friend_request = Friend.query.filter_by(user_id=accept_id, friend_id=my_user_id, status='PENDING').first()
+            if friend_request:
+                friend_request.status = 'ACCEPTED'
+                # Also create reciprocal accepted friendship
+                reciprocal = Friend.query.filter_by(user_id=my_user_id, friend_id=accept_id).first()
+                if not reciprocal:
+                    db.session.add(Friend(user_id=my_user_id, friend_id=accept_id, status='ACCEPTED'))
+                else:
+                    reciprocal.status = 'ACCEPTED'
+                db.session.commit()
+                flash("Friend request accepted!", "success")
+            return redirect(url_for('friends'))
+        elif 'reject_friend_id' in request.form:
+            reject_id = int(request.form.get('reject_friend_id'))
+            friend_request = Friend.query.filter_by(user_id=reject_id, friend_id=my_user_id, status='PENDING').first()
+            if friend_request:
+                db.session.delete(friend_request)
+                db.session.commit()
+                flash("Friend request rejected.", "info")
+            return redirect(url_for('friends'))
 
     return render_template(
         'friends.html',
@@ -537,5 +612,6 @@ def friends():
         search_results=search_results,
         searching_friends=searching_friends,
         search_friend_id=search_friend_id,
-        form=form
+        form=form,
+        pending_requests=pending_requests
     )

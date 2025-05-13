@@ -232,7 +232,7 @@ class Auth:
   def restoreDatabaseToken(self):
     print("DEBUG: Attemping to restore token from database")
     try:
-      user_id = session["user"]["id"]
+      user_id = current_user.user_id
       user = User.query.get(user_id)
     except KeyError:
       print("DEBUG: No user session token")
@@ -274,7 +274,9 @@ class Auth:
   """
   def getCurrentToken(self):
     # check if this is a fresh auth instance
+    print("DEBUG: Checking for existing access token")
     if (self.access_token == ""):
+      print("DEBUg: Access token not found")
       # restore the auth state from stored token
       try:
         if (not self.restoreToken()):
@@ -282,6 +284,7 @@ class Auth:
       except BadRefreshTokenError:
         raise BadRefreshTokenError
     
+    print("DEBUG: access token found")
     # get the current token
     current_time = datetime.now()
     # token expires in 60 minutes so refresh every 55 to be safe
