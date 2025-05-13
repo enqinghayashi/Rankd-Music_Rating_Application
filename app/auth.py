@@ -274,7 +274,9 @@ class Auth:
   """
   def getCurrentToken(self):
     # check if this is a fresh auth instance
+    print("DEBUG: Checking for existing access token")
     if (self.access_token == ""):
+      print("DEBUg: Access token not found")
       # restore the auth state from stored token
       try:
         if (not self.restoreToken()):
@@ -282,6 +284,7 @@ class Auth:
       except BadRefreshTokenError:
         raise BadRefreshTokenError
     
+    print("DEBUG: access token found")
     # get the current token
     current_time = datetime.now()
     # token expires in 60 minutes so refresh every 55 to be safe
