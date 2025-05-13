@@ -1,76 +1,126 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Your Friends</h2>
-    <div class="mb-3">
-        <input type="text" class="form-control" placeholder="Search friends..." id="friend-search">
-    </div>
-    <ul class="list-group mb-4" id="friends-list" style="max-height: 350px; overflow-y: auto;">
-        <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile" class="rounded-circle me-2" width="40" height="40">
-                <span>John Doe</span>
+    <div class="row g-3">
+        <!-- Search Friends -->
+        <div class="col-12 col-md-4">
+            <div class="bg-primary text-white p-3 rounded h-100">
+                <h5>Search Your Friends</h5>
+                <form method="POST" action="{{ url_for('friends') }}">
+                    {{ form.hidden_tag() }}
+                    {{ form.searching_friends(class="form-control mb-2", placeholder="Search by username or name") }}
+                    {% for error in form.searching_friends.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                    {{ form.submit_search(class="btn btn-light w-100") }}
+                </form>
             </div>
-            <button class="btn btn-danger btn-sm">Remove</button>
-        </li>
-        <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Profile" class="rounded-circle me-2" width="40" height="40">
-                <span>Jane Smith</span>
+        </div>
+        <!-- Send Friend Request by User ID -->
+        <div class="col-12 col-md-4">
+            <div class="bg-primary text-white p-3 rounded h-100">
+                <h5>Send Friend Request by User ID</h5>
+                <form method="POST" action="{{ url_for('friends') }}">
+                    {{ form.hidden_tag() }}
+                    {{ form.search_friend_id(class="form-control mb-2", placeholder="Enter friend's User ID") }}
+                    {% for error in form.search_friend_id.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                    {{ form.submit_add(class="btn btn-light w-100") }}
+                </form>
             </div>
-            <button class="btn btn-danger btn-sm">Remove</button>
-        </li>
-        <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="Profile" class="rounded-circle me-2" width="40" height="40">
-                <span>Mike Johnson</span>
+        </div>
+        <!-- Copy Your User ID -->
+        <div class="col-12 col-md-4">
+            <div class="bg-primary text-white p-3 rounded h-100">
+                <h5>Copy your User ID here</h5>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="{{ my_user_id }}" id="my_user_id" readonly>
+                    <button class="btn btn-outline-light" type="button" id="copy-link-btn">Copy</button>
+                </div>
             </div>
-            <button class="btn btn-danger btn-sm">Remove</button>
-        </li>
-        <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="https://randomuser.me/api/portraits/women/4.jpg" alt="Profile" class="rounded-circle me-2" width="40" height="40">
-                <span>Emily Davis</span>
-            </div>
-            <button class="btn btn-danger btn-sm">Remove</button>
-        </li>
-        <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="https://randomuser.me/api/portraits/men/5.jpg" alt="Profile" class="rounded-circle me-2" width="40" height="40">
-                <span>Chris Lee</span>
-            </div>
-            <button class="btn btn-danger btn-sm">Remove</button>
-        </li>
-        <li class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <img src="https://randomuser.me/api/portraits/women/6.jpg" alt="Profile" class="rounded-circle me-2" width="40" height="40">
-                <span>Sarah Kim</span>
-            </div>
-            <button class="btn btn-danger btn-sm">Remove</button>
-        </li>
-    </ul>
-    <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Paste friend link here..." id="add-friend-link">
-        <button class="btn btn-primary" type="button" id="add-friend-btn">Add Friend</button>
-    </div>
-    <div class="mb-3">
-        <input type="text" class="form-control d-inline-block w-auto" value="{{ your_friend_link }}" id="your-friend-link" readonly>
-        <button class="btn btn-outline-secondary" type="button" id="copy-link-btn">Copy Link</button>
+        </div>
     </div>
 </div>
 <script>
-document.getElementById('friend-search').addEventListener('input', function() {
-    let filter = this.value.toLowerCase();
-    let items = document.querySelectorAll('#friends-list li');
-    items.forEach(function(item) {
-        let name = item.querySelector('span').textContent.toLowerCase();
-        item.style.display = name.includes(filter) ? '' : 'none';
-    });
-});
 document.getElementById('copy-link-btn').onclick = function() {
-    let input = document.getElementById('your-friend-link');
+    let input = document.getElementById('my_user_id');
     input.select();
+    input.setSelectionRange(0, 99999); // For mobile devices
     document.execCommand('copy');
 };
 </script>
+{% if pending_requests %}
+<h4 class="mt-4">Pending Friend Requests</h4>
+<div class="container">
+    {% for user in pending_requests %}
+        <div class="card mb-3 p-3">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                     alt="Profile" class="rounded-circle me-3" width="48" height="48">
+                <div>
+                    <strong>{{ user.name or user.username }}</strong>
+                    <div class="text-muted small">User ID: {{ user.user_id }}</div>
+                </div>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto d-flex gap-2">
+                    <input type="hidden" name="accept_friend_id" value="{{ user.user_id }}">
+                    <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                </form>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-2">
+                    <input type="hidden" name="reject_friend_id" value="{{ user.user_id }}">
+                    <button type="submit" class="btn btn-secondary btn-sm">Reject</button>
+                </form>
+            </div>
+            <div class="mt-2 text-secondary small">{{ user.bio }}</div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% if search_results %}
+<h4 class="mt-4">Searching...</h4>
+<div class="container">
+    {% for user in search_results %}
+        <div class="card mb-3 p-3">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                     alt="Profile" class="rounded-circle me-3" width="48" height="48">
+                <div>
+                    <strong>{{ user.name or user.username }}</strong>
+                    <div class="text-muted small">User ID: {{ user.user_id }}</div>
+                </div>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto">
+                    <input type="hidden" name="add_friend_id" value="{{ user.user_id }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Add Friend</button>
+                </form>
+            </div>
+            <div class="mt-2 text-secondary small">{{ user.bio }}</div>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<h2 class="mt-4">Friends</h2>
+<div class="container">
+    {% for friend in friends %}
+        <div class="card mb-3 p-3">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
+                        alt="Profile" class="rounded-circle me-3" width="48" height="48">
+                <div>
+                    <strong>{{ friend.name or friend.username }}</strong>
+                </div>
+                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto">
+                    <input type="hidden" name="remove_friend_id" value="{{ friend.user_id }}">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this friend?');">Remove</button>
+                </form>
+            </div>
+            <div class="mt-2 text-secondary small">{{ friend.bio }}</div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center">
+            <p>YOU DON'T HAVE FRIENDS</p>
+            <p>ASK YOUR FRIENDS FOR THEIR USER ID</p>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

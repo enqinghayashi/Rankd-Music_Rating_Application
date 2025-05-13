@@ -15,7 +15,7 @@
         <div class="d-flex align-items-center">
         <a class="navbar-brand" href="/home" aria-current="page">Rankd</a>
 
-        <ul class="navbar-nav d-flex flex-row ms-3">
+        <ul class="navbar-nav d-xl-flex d-none flex-row ms-3">
           <li class="nav-item">
             <a class="nav-link text-light nav-protected" href="/scores">Scores</a>
           </li>
@@ -25,10 +25,13 @@
           <li class="nav-item">
             <a class="nav-link text-light nav-protected" href="/compare_scores">Share</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link text-light nav-protected" href="{{ url_for('friends') }}">Friends</a>
+          </li>
         </ul>
       </div>
 
-        {% if 'user' in session %}
+        {% if current_user.is_authenticated %}
         <div class="dropdown">
           <a class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expended="false">
             Profile
@@ -45,6 +48,21 @@
         {% endif %}
       </div>
     </nav>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-message-container position-fixed top-50 start-50 translate-middle" style="z-index: 1050;">
+          <div>
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
     <div class="modal fade" id="loginAccount" tabindex="-1" aria-labelledby="loginAccounts" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center">
@@ -91,24 +109,13 @@
         <i class="bi bi-share"></i>
         <p>Share</p>
       </a>
+      <a class="nav-link nav-protected" href="{{url_for('friends')}}">
+        <i class="bi bi-people"></i>
+        <p>Friends</p>
+      </a>
     </nav>
-    {% block content %}{% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
-    <div class="flash-message-container position-fixed top-50 start-50 translate-middle" style="z-index: 1050; display: none;">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div>
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-    </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // Flash message
@@ -122,7 +129,7 @@
 
       
       // Login to account prompts
-      {% if 'user' not in session  %}
+      {% if not current_user.is_authenticated %}
       document.querySelectorAll('.nav-protected').forEach(function(link) {
         link.addEventListener('click', function(e) {
           e.preventDefault();
@@ -133,7 +140,9 @@
     {% endif %}
 
       // Link to Spotify prompts
-    {% if ('user' in session) and ('refresh_token' not in session)  %}
+
+    {% if current_user.is_authenticated and 'refresh_token' not in session  %}
+
       document.querySelectorAll('.nav-protected').forEach(function(link) {
         link.addEventListener('click', function(e) {
           e.preventDefault();
@@ -143,6 +152,56 @@
       });
     {% endif %}
   });
+ //<---------------Email realtime validation-------------------------->
+            function debounce(func, delay) {
+                let timeoutId;
+                return function (...args) {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+        
+            async function validateEmailField(value) {
+                const payload = { email: value };
+                try {
+                    const response = await fetch('{{ url_for("validate_user") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    const feedback = document.getElementById('email-feedback');
+                    if (data.email) {
+                        feedback.textContent = data.email;
+                        feedback.classList.remove('text-success', 'text-danger');
+                        if (data.email.includes('available')) {
+                            feedback.classList.add('text-success');
+                        } else {
+                            feedback.classList.add('text-danger');
+                        }
+                    } else {
+                        feedback.textContent = '';
+                        feedback.classList.remove('text-success', 'text-danger');
+                    }
+                } catch (error) {
+                    console.error('Error validating email:', error);
+                    const feedback = document.getElementById('email-feedback');
+                    feedback.textContent = 'Error validating. Please try again.';
+                    feedback.classList.remove('text-success');
+                    feedback.classList.add('text-danger');
+                }
+            }
+        
+            const validateEmailDebounced = debounce((value) => validateEmailField(value), 500);
+        
+            const emailInput = document.getElementById('email');
+            if (emailInput) {
+                emailInput.addEventListener('input', function () {
+                    validateEmailDebounced(this.value);
+                });
+            }
 
     </script>
   </body>

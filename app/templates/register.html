@@ -6,71 +6,87 @@
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="card shadow-sm p-4" style="max-width: 400px; width: 100%;">
         <h1 class="text-center mb-4">Register</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-            <form action="/register" method="POST">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
-                    <div id="username-feedback" class="feedback-message small" style="min-height: 20px;"></div>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
-                    <div id="email-feedback" class="feedback-message small" style="min-height: 20px;"></div>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="confirm-password" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirm-password" name="confirm_password" placeholder="Confirm your password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register</button>
-            </form>
-            <p class = "mt-3">
-                Already have an account?
-                <a href="{{ url_for('login') }}">Log in here</a>
-            </p>
-        </div>
+        <form action="" method="POST" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.username.label(class="form-label") }}
+                {{ form.username(class="form-control", placeholder="Enter your username", id="username") }}
+                <div id="username-feedback" class="feedback-message small" style="min-height: 20px;"></div>
+            </div>
+            <div class="mb-3">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control", placeholder="Enter your email", id="email") }}
+                <div id="email-feedback" class="feedback-message small" style="min-height: 20px;"></div>
+            </div>
+            <div class="mb-3">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control", placeholder="Enter your password", id="password") }}
+
+                <div id="password-feedback" class="feedback-message small" style="min-height: 20px;"></div>
+            </div>
+            <div class="mb-3">
+                {{ form.confirm_password.label(class="form-label") }}
+                {{ form.confirm_password(class="form-control", placeholder="Confirm your password", id="confirm_password") }}
+                <div id="confirm_password-feedback" class="feedback-message small" style="min-height: 20px;"></div>
+            </div>
+            {{ form.submit(class="btn btn-primary w-100") }}
+        </form>
+        <p class="mt-3">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Log in here</a>
+        </p>
     </div>
-    <script>
-        function debounce(func, delay) {
-            let timeoutId;
-            return function (...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => func.apply(this, args), delay);
-            };
+</div>
+<script>
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    async function validateField(field, value, confirmValue = null) {
+        const payload = {};
+        if (field === 'username') {
+            payload.username = value;
+        } else if (field === 'email') {
+            payload.email = value;
+        } else if (field === 'password') {
+            payload.password = value;
+            payload.confirm_password = confirmValue !== null ? confirmValue : '';
+        } else if (field === 'confirm_password') {
+            payload.password = document.getElementById('password').value;
+            payload.confirm_password = value;
         }
-    
-        async function validateField(field, value) {
-            const payload = {};
-            if (field === 'username') {
-                payload.username = value;
-            } else if (field === 'email') {
-                payload.email = value;
-            }
-    
-            try {
-                const response = await fetch('{{ url_for("validate_user") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                const feedback = document.getElementById(`${field}-feedback`);
-    
+
+        try {
+            const response = await fetch('{{ url_for("validate_user") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            const feedback = document.getElementById(`${field}-feedback`);
+
+            if (field === 'password' || field === 'confirm_password') {
+                // Password feedback
+                if (data.password) {
+                    feedback.textContent = data.password;
+                    feedback.classList.remove('text-success', 'text-danger');
+                    if (data.password.includes('valid')) {
+                        feedback.classList.add('text-success');
+                    } else {
+                        feedback.classList.add('text-danger');
+                    }
+                } else {
+                    feedback.textContent = '';
+                    feedback.classList.remove('text-success', 'text-danger');
+                }
+            } else {
+                // Username/email feedback
                 if (data[field]) {
                     feedback.textContent = data[field];
                     feedback.classList.remove('text-success', 'text-danger');
@@ -83,28 +99,41 @@
                     feedback.textContent = '';
                     feedback.classList.remove('text-success', 'text-danger');
                 }
-            } catch (error) {
-                console.error(`Error validating ${field}:`, error);
-                const feedback = document.getElementById(`${field}-feedback`);
-                feedback.textContent = 'Error validating. Please try again.';
-                feedback.classList.remove('text-success');
-                feedback.classList.add('text-danger');
             }
+        } catch (error) {
+            console.error(`Error validating ${field}:`, error);
+            const feedback = document.getElementById(`${field}-feedback`);
+            feedback.textContent = 'Error validating. Please try again.';
+            feedback.classList.remove('text-success');
+            feedback.classList.add('text-danger');
         }
-    
-        const validateUsernameDebounced = debounce((value) => validateField('username', value), 500);
-        const validateEmailDebounced = debounce((value) => validateField('email', value), 500);
-    
-        document.getElementById('username').addEventListener('input', function () {
-            validateUsernameDebounced(this.value);
-        });
-    
-        document.getElementById('email').addEventListener('input', function () {
-            validateEmailDebounced(this.value);
-        });
-    </script>
+    }
 
-</body>
-</html>
+    const validateUsernameDebounced = debounce((value) => validateField('username', value), 500);
+    const validateEmailDebounced = debounce((value) => validateField('email', value), 500);
+    const validatePasswordDebounced = debounce((value) => {
+        const confirmValue = document.getElementById('confirm_password').value;
+        validateField('password', value, confirmValue);
+    }, 500);
+    const validateConfirmPasswordDebounced = debounce((value) => {
+        validateField('confirm_password', value);
+    }, 500);
+
+    document.getElementById('username').addEventListener('input', function () {
+        validateUsernameDebounced(this.value);
+    });
+
+    document.getElementById('email').addEventListener('input', function () {
+        validateEmailDebounced(this.value);
+    });
+
+    document.getElementById('password').addEventListener('input', function () {
+        validatePasswordDebounced(this.value);
+    });
+
+    document.getElementById('confirm_password').addEventListener('input', function () {
+        validateConfirmPasswordDebounced(this.value);
+    });
+</script>
 {% endblock %}
 
