@@ -9,14 +9,13 @@
         <!-- ITEM SECTION -->
         {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
         <!-- TOP ITEMS COMPARISON -->
-        {% if section['db_top'] == "" %}
-        <p>Please rate more {{title.lower()}} to see your analysis.</p>
-        {% elif section['api_top'] == "" %}
-        <p>It seems that you don't have any listening history on this acocunt. There is nothing to analyse.</p>
-        {% else %}
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">Top {{ title }} Comparison</h2>
-          
+          {% if section['db_top'] == "" %}
+          <p>Please rate more {{title.lower()}} to see your analysis.</p>
+          {% elif section['api_top'] == "" %}
+          <p>It seems that you don't have any listening history on this acocunt. There is nothing to analyse.</p>
+          {% else %}
           <div class="comparison-item">
             <div class="comparison-subtitle col-4">
               <p>Your Pick</p>
@@ -54,7 +53,7 @@
               <span class="comparison-badge badge bg-danger"><i class="bi bi-x-circle"></i> No Match</span>                       
             {% endif %}                                                                                                            
           </div>
-        {% endif %}
+          {% endif %}
         </div>
         <!-- EXTREMES SECTION -->
         {% if section['high_high'] != "" %}
@@ -136,8 +135,6 @@
             </div>
           </div>
         </div>
-        {% else %}
-        <p>Not enough data to find outliers...</p>
         {% endif %}
         
         {% if section['similarity'] != "" %}
@@ -177,19 +174,15 @@
         {% endfor %}
 
         <!-- SIMILARITY SECTION -->
+        {% if analysis['similarity'] != "" %}
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">Scores vs Listening Temporal Similarity</h2>
-          {% if analysis['similarity'] != "" %}
             <div class="percentage-circle mt-2 mb-4" style="background: conic-gradient(gray {{ analysis['similarity'] }}%, white 0);"></div>
             <div class="text centre fs-4">
               <p>{{ analysis['similarity'] }}%</p>
             </div>
-          {% else %}
-            <div class="text centre fs-4">
-              Unable to calculate genre similarity percentage - requires more ratings.
-            </div>
-          {% endif %}
         </div>
+        {% endif %}
       </div>
     </div>
   </div>
