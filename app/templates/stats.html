@@ -156,6 +156,86 @@
           </div>
         </div>
         {% endfor %}
+
+        <div class="comparison shadow-sm">
+          <h2 class="comparison-title">Scores vs Listening Similarity</h2>
+          <div class="percentage-circle" style="background: conic-gradient(gray {{ similarity_percentage }}%, white 0)"></div>
+          <div class="comparison-subtitle">
+            <p>{{ similarity_percentage }}%</p>
+          </div>
+        </div>
+
+        <div class="comparison shadow-sm">
+          <h2 class="comparison-title">Scores vs Listening Temporal Similarity</h2>
+          {% if temporal_similarity is not none %}
+            <div class="percentage-circle mt-2 mb-4" style="background: conic-gradient(gray {{ temporal_similarity }}%, white 0);"></div>
+            <div class="text centre fs-4">
+              <p>{{ temporal_similarity }}%</p>
+            </div>
+          {% else %}
+            <div class="text centre fs-4">
+              Unable to calculate genre similarity percentage - requires more ratings.
+            </div>
+          {% endif %}
+        </div>
+
+
+        <h4 class="mt-5 mb-3 text-center">Summary for Sharing</h4>
+        <div id="summary-section" class="comparison-table table-responsive mb-4">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Category</th>
+                <th scope="col">From Scores</th>
+                <th scope="col">From Listening</th>
+                <th scope="col">Match</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Top Song</td>
+                <td>{{ item_comparisons[0][1].title }}</td>
+                <td>{{ item_comparisons[0][2].title }}</td>
+                <td>
+                  {% if item_comparisons[0][1].title == item_comparisons[0][2].title %}
+                    <span class="badge bg-success">Match</span>
+                  {% else %}
+                    <span class="badge bg-danger">No Match</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Top Album</td>
+                <td>{{ item_comparisons[1][1].title }}</td>
+                <td>{{ item_comparisons[1][2].title }}</td>
+                <td>
+                  {% if item_comparisons[1][1].title == item_comparisons[1][2].title %}
+                    <span class="badge bg-success">Match</span>
+                  {% else %}
+                    <span class="badge bg-danger">No Match</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td>Most Listened Artist</td>
+                <td>{{ item_comparisons[2][1].title }}</td>
+                <td>{{ item_comparisons[2][2].title }}</td>
+                <td>
+                  {% if item_comparisons[2][1].title == item_comparisons[2][2].title %}
+                    <span class="badge bg-success">Match</span>
+                  {% else %}
+                    <span class="badge bg-danger">No Match</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      
+      <div class="text-center mb-5">
+        <button class="btn btn-primary" onclick="downloadSummary()">📤 Share Summary</button>
+      </div>
+
       </div>
     </div>
   </div>
