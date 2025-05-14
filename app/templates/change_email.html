@@ -11,14 +11,14 @@
                 <label class="form-label">Current Email</label>
                 <input type="text" class="form-control" value="{{ current_user.email }}" readonly>
             </div>
-            <form action="{{ url_for('change_email') }}" method="POST">
+            <form action="{{ url_for('main.change_email') }}" method="POST">
                     {{ form.hidden_tag() }}
                     {{ form.email.label(class="form-label") }}
                     {{ form.email(class="form-control") }}
 
                     <div id="email-feedback" class="feedback-message small" style="min-height: 20px;"></div>
                 {{ form.submit(class="btn btn-success w-100") }}
-                <a href="{{ url_for('account_settings') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
+                <a href="{{ url_for('main.account_settings') }}" class="btn btn-secondary w-100 mt-2">Cancel</a>
             </form>
         </div>
 

@@ -1,12 +1,13 @@
 from flask import render_template, request, redirect, url_for, flash, session, current_app, jsonify
 from urllib import response
-from app import app, db
 from app.config import Config
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
+from app.blueprints import main
+from app import db
 
 from app.util import validate_password, validate_email, validate_score, validate_username
 from app.item_requests import *
@@ -18,13 +19,13 @@ from flask_wtf import FlaskForm
 
 
 
-@app.route('/')
-@app.route('/index')
-@app.route('/home')
+@main.route('/')
+@main.route('/index')
+@main.route('/home')
 def index():
   return render_template("index.html", title="Home")
 
-@app.route('/scores', methods=["GET", "POST"])
+@main.route('/scores', methods=["GET", "POST"])
 @login_required
 def scores():
   # Alter Database
@@ -198,7 +199,7 @@ graphs = [
   }
 ]
 
-@app.route('/stats')
+@main.route('/stats')
 @login_required
 def stats():
   return render_template("stats.html",\
@@ -209,7 +210,7 @@ def stats():
                          similarity_percentage=65\
   )
 
-@app.route('/compare_scores')
+@main.route('/compare_scores')
 @login_required
 def compare_scores():
   my_items = [
@@ -266,7 +267,7 @@ def compare_scores():
   ]
   return render_template("compare_scores.html", title="Compare Scores", my_items=my_items, friend_items=friend_items)
 
-@app.route('/compare_stats')
+@main.route('/compare_stats')
 @login_required
 def compare_stats():
   return render_template("compare_stats.html",\
@@ -277,7 +278,7 @@ def compare_stats():
                          similarity_percentage=65\
   )
 
-@app.route('/register', methods=['GET', 'POST'])
+@main.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -290,12 +291,12 @@ def register():
           db.session.add(new_user)
           db.session.commit()
           flash("Account created successfully", "success")
-          return redirect(url_for('login'))
+          return redirect(url_for('main.login'))
         elif request.method == 'POST':
           flash("Failed to register. Please check your input.", "danger")
     return render_template("register.html", title="Register", form=form)
 
-@app.route('/validate_user', methods=['POST'])
+@main.route('/validate_user', methods=['POST'])
 def validate_user():
     username = request.json.get('username')
     email = request.json.get('email')
@@ -331,7 +332,7 @@ def validate_user():
 
     return response
 
-@app.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
 
     form = LoginForm()
@@ -341,27 +342,27 @@ def login():
         user = User.query.filter_by(username=username).first()
         if not user or not check_password_hash(user.password, password):
             flash("Incorrect username or password", "danger")
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         login_user(user)
         flash("Log in successfully", "success")
         try:
             auth.getCurrentToken()
         except:
-            return redirect(url_for('link_to_spotify'))
-        return redirect(url_for('index'))
+            return redirect(url_for('main.link_to_spotify'))
+        return redirect(url_for('main.index'))
     return render_template("login.html", title="Login", form=form)
 
 
-@app.route('/profile', methods=['GET', 'POST'])
+@main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     user = current_user    
     return render_template("profile.html", title="Profile", user=user)
-app.config.from_object(Config)
-def allowed_file(filename):
-  return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
+def allowed_file(filename):
+  return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
+
+@main.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     user = current_user
@@ -384,24 +385,22 @@ def edit_profile():
         user.bio = form.bio.data
         db.session.commit()
         flash("Profile updated", "success")
-        return redirect(url_for('profile'))
+        return redirect(url_for('main.profile'))
     return render_template("edit_profile.html", title="Edit Profile", user=user, form=form)
 
-app.secret_key = Config.SECRET_KEY
-
-@app.route('/logout')
+@main.route('/logout')
 @login_required
 def logout():
 
   logout_user()
   session.clear()
   flash("Logged out successfully", "info")
-  return redirect(url_for('index'))
+  return redirect(url_for('main.index'))
 
-@app.route('/auth')
-@app.route('/authenticate')
-@app.route('/authorize')
-@app.route('/connect_music', methods=['GET'])
+@main.route('/auth')
+@main.route('/authenticate')
+@main.route('/authorize')
+@main.route('/connect_music', methods=['GET'])
 @login_required
 def link_to_spotify():
   num_args = len(request.args)
@@ -411,23 +410,23 @@ def link_to_spotify():
     if ('code' in request.args.keys()): # User accepted the authorization
       auth.completeAuth(request.args['code'])
       flash("Authorization successful!", "success")
-      return redirect(url_for('scores'))
+      return redirect(url_for('main.scores'))
     elif ('error' in request.args.keys()): # User declined the authorization
       flash("Authorization failed! Please try again.", "danger")
-      return redirect(url_for('profile'))
+      return redirect(url_for('main.profile'))
     else: # An invalid argument has been given to the route (i.e. user input on purpose)
       flash("Authorization failed! Please try again.", "danger")
-      return redirect(url_for('profile'))
+      return redirect(url_for('main.profile'))
   else: # This page should never receive more than 1 argument
     return "Error"
 
-@app.route('/account_settings')
+@main.route('/account_settings')
 @login_required
 def account_settings():
     form = DeleteAccountForm()
     return render_template("account_settings.html", title="Account Setting", form=form)
 
-@app.route('/change_password', methods=['GET', 'POST'])
+@main.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
     user = current_user
@@ -438,21 +437,21 @@ def change_password():
         confirm_new_password = form.confirm_new_password.data
         if not user or not check_password_hash(user.password, current_password):
             flash("Please enter the correct current password", "danger")
-            return redirect(url_for('change_password'))
+            return redirect(url_for('main.change_password'))
         validation_error = validate_password(new_password, confirm_new_password)
         if validation_error:
             flash(validation_error, "danger")
-            return redirect(url_for('change_password'))
+            return redirect(url_for('main.change_password'))
         user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
 
         db.session.commit()
         flash("Password updated successfully", "success")
-        return redirect(url_for('account_settings'))
+        return redirect(url_for('main.account_settings'))
     elif request.method == 'POST':
         flash("Failed to update password. Please check your input.", "danger")
     return render_template('change_password.html', form=form)
 
-@app.route('/validate_password_change', methods=['POST'])
+@main.route('/validate_password_change', methods=['POST'])
 @login_required
 def validate_password_change():
     user = current_user
@@ -476,7 +475,7 @@ def validate_password_change():
 
     return jsonify(response)
 
-@app.route('/change_email', methods=['GET', 'POST'])
+@main.route('/change_email', methods=['GET', 'POST'])
 @login_required
 def change_email():
     user = current_user
@@ -485,20 +484,20 @@ def change_email():
         new_email = form.email.data
         if User.query.filter_by(email=new_email).first():
             flash("Email is already registered with another account.", "danger")
-            return redirect(url_for('change_email'))
+            return redirect(url_for('main.change_email'))
         if validate_email(new_email) is not None:
             flash("Invalid email address. Please enter a valid email.", "danger")
-            return redirect(url_for('change_email'))
+            return redirect(url_for('main.change_email'))
         user.email = new_email
         db.session.commit()
         flash("Email updated successfully", "success")
-        return redirect(url_for('account_settings'))
+        return redirect(url_for('main.account_settings'))
 
     elif request.method == 'POST':
         flash("Failed to update email. Please check your input.", "danger")
     return render_template("change_email.html", title="change email", user=user, form=form)
 
-@app.route('/delete_account', methods=['POST'])
+@main.route('/delete_account', methods=['POST'])
 @login_required
 def delete_account():
     form = DeleteAccountForm()
@@ -508,12 +507,12 @@ def delete_account():
         db.session.commit()
         logout_user()
         flash('Your account has been deleted. See ya', 'info')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     else:
         flash('Your account cannot be delete, please contact admin', 'danger')
-        return redirect(url_for('account_settings'))
+        return redirect(url_for('main.account_settings'))
 
-@app.route('/friends', methods=["GET", "POST"])
+@main.route('/friends', methods=["GET", "POST"])
 @login_required
 def friends():
     my_user_id = int(current_user.user_id)
@@ -551,7 +550,7 @@ def friends():
                         db.session.add(new_friend)
                         db.session.commit()
                         flash("Friend request sent!", "success")
-                        return redirect(url_for('friends'))
+                        return redirect(url_for('main.friends'))
                     elif existing_friendship.status == 'PENDING':
                         flash("Friend request already sent.", "info")
                     elif existing_friendship.status == 'ACCEPTED':
@@ -578,7 +577,7 @@ def friends():
                 db.session.delete(friend)
                 db.session.commit()
                 flash("Friend removed.", "info")
-            return redirect(url_for('friends'))
+            return redirect(url_for('main.friends'))
         elif 'accept_friend_id' in request.form:
             accept_id = int(request.form.get('accept_friend_id'))
             # Find the pending request sent to me
@@ -593,7 +592,7 @@ def friends():
                     reciprocal.status = 'ACCEPTED'
                 db.session.commit()
                 flash("Friend request accepted!", "success")
-            return redirect(url_for('friends'))
+            return redirect(url_for('main.friends'))
         elif 'reject_friend_id' in request.form:
             reject_id = int(request.form.get('reject_friend_id'))
             friend_request = Friend.query.filter_by(user_id=reject_id, friend_id=my_user_id, status='PENDING').first()
@@ -601,7 +600,7 @@ def friends():
                 db.session.delete(friend_request)
                 db.session.commit()
                 flash("Friend request rejected.", "info")
-            return redirect(url_for('friends'))
+            return redirect(url_for('main.friends'))
 
     return render_template(
         'friends.html',

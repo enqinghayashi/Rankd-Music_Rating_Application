@@ -26,7 +26,7 @@
             <a class="nav-link text-light nav-protected" href="/compare_scores">Share</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-light nav-protected" href="{{ url_for('friends') }}">Friends</a>
+            <a class="nav-link text-light nav-protected" href="{{ url_for('main.friends') }}">Friends</a>
           </li>
         </ul>
       </div>
@@ -90,7 +90,7 @@
             Please link to Spotify first to access these pages
           </div>
           <div class="modal-footer justify-content-center">
-            <a class="btn btn-primary" href=" {{ url_for('link_to_spotify')}}">Link</a>
+            <a class="btn btn-primary" href=" {{ url_for('main.link_to_spotify')}}">Link</a>
           </div>
         </div>
       </div>
@@ -109,7 +109,7 @@
         <i class="bi bi-share"></i>
         <p>Share</p>
       </a>
-      <a class="nav-link nav-protected" href="{{url_for('friends')}}">
+      <a class="nav-link nav-protected" href="{{url_for('main.friends')}}">
         <i class="bi bi-people"></i>
         <p>Friends</p>
       </a>
@@ -164,7 +164,7 @@
             async function validateEmailField(value) {
                 const payload = { email: value };
                 try {
-                    const response = await fetch('{{ url_for("validate_user") }}', {
+                    const response = await fetch('{{ url_for("main.validate_user") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
