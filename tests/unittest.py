@@ -214,28 +214,47 @@ class TestItem(unittest.TestCase):
         self.assertEqual(result, "a,b,c")
 
 # Integration tests
-from app import create_app
+from app import create_app, db
+from app.config import TestingConfig
+from app.models import User
 
 class TestRoutesIntegration(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.app = create_app().test_client()
-        cls.app.testing = True
+    def setUp(self):
+        self.app = create_app(TestingConfig)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        self.client = self.app.test_client()
+        self.app.testing = True
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+        super().tearDown()
 
     def test_home_page(self):
-        response = self.app.get('/')
+        response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Home', response.data)
 
     def test_login_page(self):
-        response = self.app.get('/login')
+        response = self.client.get('/login')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Login', response.data)
 
     def test_register_page(self):
-        response = self.app.get('/register')
+        response = self.client.get('/register')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Register', response.data)
+
+    def test_successful_user_creation(self):
+        user = User(username="testuser", email="test@example.com", password="hashedpw")
+        db.session.add(user)
+        db.session.commit()
+        found = User.query.filter_by(username="testuser").first()
+        self.assertIsNotNone(found)
+        self.assertEqual(found.email, "test@example.com")
 
 if __name__ == "__main__":
     unittest.main()
