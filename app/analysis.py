@@ -183,15 +183,16 @@ class DatabaseStats(AnalysisStats):
 """
 """
 class APIStats(AnalysisStats):
-  def __init__(self):
+  def __init__(self, depth):
     super().__init__()
+    self.depth = depth
   
   """
   Get users's top tracks and artists from API
   """
   def getTopItemsFromAPI(self):
-    self.top_tracks = api.getAllTopItems("tracks")
-    self.top_artists = api.getAllTopItems("artists")
+    self.top_tracks = api.getAllTopItems("tracks", limit=self.depth)
+    self.top_artists = api.getAllTopItems("artists", limit=self.depth)
   
   """
   """
@@ -214,11 +215,6 @@ Performs the analysis on the data found above.
 """
 class StatsAnalyser:
   def __init__(self):
-    self.db_stats = DatabaseStats()
-    self.api_stats = APIStats()
-    self.db_stats.getStats()
-    self.api_stats.getStats()
-
     self.compared_tracks = {}
     self.common_tracks = {}
     self.track_stats = {}
@@ -518,7 +514,13 @@ class StatsAnalyser:
   
   """
   """
-  def completeAnalysis(self):
+  def completeAnalysis(self, depth):
+    # setup fields
+    self.db_stats = DatabaseStats()
+    self.api_stats = APIStats(depth)
+    self.db_stats.getStats()
+    self.api_stats.getStats()
+
     # this is what we are going to fill in and return
     analysis = {
       "tracks": {

@@ -30,9 +30,9 @@ function updateAnalysisDesc() {
     count.innerText = "1000";
     desc.innerText = "Extended analysis, may take a few minutes.";
   }
-  else if (depth === "All") {
-    count.innerText = "All";
-    desc.innerText = "Full analysis, could take a VERY long time.";
+  else if (depth === "5000") {
+    count.innerText = "5000";
+    desc.innerText = "Extreme analysis, could take a VERY long time.";
   }
   else  {
     count.innerText = "Invalid";
@@ -42,5 +42,5 @@ function updateAnalysisDesc() {
 
 function generateAnalysis() {
   const depth = getRadioSelected(document.getElementsByName("analysis-depth"));
-  window.location.href="/stats?generate=true&depth="+depth;
+  window.location.href="/stats?depth="+depth;
 }

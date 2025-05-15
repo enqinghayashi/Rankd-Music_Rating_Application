@@ -6,6 +6,7 @@
     <div class="col col-lg-9 col-xxl-6">
       <h2 class="mt-4 mb-4 text-center">🎵 Rankd Music Stats</h2>
       <div class="d-flex flex-column gap-4">
+        {% if analysis is not none %}
         <!-- ITEM SECTION -->
         {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
         <!-- TOP ITEMS COMPARISON -->
@@ -183,7 +184,7 @@
             </div>
         </div>
         {% endif %}
-
+        {% endif %} <!-- Endif for if analysis is not none -->
         <!-- GENERATE ANALYSIS INPUT -->
          <div class="comparison shadow-sm">
             <h2 class="comparison-title">Generate Analysis</h2>
@@ -202,8 +203,8 @@
               <label class="btn btn-secondary depth col-2" for="500">500</label>
               <input type="radio" class="btn-check" name="analysis-depth" id="1000" autocomplete="off">
               <label class="btn btn-secondary depth col-2" for="1000">1000</label>
-              <input type="radio" class="btn-check" name="analysis-depth" id="All" autocomplete="off">
-              <label class="btn btn-secondary depth col-2" for="All">All</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="5000" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="5000">5000</label>
             </div>
           </div>
       </div>

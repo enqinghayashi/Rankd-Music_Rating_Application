@@ -86,10 +86,12 @@ def scores():
 @app.route('/stats')
 @login_required
 def stats():
-
   analysis = StatsAnalyser.getAnalysisFromDB()
-  if analysis is None:
-    analysis = StatsAnalyser().completeAnalysis()
+  
+  depth = request.args.get("depth")
+  if validateDepth(depth):
+    StatsAnalyser().completeAnalysis(int(depth))
+    return redirect(url_for('account_settings'))
   
   return render_template("stats.html", title="Stats", analysis=analysis)
 
