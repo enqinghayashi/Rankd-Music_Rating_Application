@@ -183,8 +183,32 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- GENERATE ANALYSIS INPUT -->
+         <div class="comparison shadow-sm">
+            <h2 class="comparison-title">Generate Analysis</h2>
+            <div class="generate-analysis-feedback">
+              <p id="generate-analysis-count">100</p>
+              <p id="generate-analysis-desc">Short analysis, shouldn't take too long.</p>
+              <button type="button" class="btn btn-secondary" id="generate-analysis-button">Generate</button>
+            </div>
+            <p>How many of your top items should we look at for our analysis?</p>
+            <div class="search-options d-flex flex-row justify-content-center w-100 mb-3">
+              <input type="radio" class="btn-check" name="analysis-depth" id="100" autocomplete="off" checked>
+              <label class="btn btn-secondary depth col-2" for="100">100</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="250" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="250">250</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="500" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="500">500</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="1000" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="1000">1000</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="All" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="All">All</label>
+            </div>
+          </div>
       </div>
     </div>
   </div>
 </div>
+<script src="{{ url_for('static', filename='stats.js') }}" type="module"></script>
 {% endblock %}

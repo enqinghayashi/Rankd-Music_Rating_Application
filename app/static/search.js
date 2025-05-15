@@ -1,5 +1,5 @@
 // Return the id of the selected radio button
-function getRadioSelected(radios) {
+export function getRadioSelected(radios) {
   for (let i in radios) {
     const radio = radios[i];
     if (radio.checked) return radio.id;

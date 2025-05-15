@@ -11,6 +11,7 @@
 @import "bar_graph.css";
 @import "percentage_circle.css";
 @import "page_top.css";
+@import "stats.css";
 
 body {
   padding-top: 80px;
