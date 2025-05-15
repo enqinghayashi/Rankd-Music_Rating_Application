@@ -3,7 +3,7 @@ from app import db
 from app.models import Score
 
 class Item:
-  def __init__(self, data, from_db=False):
+  def __init__(self, data, from_db=False, from_analysis=False):
     """
     List of fields for documentation purposes.
     """
@@ -25,6 +25,9 @@ class Item:
     """
     if from_db:
       self.init_from_database(data)
+      return
+    elif from_analysis:
+      self.init_from_analysis(data)
       return
 
     # General fields
@@ -69,6 +72,17 @@ class Item:
     self.album = data.album
     self.album_id = data.album_id
     self.artist_ids = data.artist_ids.split(",")
+  
+  def init_from_analysis(self, data):
+    self.score = data["score"]
+    self.id = data["id"]
+    self.type = data["type"]
+    self.title = data["title"]
+    self.creator = data["creator"]
+    self.img_url = data["img_url"]
+    self.album = data["album"]
+    self.album_id = data["album_id"]
+    self.artist_ids = data["artist_ids"]
 
   def to_dict(self):
     return {

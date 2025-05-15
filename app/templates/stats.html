@@ -4,81 +4,159 @@
 <div class="page-content container-fluid">
   <div class="row justify-content-center">
     <div class="col col-lg-9 col-xxl-6">
-      <h2 class="mt-4 mb-4 text-center">🎵 Your Music Stats</h2>
+      <h2 class="mt-4 mb-4 text-center">🎵 Rankd Music Stats</h2>
       <div class="d-flex flex-column gap-4">
-        <!-- TOP ITEMS SECTION -->
-        {% for title, user, streaming in item_comparisons %}
+        <!-- ITEM SECTION -->
+        {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
+        <!-- TOP ITEMS COMPARISON -->
         <div class="comparison shadow-sm">
-          <h2 class="comparison-title">{{ title }}</h2>
-          
+          <h2 class="comparison-title">Top {{ title }} Comparison</h2>
+          {% if section['db_top'] == "" %}
+          <p>Please rate more {{title.lower()}} to see your analysis.</p>
+          {% elif section['api_top'] == "" %}
+          <p>It seems that you don't have any listening history on this acocunt. There is nothing to analyse.</p>
+          {% else %}
           <div class="comparison-item">
-            <div class="comparison-subtitle col-3">
+            <div class="comparison-subtitle col-4">
               <p>Your Pick</p>
             </div>
-            <div class="item item-lg item-borderless item-type-{{ user.type }} col">
-              <img class="item-img" src="{{ user.img_url }}" alt="">
+            <div class="item item-lg item-borderless item-type-{{ section['db_top'].type }} col">
+              <img class="item-img" src="{{ section['db_top'].img_url }}" alt="">
               <div class="item-desc">
-                <p class="item-title">{{ user.title }}</p>
-                {% if user.type != 'artist' %}
-                <p class="item-creator">{{ user.creator }}</p>
+                <p class="item-title">{{ section['db_top'].title }}</p>
+                {% if section['db_top'].type != 'artist' %}
+                <p class="item-creator">{{ section['db_top'].creator }}</p>
                 {% endif %}
               </div>
             </div>
           </div>
                     
           <div class="comparison-item">
-            <div class="comparison-subtitle col-3">
+            <div class="comparison-subtitle col-4">
               <p>Spotify Says</p>
             </div>
-            <div class="item item-lg item-borderless item-type-{{ streaming.type }} col">
-              <img class="item-img" src="{{ streaming.img_url }}" alt="">
+            <div class="item item-lg item-borderless item-type-{{ section['api_top'].type }} col">
+              <img class="item-img" src="{{ section['api_top'].img_url }}" alt="">
               <div class="item-desc">
-                <p class="item-title">{{ streaming.title }}</p>
-                {% if streaming.type != 'artist' %}
-                <p class="item-creator">{{ streaming.creator }}</p>
+                <p class="item-title">{{ section['api_top'].title }}</p>
+                {% if section['api_top'].type != 'artist' %}
+                <p class="item-creator">{{ section['api_top'].creator }}</p>
                 {% endif %}
               </div>
             </div>
           </div>
           
           <div class="comparison-result col-12">
-            {% if user.id == streaming.id %}
+            {% if section['db_top'].id == section['api_top'].id %}
               <span class="comparison-badge badge bg-success"><i class="bi bi-check-circle"></i> Perfect Match!</span>
             {% else %}                                                                                                             
               <span class="comparison-badge badge bg-danger"><i class="bi bi-x-circle"></i> No Match</span>                       
             {% endif %}                                                                                                            
           </div>
-
+          {% endif %}
         </div>
-        {% endfor %}
-
-        <!-- OUTLIERS SECTION -->
-
-        {% for title, outlier_comparison in outlier_comparisons %}
+        <!-- EXTREMES SECTION -->
+        {% if section['high_high'] != "" %}
         <div class="comparison shadow-sm">
-          <h2 class="comparison-title">{{ title }}</h2>
-          
-          {% for outlier, item in outlier_comparison %}
+          <h2 class="comparison-title">Overrated, Underrated, and Perfectly Rated</h2>
+          <p>We looked at your scores and your top {{ title.lower() }} and these were the most extreme results.</p> 
           <div class="comparison-item">
-            <div class="comparison-subtitle col-3">
-              <p>{{ outlier }}</p>
+            <div class="comparison-subtitle col-4">
+              <p>Highest Rated Most Listened</p>
             </div>
-            <div class="item item-lg item-borderless item-type-{{ item.type }} col">
-              <img class="item-img" src="{{ item.img_url }}" alt="">
+            <div class="item item-lg item-borderless item-type-{{ section['high_high'].type }} col">
+              <img class="item-img" src="{{ section['high_high'].img_url }}" alt="">
               <div class="item-desc">
-                <p class="item-title">{{ item.title }}</p>
-                {% if item.type != 'artist' %}
-                <p class="item-creator">{{ item.creator }}</p>
+                <p class="item-title">{{ section['high_high'].title }}</p>
+                {% if section['high_high'].type != 'artist' %}
+                <p class="item-creator">{{ section['high_high'].creator }}</p>
                 {% endif %}
               </div>
             </div>
           </div>
-          {% endfor %}
-        </div>
-        {% endfor %}
+          
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-4">
+              <p>Highest Rated Least Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['high_low'].type }} col">
+              <img class="item-img" src="{{ section['high_low'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['high_low'].title }}</p>
+                {% if section['high_low'].type != 'artist' %}
+                <p class="item-creator">{{ section['high_low'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-4">
+              <p>Lowest Rated Most Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['low_high'].type }} col">
+              <img class="item-img" src="{{ section['low_high'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['low_high'].title }}</p>
+                {% if section['low_high'].type != 'artist' %}
+                <p class="item-creator">{{ section['low_high'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
 
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-4">
+              <p>Lowest Rated Least Listened</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['low_low'].type }} col">
+              <img class="item-img" src="{{ section['low_low'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['low_low'].title }}</p>
+                {% if section['low_low'].type != 'artist' %}
+                <p class="item-creator">{{ section['low_low'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="comparison-item">
+            <div class="comparison-subtitle col-4">
+              <p>Biggest Outlier</p>
+            </div>
+            <div class="item item-lg item-borderless item-type-{{ section['outlier'].type }} col">
+              <img class="item-img" src="{{ section['outlier'].img_url }}" alt="">
+              <div class="item-desc">
+                <p class="item-title">{{ section['outlier'].title }}</p>
+                {% if section['outlier'].type != 'artist' %}
+                <p class="item-creator">{{ section['outlier'].creator }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        
+        {% if section['similarity'] != "" %}
+        <div class="comparison shadow-sm">
+          <h2 class="comparison-title">Scores vs Listening Similarity</h2>
+          <p>How much your scores match your top {{ title.lower() }}.</p>
+          <div class="percentage-circle mt-2 mb-4" style="background: conic-gradient(gray {{ section['similarity'] }}%, white 0);"></div>
+          <div class="text centre fs-4">
+            <p>{{ section['similarity'] }}%</p>
+          </div>
+          {% if section['similarity'] >= 50 %}
+          <p>You listen to your highest rated {{ title.lower() }} more than your lowest!</p>
+          {% else %}
+          <p>You listen to your lowest rated {{ title.lower() }} more than your highest!</p>
+          {% endif %}
+        </div>
+        {% endif %}
+        
+        {% endfor %}
+        
         <!-- GRAPH SECTION -->
-        {% for graph in graphs %}
+        {% for graph in analysis['graphs'][0:4] %} <!-- Genres doesn't look good so removed for now -->
         <div class="comparison shadow-sm">
           <h2 class="comparison-title">{{ graph.title }}</h2>
           <div class="bar-graph">
@@ -95,70 +173,16 @@
         </div>
         {% endfor %}
 
+        <!-- SIMILARITY SECTION -->
+        {% if analysis['similarity'] != "" %}
         <div class="comparison shadow-sm">
-          <h2 class="comparison-title">Scores vs Listening Similarity</h2>
-          <div class="percentage-circle" style="background: conic-gradient(gray {{ similarity_percentage }}%, white 0)"></div>
-          <div class="comparison-subtitle">
-            <p>{{ similarity_percentage }}%</p>
-          </div>
+          <h2 class="comparison-title">Scores vs Listening Temporal Similarity</h2>
+            <div class="percentage-circle mt-2 mb-4" style="background: conic-gradient(gray {{ analysis['similarity'] }}%, white 0);"></div>
+            <div class="text centre fs-4">
+              <p>{{ analysis['similarity'] }}%</p>
+            </div>
         </div>
-
-        <h4 class="mt-5 mb-3 text-center">Summary for Sharing</h4>
-        <div id="summary-section" class="comparison-table table-responsive mb-4">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th scope="col">Category</th>
-                <th scope="col">From Scores</th>
-                <th scope="col">From Listening</th>
-                <th scope="col">Match</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Top Song</td>
-                <td>{{ item_comparisons[0][1].title }}</td>
-                <td>{{ item_comparisons[0][2].title }}</td>
-                <td>
-                  {% if item_comparisons[0][1].title == item_comparisons[0][2].title %}
-                    <span class="badge bg-success">Match</span>
-                  {% else %}
-                    <span class="badge bg-danger">No Match</span>
-                  {% endif %}
-                </td>
-              </tr>
-              <tr>
-                <td>Top Album</td>
-                <td>{{ item_comparisons[1][1].title }}</td>
-                <td>{{ item_comparisons[1][2].title }}</td>
-                <td>
-                  {% if item_comparisons[1][1].title == item_comparisons[1][2].title %}
-                    <span class="badge bg-success">Match</span>
-                  {% else %}
-                    <span class="badge bg-danger">No Match</span>
-                  {% endif %}
-                </td>
-              </tr>
-              <tr>
-                <td>Most Listened Artist</td>
-                <td>{{ item_comparisons[2][1].title }}</td>
-                <td>{{ item_comparisons[2][2].title }}</td>
-                <td>
-                  {% if item_comparisons[2][1].title == item_comparisons[2][2].title %}
-                    <span class="badge bg-success">Match</span>
-                  {% else %}
-                    <span class="badge bg-danger">No Match</span>
-                  {% endif %}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      
-      <div class="text-center mb-5">
-        <button class="btn btn-primary" onclick="downloadSummary()">📤 Share Summary</button>
-      </div>
-
+        {% endif %}
       </div>
     </div>
   </div>

@@ -53,3 +53,12 @@ class Friend(db.Model):
   __table_args__ = (
     db.PrimaryKeyConstraint('user_id', 'friend_id'), # comma is necessary as table args must be a tuple
   )
+
+class Analysis(db.Model):
+  __table_name__ = 'Analysis'
+
+  user_id = db.Column(db.Integer, db.ForeignKey(User.user_id), primary_key=True)
+  # Analysis will be stored as a long json string
+  # This is likely not the best way to store this but it offers a quick solution to the problem
+  # as time is currently sensitive
+  analysis = db.Column(db.String, nullable=False) 

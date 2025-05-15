@@ -101,7 +101,7 @@ class API:
 
   Raises an exception on error
   """
-  def getSeveralItems(self, type, ids):
+  def getSeveralItems(self, type, ids, return_data=False):
     allowed_types = ["tracks", "albums", "artists"]
     if type not in allowed_types:
       raise ValueError("Type is not of allowed types.")
@@ -119,6 +119,8 @@ class API:
     params = {"ids":ids_str}
     
     data = self.api_request(type, params)
+    if return_data:
+       return data[type]
 
     items = []
     for item in data[type]:
@@ -139,7 +141,7 @@ class API:
     }
     
     data = self.api_request("me/top/" + type, params)
-    
+
     items = []
     for item in data["items"]:
       items.append(Item(item))
@@ -161,11 +163,13 @@ class API:
     received = 0
     items = []
     while received < limit:
-      new_items = self.getTopItems(type, received)
+      print(f"DEBUG: Retrieved {received} of {limit} items")
+      new_items = self.getTopItems(type, offset=received)
       if new_items == []: # limit was higher than available tracks
         break
       items += new_items
       received += len(new_items)
+    print(f"DEBUG: Retrieved all items")
     return items[:limit]
 
 api = API()

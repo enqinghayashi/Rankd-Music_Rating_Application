@@ -6,6 +6,7 @@
   margin-bottom: 1rem;
   border: 1px solid #A0A0A0;
   border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 .comparison-title{
