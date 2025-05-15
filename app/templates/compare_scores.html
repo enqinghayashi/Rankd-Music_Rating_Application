@@ -15,89 +15,46 @@
       <div class="friend-select-group input-group">
         <label class="input-group-text" for="friend-select">View Friend</label>
         <select class="form-select" id="friend-select">
-          <option value="Friend 1">Friend 1</option>
-          <option value="Friend 2">Friend 2</option>
-          <option value="Friend 3">Friend 3</option>
+          {% if friends == [] %}
+            <option value="-1">No friends</option>
+          {% else %}
+            {% for friend in friends %}
+            <option value="{{ friend.user_id }}">{{ friend.username }}</option>
+            {% endfor %}
+          {% endif %}
         </select>
       </div>
       <div class="search-bar input-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
         <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
       </div>
-      <div class="search-options">
-        <input type="checkbox" class="btn-check" id="tracks-filter" checked autocomplete="off">
-        <label class="btn btn-secondary" for="tracks-filter">Tracks</label>
-        <input type="checkbox" class="btn-check" id="albums-filter" checked autocomplete="off">
-        <label class="btn btn-secondary" for="albums-filter">Albums</label>
-        <input type="checkbox" class="btn-check" id="artists-filter" checked autocomplete="off">
-        <label class="btn btn-secondary" for="artists-filter">Artists</label>
+      <div class="search-options d-flex flex-row mb-3">
+        <input type="radio" class="btn-check" name="filter" id="track" autocomplete="off" checked>
+        <label class="btn btn-secondary filter col-4" for="track">Tracks</label>
+        <input type="radio" class="btn-check" name="filter" id="album" autocomplete="off">
+        <label class="btn btn-secondary filter col-4" for="album">Albums</label>
+        <input type="radio" class="btn-check" name="filter" id="artist" autocomplete="off">
+        <label class="btn btn-secondary filter col-4" for="artist">Artists</label>
+        <input type="checkbox" class="btn-check" id="saved" autocomplete="off">
+        <label class="btn btn-secondary filter" for="saved">Saved</label>
         <div class="col"></div>
-        <div class="sort-select dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            Sort
-          </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Default</a></li>
-            <li><a class="dropdown-item" href="#">Album</a></li>
-            <li><a class="dropdown-item" href="#">Artist</a></li>
-            <li><a class="dropdown-item" href="#">Date Reviewed</a></li>
-          </ul>
-        </div>
-        <button class="btn btn-secondary" id="sort-direction"><i class="bi bi-sort-down"></i></button>
       </div>
     </div>
   </div>
   <div class="row justify-content-center">
-    <div id="user-scores" class="user-scores col-lg-6 d-none d-lg-block">
+    <div class="left-scores col-lg-6 d-none d-lg-block">
       <h2 class="compare-section-title">Your Ratings</h2>
-      <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
-        {% for item in my_items %}
-        <div class="item item-type-{{ item.type }}">
-          <div class="item-score col-2 col-lg-1">{{ item.score }}</div>
-          <img class="item-img" src="{{ item.img_url }}" alt="...">
-          <div class="item-desc col">
-            <p class="item-title">{{ item.title }}</p>
-            {% if item.type != 'artist' %}
-            <p class="item-creator">{{ item.creator }}</p>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-        <div class="item placeholder-glow">
-          <div class="item-score col-2 col-lg-1 placeholder"></div>
-          <img src="..." class="item-img placeholder" alt="...">
-          <div class="item-desc col">
-            <span class="item-title mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
-            <span class="item-creator mb-0 placeholder col-5" aria-disabled="true"></span>
-          </div>
-        </div>
+      <div id="user-items" class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
+        <!-- Filled in by JS -->
       </div>
     </div>
-    <div id="friend-scores" class="friend-scores col col-lg-6">
+    <div class="right-scores col col-lg-6">
       <h2 class="compare-section-title"><span class="friend-name">Friend</span>'s Ratings</h2>
-      <div class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
-        {% for item in friend_items %}
-        <div class="item item-type-{{ item.type }}">
-          <div class="item-score col-2 col-lg-1">{{ item.score }}</div>
-          <img class="item-img" src="{{ item.img_url }}" alt="...">
-          <div class="item-desc col">
-            <p class="item-title">{{ item.title }}</p>
-            {% if item.type != 'artist' %}
-            <p class="item-creator">{{ item.creator }}</p>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-        <div class="item placeholder-glow">
-          <div class="item-score col-2 col-lg-1 placeholder"></div>
-          <img src="..." class="item-img placeholder" alt="...">
-          <div class="item-desc col">
-            <span class="item-title mt-1 mb-2 placeholder col-7" aria-disabled="true"></span>
-            <span class="item-creator mb-0 placeholder col-5" aria-disabled="true"></span>
-          </div>
-        </div>
+      <div id="friend-items" class="saved-scores d-flex flex-column align-items-center mb-3 overflow-auto">
+        <!-- Filled in by JS -->
       </div>
     </div>
   </div>
 </div>
+<script src="{{ url_for('static', filename='compare_scores.js') }}" type="module"></script>
 {% endblock %}

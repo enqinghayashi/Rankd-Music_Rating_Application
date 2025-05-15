@@ -6,14 +6,17 @@ from app.item import Item
 from app.api_requests import api
 import re
 
-def getScoreItems(search, type, saved):
+def getDatabaseItems(type, user_id=""):
   # Get user's saved scores
-  user_id = current_user.user_id
-  db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score)).all()
+  if user_id == "":
+    user_id = current_user.user_id
+  db_rows = db.session.execute(db.select(Score).filter_by(user_id=user_id, item_type=type).order_by(Score.score.desc())).all()
   db_items = []
   for row in db_rows:
     db_items.append(Item(row[0], True))
-  
+  return db_items
+
+def filterDatabaseItems(db_items, search):
   # This is used to add scores to the search results
   # Our filter algorithm and spotify's search are different so this ensure we don't miss anything
   db_ids = []
@@ -23,17 +26,26 @@ def getScoreItems(search, type, saved):
 
   # Filter the saved scores to the search
   filtered_items = []
-  for item in db_items: # I know the filter() method exists but this needs 2 parameters which was annoying to do
-    title = re.search(search, item.title)
-    album = re.search(search, item.album)
-    creator = re.search(search, item.creator)
-    if (title or album or creator): filtered_items.append(item)
+  if search == "":
+    filtered_items = db_items
+  else:
+    for item in db_items: # I know the filter() method exists but this needs 2 parameters which was annoying to do
+      title = re.search(search, item.title)
+      album = re.search(search, item.album)
+      creator = re.search(search, item.creator)
+      if (title or album or creator): filtered_items.append(item)
   
   # Convert items to dictionaries to convert to json to send later
   total = len(filtered_items)
   for i in range(0, total):
     filtered_items[i] = filtered_items[i].to_dict()
 
+  return db_ids, filtered_items
+
+def getScoreItems(search, type, saved, user_id=""):
+  db_items = getDatabaseItems(type, user_id)
+  db_ids, filtered_items = filterDatabaseItems(db_items, search)
+  
   # Make search request
   search_items = []
   if saved == "false" and search != "": # This is from a json response

@@ -6,30 +6,18 @@
     <div class="col col-lg-9 col-xxl-7"> 
       <div class="search-bar input-group">
         <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="text" class="form-control" id="search-bar-input" onkeydown="handleKeyDown(event)" placeholder="Search for something...">
+        <input type="text" class="form-control" id="search-bar-input" placeholder="Search for something...">
       </div>
       <div class="search-options d-flex flex-row mb-3">
         <input type="radio" class="btn-check" name="filter" id="track" autocomplete="off" checked>
-        <label class="btn btn-secondary filter" for="track">Tracks</label>
+        <label class="btn btn-secondary filter col-3" for="track">Tracks</label>
         <input type="radio" class="btn-check" name="filter" id="album" autocomplete="off">
-        <label class="btn btn-secondary filter" for="album">Albums</label>
+        <label class="btn btn-secondary filter col-3" for="album">Albums</label>
         <input type="radio" class="btn-check" name="filter" id="artist" autocomplete="off">
-        <label class="btn btn-secondary filter" for="artist">Artists</label>
+        <label class="btn btn-secondary filter col-3" for="artist">Artists</label>
         <input type="checkbox" class="btn-check" id="saved" autocomplete="off">
-        <label class="btn btn-secondary filter" for="saved">Saved</label>
+        <label class="btn btn-secondary filter col-3" for="saved">Saved</label>
         <div class="col"></div>
-        <div class="sort-select dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            Sort
-          </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Default</a></li>
-            <li><a class="dropdown-item" href="#">Album</a></li>
-            <li><a class="dropdown-item" href="#">Artist</a></li>
-            <li><a class="dropdown-item" href="#">Date Reviewed</a></li>
-          </ul>
-        </div>
-        <button class="btn btn-secondary" id="sort-direction"><i class="bi bi-sort-down"></i></button>
       </div>
       <div class="scores-containter d-flex flex-column align-items-center mb-3 overflow-auto">
         <div id="search-results" class="w-100"></div>
@@ -51,5 +39,9 @@
     </div>
   </div>
 </div>
+<<<<<<< HEAD
 <script src="{{ url_for('main.static', filename='scores.js') }}"></script>
+=======
+<script src="{{ url_for('static', filename='scores.js') }}" type="module"></script>
+>>>>>>> origin/main
 {% endblock %}

@@ -1,0 +1,33 @@
+.generate-analysis-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 400px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  margin: 10px;
+}
+
+#generate-analysis-count {
+  margin-top: 30%;
+  margin-bottom: 5px;
+  font-weight: 400;
+  font-size: 4rem;
+  position: relative;
+  translate: (50%, 50%);
+}
+
+#generate-analysis-button {
+  margin: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+#generate-analysis-loading {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  z-index: -1;
+  margin: 10px;
+}

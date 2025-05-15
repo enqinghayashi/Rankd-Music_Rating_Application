@@ -6,22 +6,33 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from app.models import User, Friend, Score
 from app.auth import auth, UserNotAuthroizedError, BadRefreshTokenError
+<<<<<<< HEAD
 from app.blueprints import main
 from app import db
 
 from app.util import validate_password, validate_email, validate_score, validate_username
+=======
+from app.util import *
+>>>>>>> origin/main
 from app.item_requests import *
 from urllib.parse import parse_qs
+from app.analysis import *
 from flask_login import login_user, logout_user, login_required, current_user
 from app.forms import RegistrationForm, LoginForm, ChangePasswordForm, ChangeEmailForm, EditProfileForm, FriendForm, DeleteAccountForm
 from wtforms import StringField, SubmitField
 from flask_wtf import FlaskForm
 
+<<<<<<< HEAD
 
 
 @main.route('/')
 @main.route('/index')
 @main.route('/home')
+=======
+@app.route('/')
+@app.route('/index')
+@app.route('/home')
+>>>>>>> origin/main
 def index():
   return render_template("index.html", title="Home")
 
@@ -86,6 +97,7 @@ def scores():
   # View Page
   return render_template("scores.html", title="Scores")
 
+<<<<<<< HEAD
 track = {
   "id": "r",
   "type": "track",
@@ -200,83 +212,75 @@ graphs = [
 ]
 
 @main.route('/stats')
+=======
+@app.route('/stats')
+>>>>>>> origin/main
 @login_required
 def stats():
-  return render_template("stats.html",\
-                         title="Stats",\
-                         item_comparisons=item_comparisons,\
-                         outlier_comparisons=outlier_comparisons,\
-                         graphs=graphs,\
-                         similarity_percentage=65\
-  )
+  analysis = StatsAnalyser.getAnalysisFromDB()
+  
+  depth = request.args.get("depth")
+  if validateDepth(depth):
+    StatsAnalyser().completeAnalysis(int(depth))
+    # removes the queries so that if a user reloads they don't have to generate a new analysis again
+    return redirect(url_for('stats')) 
+  
+  return render_template("stats.html", title="Stats", analysis=analysis)
 
+<<<<<<< HEAD
 @main.route('/compare_scores')
+=======
+# region SCORES COMPARE
+@app.route('/compare_scores')
+>>>>>>> origin/main
 @login_required
 def compare_scores():
-  my_items = [
-    {
-      "id": "",
-      "type": "track",
-      "title": "Welcome To The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "10"
-    },
-    {
-      "id": "",
-      "type": "album",
-      "title": "The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "9.9"
-    },
-    {
-      "id": "",
-      "type": "artist",
-      "title": "My Chemical Romance", 
-      "creator": "My Chemical Romance", 
-      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
-      "score": ""
-    }
-  ]
-  friend_items = [
-    {
-      "id": "",
-      "type": "track",
-      "title": "Welcome To The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "9"
-    },
-    {
-      "id": "",
-      "type": "album",
-      "title": "The Black Parade", 
-      "creator": "My Chemical Romance", 
-      "img_url": "https://i.scdn.co/image/ab67616d0000485117f77fab7e8f18d5f9fee4a1",
-      "score": "8"
-    },
-    {
-      "id": "",
-      "type": "artist",
-      "title": "My Chemical Romance", 
-      "creator": "My Chemical Romance", 
-      "img_url": 'https://i.scdn.co/image/ab6761610000f1789c00ad0308287b38b8fdabc2',
-      "score": ""
-    }
-  ]
-  return render_template("compare_scores.html", title="Compare Scores", my_items=my_items, friend_items=friend_items)
+  friends = getFriends()
 
+<<<<<<< HEAD
 @main.route('/compare_stats')
+=======
+  if request.is_json:
+    search = request.args.get("search")
+    type = request.args.get("type")
+        
+    user_results = getDatabaseItems(type)
+    user_results = filterDatabaseItems(user_results, search)[1]
+
+    friend_id = request.args.get("friend_id")
+    if validateFriend(friend_id) >= 0:
+      friend_results = getDatabaseItems(type, friend_id)
+      friend_results = filterDatabaseItems(friend_results, search)[1]
+    else:
+      friend_results = []
+
+    response = {
+       "user_results": user_results,
+       "friend_results": friend_results
+    }
+    return jsonify(response)
+
+  return render_template("compare_scores.html", title="Compare Scores", friends=friends)
+
+#region STATS COMPARE
+@app.route('/compare_stats')
+>>>>>>> origin/main
 @login_required
 def compare_stats():
-  return render_template("compare_stats.html",\
-                         title="Compare Stats",\
-                         item_comparisons=item_comparisons,\
-                         outlier_comparisons=outlier_comparisons,\
-                         graphs=graphs,\
-                         similarity_percentage=65\
-  )
+  analysis = None
+  friends = getFriends()
+
+  friend_id = request.args.get("friend_id")
+  if friend_id is None and len(friends) > 0:
+    friend_id = friends[0].user_id
+  
+  if (friend_id is not None):
+    i = validateFriend(friend_id)
+    if i >= 0:
+      friends = [friends[i]] + friends # puts the selected friend at the top of the selected box
+      analysis = StatsAnalyser.getAnalysisFromDB(friend_id)
+
+  return render_template("compare_stats.html", title="Compare Stats", friends=friends, analysis=analysis)
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
