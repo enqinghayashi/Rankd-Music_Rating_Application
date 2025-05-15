@@ -6,6 +6,7 @@
     <div class="col col-lg-9 col-xxl-6">
       <h2 class="mt-4 mb-4 text-center">🎵 Rankd Music Stats</h2>
       <div class="d-flex flex-column gap-4">
+        {% if analysis is not none %}
         <!-- ITEM SECTION -->
         {% for title, section in [("Tracks", analysis["tracks"]), ("Albums", analysis["albums"]), ("Artists", analysis["artists"])] %}
         <!-- TOP ITEMS COMPARISON -->
@@ -183,8 +184,35 @@
             </div>
         </div>
         {% endif %}
+        {% endif %} <!-- Endif for if analysis is not none -->
+        <!-- GENERATE ANALYSIS INPUT -->
+         <div class="comparison shadow-sm">
+            <h2 class="comparison-title">Generate Analysis</h2>
+            <div>
+              <div id="generate-analysis-loading" class="text-secondary border border-2 border-secondary rounded-circle"></div>
+              <div class="generate-analysis-feedback">
+                <p id="generate-analysis-count">100</p>
+                <p id="generate-analysis-desc">Short analysis, shouldn't take too long.</p>
+                <button type="button" class="btn btn-secondary" id="generate-analysis-button">Generate</button>
+              </div>
+            </div>
+            <p>How many of your top items should we look at for our analysis?</p>
+            <div class="search-options d-flex flex-row justify-content-center w-100 mb-3">
+              <input type="radio" class="btn-check" name="analysis-depth" id="100" autocomplete="off" checked>
+              <label class="btn btn-secondary depth col-2" for="100">100</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="250" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="250">250</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="500" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="500">500</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="1000" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="1000">1000</label>
+              <input type="radio" class="btn-check" name="analysis-depth" id="5000" autocomplete="off">
+              <label class="btn btn-secondary depth col-2" for="5000">5000</label>
+            </div>
+          </div>
       </div>
     </div>
   </div>
 </div>
+<script src="{{ url_for('static', filename='stats.js') }}" type="module"></script>
 {% endblock %}

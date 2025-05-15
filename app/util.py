@@ -64,3 +64,8 @@ def validateFriend(friend_id):
       if int(friends[i].user_id) == int(friend_id):
         return i
     return -1
+
+def validateDepth(depth):
+    if depth not in ("100", "250", "500", "1000", "All"):
+        return False
+    return True
