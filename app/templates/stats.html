@@ -188,10 +188,13 @@
         <!-- GENERATE ANALYSIS INPUT -->
          <div class="comparison shadow-sm">
             <h2 class="comparison-title">Generate Analysis</h2>
-            <div class="generate-analysis-feedback">
-              <p id="generate-analysis-count">100</p>
-              <p id="generate-analysis-desc">Short analysis, shouldn't take too long.</p>
-              <button type="button" class="btn btn-secondary" id="generate-analysis-button">Generate</button>
+            <div>
+              <div id="generate-analysis-loading" class="text-secondary border border-2 border-secondary rounded-circle"></div>
+              <div class="generate-analysis-feedback">
+                <p id="generate-analysis-count">100</p>
+                <p id="generate-analysis-desc">Short analysis, shouldn't take too long.</p>
+                <button type="button" class="btn btn-secondary" id="generate-analysis-button">Generate</button>
+              </div>
             </div>
             <p>How many of your top items should we look at for our analysis?</p>
             <div class="search-options d-flex flex-row justify-content-center w-100 mb-3">

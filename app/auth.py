@@ -175,6 +175,7 @@ class Auth:
   def refreshCurrentToken(self):
     response = self.requestTokenRefresh()
     if response.status_code == 400:
+      print(response.text)
       raise BadRefreshTokenError 
     data = response.json()
     print(data)

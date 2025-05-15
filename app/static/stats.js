@@ -41,6 +41,10 @@ function updateAnalysisDesc() {
 }
 
 function generateAnalysis() {
+  $("#generate-analysis-loading").removeClass("border")
+  $("#generate-analysis-loading").removeClass("border-secondary")
+  $("#generate-analysis-loading").addClass("spinner-border")
+  $("#generate-analysis-button").hide()
   const depth = getRadioSelected(document.getElementsByName("analysis-depth"));
   window.location.href="/stats?depth="+depth;
 }

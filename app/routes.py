@@ -91,7 +91,8 @@ def stats():
   depth = request.args.get("depth")
   if validateDepth(depth):
     StatsAnalyser().completeAnalysis(int(depth))
-    return redirect(url_for('account_settings'))
+    # removes the queries so that if a user reloads they don't have to generate a new analysis again
+    return redirect(url_for('stats')) 
   
   return render_template("stats.html", title="Stats", analysis=analysis)
 
