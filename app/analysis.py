@@ -380,7 +380,7 @@ class StatsAnalyser:
     # Get Tracks to display
     try: # will continue until error, in which values will remain at default
       display_track_ids = [self.db_stats.top_tracks[0].id, self.api_stats.top_tracks[0].id, self.track_stats["high_high"][0],
-                           self.track_stats["high_low"][0], self.track_stats["low_high"][0],\
+                           self.track_stats["high_low"][0], self.track_stats["low_high"][0],
                            self.track_stats["low_low"][0], self.track_stats["outlier"][0]]
       display_tracks = api.getSeveralItems("tracks", display_track_ids)
 
@@ -400,7 +400,7 @@ class StatsAnalyser:
     try: # will continue until error, in which values will remain at default
       # Get Albums to display
       api_top_albums = list(self.api_stats.listened_albums.items())
-      api_top_albums.sort(key=lambda album: album[1]["score"])
+      api_top_albums.sort(key=lambda album: album[1]["score"], reverse=True)
       api_top_album_id = api_top_albums[0][0]
 
       display_album_ids = [self.db_stats.top_albums[0].id, api_top_album_id, self.album_stats["high_high"][0],
