@@ -380,7 +380,7 @@ class StatsAnalyser:
     # Get Tracks to display
     try: # will continue until error, in which values will remain at default
       display_track_ids = [self.db_stats.top_tracks[0].id, self.api_stats.top_tracks[0].id, self.track_stats["high_high"][0],
-                           self.track_stats["high_low"][0], self.track_stats["low_high"][0],\
+                           self.track_stats["high_low"][0], self.track_stats["low_high"][0],
                            self.track_stats["low_low"][0], self.track_stats["outlier"][0]]
       display_tracks = api.getSeveralItems("tracks", display_track_ids)
 
