@@ -346,7 +346,9 @@ def login():
         login_user(user)
         flash("Log in successfully", "success")
         try:
+            print("DEBUG: Attempting to get current token")
             auth.getCurrentToken()
+            print(f"DEBUG: Current token restored")
         except:
             return redirect(url_for('main.link_to_spotify'))
         return redirect(url_for('main.index'))
@@ -391,7 +393,7 @@ def edit_profile():
 @main.route('/logout')
 @login_required
 def logout():
-
+  auth.clear()
   logout_user()
   session.clear()
   flash("Logged out successfully", "info")
