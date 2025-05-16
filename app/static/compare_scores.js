@@ -28,7 +28,6 @@ function getItems() {
   
   const params = getSearchParameters();
   params["friend_id"] = getSelectedFriend();
-  console.log(params);
   requestItems(params);
 }
 

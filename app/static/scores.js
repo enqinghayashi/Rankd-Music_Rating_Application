@@ -69,6 +69,7 @@ function sendSaveRequest(e) {
 
 function sendRemoveRequest(e) {
   const item = e.currentTarget.parentElement;
+  item.style.display = "none";
   let data = item.data;
   data.score = "";
   $.ajax({
