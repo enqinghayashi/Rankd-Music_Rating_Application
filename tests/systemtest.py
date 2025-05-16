@@ -142,19 +142,22 @@ class SystemTests(unittest.TestCase):
         name_field = self.driver.find_element(By.ID, "name")
         bio_field = self.driver.find_element(By.ID, "bio")
         name_field.clear()
-        name_field.send_keys("Testing edit UsetName")
+        name_field.send_keys("Testing edit UserName")
         bio_field.clear()
         bio_field.send_keys("Selenium testing on bio.")
-        self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".btn.btn-success.w-100").click()
         time.sleep(5)
         self.assertIn("profile", self.driver.current_url)
 
     def test_05_logout(self):
         self.driver.find_element(By.LINK_TEXT, "Profile").click()
-        time.sleep(5)
+        time.sleep(2)
         self.driver.find_element(By.LINK_TEXT, "Log Out").click()
-        time.sleep(5)
-        self.assertIn("login", self.driver.current_url)
+        time.sleep(2)
+        self.driver.find_element(By.LINK_TEXT, "Friends").click()
+        self.assertIn("home", self.driver.current_url)
+
+
 
 if __name__ == '__main__':
     unittest.main()
