@@ -48,6 +48,6 @@ function renderItems(response) {
   const user_container = document.getElementById("user-items")
   const friend_container = document.getElementById("friend-items")
 
-  renderContainer(user_container, response.user_results);
-  renderContainer(friend_container, response.friend_results);
+  renderContainer(user_container, response.user_results, false);
+  renderContainer(friend_container, response.friend_results, false);
 }

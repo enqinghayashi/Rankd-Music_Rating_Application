@@ -43,8 +43,8 @@ function renderItems(response) {
   
   $("#placeholders").hide()
   
-  renderContainer(search_container, response.search_results);
-  renderContainer(db_container, response.db_results);
+  renderContainer(search_container, response.search_results, true);
+  renderContainer(db_container, response.db_results, true);
 
   $(".item-score-input").on("keydown", function(e) {if (e.key == "Enter") send_save_request(e);});
   $(".item-save").click(function(e) {send_save_request(e)});

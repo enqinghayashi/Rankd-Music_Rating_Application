@@ -1,9 +1,9 @@
 import { addClassTo } from "./util.js";
 
 // Create the items and append the items to the container
-export function renderContainer(container, items) {
+export function renderContainer(container, items, addSave) {
   for (let i in items) {
-    const item = createItem(items[i]);
+    const item = createItem(items[i], addSave);
     container.appendChild(item, i);
   }
 }
