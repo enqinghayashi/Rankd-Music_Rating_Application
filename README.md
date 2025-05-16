@@ -138,3 +138,30 @@ Once you have added some of your friends you should see something like this:
 You can now navigate to the Share page and view your scores next to your friend's as well as view their analysis.
 ![Rankd Share Page share scores tab.](/readme_images/appuse15.png)
 ![Rankd Share Page share stats page.](/readme_images/appuse16.png)
+
+## How to Run the Tests for Application
+
+To run the automated tests for this application, follow these steps:
+
+1. **Install all dependencies**  
+   Make sure you have installed all required Python packages (see `requirements.txt`).
+
+2. **Unit and Integration Tests**  
+   From the project root directory(cits3403-group-5-2025-S1), run:
+   ```
+   python3 -m unittest tests.unittest
+   ```
+   This will run all unit and integration tests defined in `tests/unittest.py`.
+
+3. **System (Selenium) Tests**  
+   Make sure you have [ChromeDriver](https://chromedriver.chromium.org/downloads) installed and available in your PATH.  
+   Then, from the project root directory(cits3403-group-5-2025-S1), run:
+   ```
+   python3 -m unittest tests.systemtest
+   ```
+   This will start the Flask server in a subprocess and run all Selenium-based system tests defined in `tests/systemtest.py`.
+
+**Note:**  
+- The system tests will open a browser window and interact with the live application.
+- Make sure no other program is using port 5000 before running system tests.
+- For system tests involving Spotify login, ensure your test Spotify account credentials are valid and up to date.
