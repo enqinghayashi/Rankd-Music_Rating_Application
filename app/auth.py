@@ -31,7 +31,7 @@ class UserNotAuthroizedError(Exception):
 class BadRefreshTokenError(Exception):
   pass
 
-class Auth:
+class AuthToken:
   def __init__(self):
     self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
     self.redirect_uri = "http://127.0.0.1:5000/auth"
@@ -43,14 +43,6 @@ class Auth:
     self.refresh_token = ""
     self.time_token_granted = ""
   
-  def clear(self):
-    self.code_verifier = ""
-    self.code_challenge = ""
-    self.auth_code = ""
-    self.access_token = ""
-    self.refresh_token = ""
-    self.time_token_granted = ""
-
   """
   Generates a random alphanumeric string of length passed to funciton.
   """
@@ -292,5 +284,31 @@ class Auth:
     if ((current_time - self.time_token_granted) > timedelta(minutes=55)):
       self.refreshCurrentToken()
     return self.access_token
+
+class Auth:
+  def __init__(self):
+    self.user_tokens = {}
+
+  def getCurrentUserToken(self):
+    try:
+      return self.user_tokens[current_user.user_id]
+    except KeyError:
+      self.user_tokens[current_user.user_id] = AuthToken()
+      return self.user_tokens[current_user.user_id]
+    
+  def removeUserToken(self):
+    try:
+      self.user_tokens.pop(current_user.user_id)
+    except KeyError:
+      pass
+  
+  def generateAuthURL(self):
+    return self.getCurrentUserToken().generateAuthURL()
+  
+  def completeAuth(self, code):
+    return self.getCurrentUserToken().completeAuth(code)
+  
+  def getCurrentToken(self):
+    return self.getCurrentUserToken().getCurrentToken()
 
 auth = Auth()
