@@ -263,7 +263,7 @@ def edit_profile():
 @main.route('/logout')
 @login_required
 def logout():
-  auth.clear()
+  auth.removeUserToken()
   logout_user()
   session.clear()
   flash("Logged out successfully", "info")

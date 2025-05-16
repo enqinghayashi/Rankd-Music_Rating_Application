@@ -56,7 +56,7 @@ document.getElementById('copy-link-btn').onclick = function() {
     {% for user in pending_requests %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('main.static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
                      alt="Profile" class="rounded-circle me-3" width="48" height="48">
                 <div>
                     <strong>{{ user.name or user.username }}</strong>
@@ -82,7 +82,7 @@ document.getElementById('copy-link-btn').onclick = function() {
     {% for user in search_results %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('main.static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
                      alt="Profile" class="rounded-circle me-3" width="48" height="48">
                 <div>
                     <strong>{{ user.name or user.username }}</strong>
@@ -103,7 +103,7 @@ document.getElementById('copy-link-btn').onclick = function() {
     {% for friend in friends %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('main.static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
+                <img src="{{ url_for('static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
                         alt="Profile" class="rounded-circle me-3" width="48" height="48">
                 <div>
                     <strong>{{ friend.name or friend.username }}</strong>

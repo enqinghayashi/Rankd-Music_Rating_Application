@@ -31,7 +31,8 @@ class UserNotAuthroizedError(Exception):
 class BadRefreshTokenError(Exception):
   pass
 
-class Auth:
+#region Token
+class AuthToken:
   def __init__(self):
     self.client_id = "45ef5d2726a44fb3b06299adab1fb822"
     self.redirect_uri = "http://127.0.0.1:5000/auth"
@@ -42,15 +43,10 @@ class Auth:
     self.access_token = ""
     self.refresh_token = ""
     self.time_token_granted = ""
-  
-  def clear(self):
-    self.code_verifier = ""
-    self.code_challenge = ""
-    self.auth_code = ""
-    self.access_token = ""
-    self.refresh_token = ""
-    self.time_token_granted = ""
 
+#endregion
+
+#region Get Auth Code
   """
   Generates a random alphanumeric string of length passed to funciton.
   """
@@ -114,7 +110,9 @@ class Auth:
     }
     auth_url = url + "?" + urlencode(params)
     return auth_url
-  
+#endregion
+
+#region Access Token
   """
   Uses the code obtained from the authorization to request an access token from the Spotify API.
   """
@@ -153,7 +151,9 @@ class Auth:
     response = self.requestAccessToken()
     data = response.json()
     return self.setCurrentToken(data)
+#endregion
 
+#region Refresh Token
   """
   Request a token refresh from the Spotify API.
   """
@@ -180,13 +180,16 @@ class Auth:
     data = response.json()
     print(data)
     return self.setCurrentToken(data)
-  
+#endergion
+
+#region Store Token
   """
   Stores a token in the session.
   """
   def storeSessionToken(self): 
-    session["refresh_token"] = self.refresh_token
-    return session["refresh_token"]
+    session['refresh_token'] = self.refresh_token # this is still used for checking if the user is authenticated or not
+    current_user.refresh_token = self.refresh_token
+    return current_user.refresh_token
   
   """
   Stores the refresh token in the database.
@@ -203,7 +206,9 @@ class Auth:
   def storeToken(self):
     self.storeSessionToken()
     self.storeDatabaseToken()
+#endregion
 
+#region Restore Token
   """
   Restores auth from a session token.
 
@@ -212,10 +217,18 @@ class Auth:
   def restoreSessionToken(self):
     print("DEBUG: Attempting to restore session token")
     try:
-      self.refresh_token = session["refresh_token"]
+      self.refresh_token = current_user.refresh_token
       print("DEBUG: Session token FOUND")
       try:
         print("DEBUG: Attempting to refresh token")
+        try:
+          print("DEBUG: Attempting refresh")
+          self.refreshCurrentToken()
+          print("DEBUG: Refresh succesful")
+        except BadRefreshTokenError:
+          print("DEBUG: Refresh from session failed")
+          raise BadRefreshTokenError
+
         self.refreshCurrentToken()
       except BadRefreshTokenError:
         print("DEBUG: Refresh from session token failed")
@@ -267,7 +280,9 @@ class Auth:
       return self.restoreDatabaseToken()
     except BadRefreshTokenError:
         raise BadRefreshTokenError
-  
+#endregion
+
+#region Current Token
   """
   Gets a current token. If current token is close to expiring, requests a new one.
 
@@ -277,7 +292,7 @@ class Auth:
     # check if this is a fresh auth instance
     print("DEBUG: Checking for existing access token")
     if (self.access_token == ""):
-      print("DEBUg: Access token not found")
+      print("DEBUG: Access token not found")
       # restore the auth state from stored token
       try:
         if (not self.restoreToken()):
@@ -292,5 +307,34 @@ class Auth:
     if ((current_time - self.time_token_granted) > timedelta(minutes=55)):
       self.refreshCurrentToken()
     return self.access_token
+#endregion
+
+#region Management
+class Auth:
+  def __init__(self):
+    self.user_tokens = {}
+
+  def getCurrentUserToken(self):
+    try:
+      return self.user_tokens[current_user.user_id]
+    except KeyError:
+      self.user_tokens[current_user.user_id] = AuthToken()
+      return self.user_tokens[current_user.user_id]
+    
+  def removeUserToken(self):
+    try:
+      self.user_tokens.pop(current_user.user_id)
+    except KeyError:
+      pass
+  
+  def generateAuthURL(self):
+    return self.getCurrentUserToken().generateAuthURL()
+  
+  def completeAuth(self, code):
+    return self.getCurrentUserToken().completeAuth(code)
+  
+  def getCurrentToken(self):
+    return self.getCurrentUserToken().getCurrentToken()
+#endregion
 
 auth = Auth()
