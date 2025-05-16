@@ -16,11 +16,19 @@ function createItem(data, addSave) {
   item.data = data;
  
   // Rating input
-  let input = document.createElement("input");
-  input.type = "text";
-  addClassTo(input, "item-score-input col-2 col-lg-1");
-  input.placeholder = "/10";
-  input.value = data.score;
+  let input;
+  if (addSave) {
+    input = document.createElement("input");
+    input.type = "text";
+    addClassTo(input, "item-score-input col-2 col-lg-1");
+    input.placeholder = "/10";
+    input.value = data.score;
+  }
+  else {
+    input = document.createElement("div");
+    addClassTo(input, "item-score col-2 col-lg-1");
+    input.innerText= data.score;
+  }
   item.appendChild(input);
 
   // Img
