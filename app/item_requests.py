@@ -30,9 +30,9 @@ def filterDatabaseItems(db_items, search):
     filtered_items = db_items
   else:
     for item in db_items: # I know the filter() method exists but this needs 2 parameters which was annoying to do
-      title = re.search(search, item.title)
-      album = re.search(search, item.album)
-      creator = re.search(search, item.creator)
+      title = re.search(search, item.title.lower())
+      album = re.search(search, item.album.lower())
+      creator = re.search(search, item.creator.lower())
       if (title or album or creator): filtered_items.append(item)
   
   # Convert items to dictionaries to convert to json to send later
