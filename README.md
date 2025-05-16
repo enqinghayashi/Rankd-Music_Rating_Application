@@ -106,6 +106,8 @@ This should take you to the Spotify login page. Login to Spotify using your Spot
 ![Spotify Login Page.](/readme_images/appuse4.png)
 ![Spotify Authorization Page.](/readme_images/appuse5.png)
 
+If you linked to the wrong Spotify account you can change this by clicking Profile in the top right. Clicking 'Settings' on the dropdown and then 'Connect to Your Music' and you will be prompted to authorize with Spotify again.
+
 You should then be redirected to the 'Scores' page. If you haven't, click 'Scores' either in the top navigation bar or bottom icons.
 ![Rankd Score Page empty.](/readme_images/appuse6.png)
 
