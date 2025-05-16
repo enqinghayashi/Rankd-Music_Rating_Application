@@ -6,7 +6,7 @@
         <div class="col-12 col-md-4">
             <div class="bg-primary text-white p-3 rounded h-100">
                 <h5>Search Your Friends</h5>
-                <form method="POST" action="{{ url_for('friends') }}">
+                <form method="POST" action="{{ url_for('main.friends') }}">
                     {{ form.hidden_tag() }}
                     {{ form.searching_friends(class="form-control mb-2", placeholder="Search by username or name") }}
                     {% for error in form.searching_friends.errors %}
@@ -20,7 +20,7 @@
         <div class="col-12 col-md-4">
             <div class="bg-primary text-white p-3 rounded h-100">
                 <h5>Send Friend Request by User ID</h5>
-                <form method="POST" action="{{ url_for('friends') }}">
+                <form method="POST" action="{{ url_for('main.friends') }}">
                     {{ form.hidden_tag() }}
                     {{ form.search_friend_id(class="form-control mb-2", placeholder="Enter friend's User ID") }}
                     {% for error in form.search_friend_id.errors %}
@@ -56,17 +56,17 @@ document.getElementById('copy-link-btn').onclick = function() {
     {% for user in pending_requests %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                <img src="{{ url_for('main.static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
                      alt="Profile" class="rounded-circle me-3" width="48" height="48">
                 <div>
                     <strong>{{ user.name or user.username }}</strong>
                     <div class="text-muted small">User ID: {{ user.user_id }}</div>
                 </div>
-                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto d-flex gap-2">
+                <form method="POST" action="{{ url_for('main.friends') }}" class="ms-auto d-flex gap-2">
                     <input type="hidden" name="accept_friend_id" value="{{ user.user_id }}">
                     <button type="submit" class="btn btn-success btn-sm">Accept</button>
                 </form>
-                <form method="POST" action="{{ url_for('friends') }}" class="ms-2">
+                <form method="POST" action="{{ url_for('main.friends') }}" class="ms-2">
                     <input type="hidden" name="reject_friend_id" value="{{ user.user_id }}">
                     <button type="submit" class="btn btn-secondary btn-sm">Reject</button>
                 </form>
@@ -82,13 +82,13 @@ document.getElementById('copy-link-btn').onclick = function() {
     {% for user in search_results %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
+                <img src="{{ url_for('main.static', filename=user.img_url or 'img/profile_pictures/default.png') }}" 
                      alt="Profile" class="rounded-circle me-3" width="48" height="48">
                 <div>
                     <strong>{{ user.name or user.username }}</strong>
                     <div class="text-muted small">User ID: {{ user.user_id }}</div>
                 </div>
-                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto">
+                <form method="POST" action="{{ url_for('main.friends') }}" class="ms-auto">
                     <input type="hidden" name="add_friend_id" value="{{ user.user_id }}">
                     <button type="submit" class="btn btn-primary btn-sm">Add Friend</button>
                 </form>
@@ -103,12 +103,12 @@ document.getElementById('copy-link-btn').onclick = function() {
     {% for friend in friends %}
         <div class="card mb-3 p-3">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
+                <img src="{{ url_for('main.static', filename=friend.img_url or 'img/profile_pictures/default.png') }}" 
                         alt="Profile" class="rounded-circle me-3" width="48" height="48">
                 <div>
                     <strong>{{ friend.name or friend.username }}</strong>
                 </div>
-                <form method="POST" action="{{ url_for('friends') }}" class="ms-auto">
+                <form method="POST" action="{{ url_for('main.friends') }}" class="ms-auto">
                     <input type="hidden" name="remove_friend_id" value="{{ friend.user_id }}">
                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove this friend?');">Remove</button>
                 </form>
