@@ -46,15 +46,31 @@ function renderItems(response) {
   renderContainer(search_container, response.search_results, true);
   renderContainer(db_container, response.db_results, true);
 
-  $(".item-score-input").on("keydown", function(e) {if (e.key == "Enter") send_save_request(e);});
-  $(".item-save").click(function(e) {send_save_request(e)});
+  $(".item-score-input").on("keydown", function(e) {if (e.key == "Enter") sendSaveRequest(e);});
+  $(".item-save").click(function(e) {sendSaveRequest(e)});
+  $(".item-remove").click(function(e) {sendRemoveRequest(e)});
 }
 
-function send_save_request(e) {
+function sendSaveRequest(e) {
   const item = e.currentTarget.parentElement;
   const input = item.querySelector(".item-score-input");
   let data = item.data;
   data.score = input.value;
+  $.ajax({
+    url: "",
+    type: "post",
+    contentType: "application/json",
+    data: JSON.stringify(data),
+    success: function(response) {
+      alert(response);
+    }
+  });
+}
+
+function sendRemoveRequest(e) {
+  const item = e.currentTarget.parentElement;
+  let data = item.data;
+  data.score = "";
   $.ajax({
     url: "",
     type: "post",

@@ -48,13 +48,21 @@ function createItem(data, addSave) {
   
   item.appendChild(desc);
 
-  // Save Button
+  // Save and Delete Button
   if (addSave) {
-    let button = document.createElement("button");
-    button.type = "button";
-    addClassTo(button,"item-save col-2 col-lg-1 btn btn-secondary");
-    button.innerText = "Save";
-    item.appendChild(button);
+    let save = document.createElement("button");
+    save.type = "button";
+    addClassTo(save,"item-save col-2 col-lg-1 btn btn-secondary me-2");
+    save.innerText = "Save";
+    item.appendChild(save);
+
+    let remove = document.createElement("button");
+    remove.type = "button";
+    addClassTo(remove,"item-remove btn btn-danger");
+    let remove_icon = document.createElement("i");
+    addClassTo(remove_icon, "bi bi-trash")
+    remove.appendChild(remove_icon);
+    item.appendChild(remove);
   }
   
   return item;
