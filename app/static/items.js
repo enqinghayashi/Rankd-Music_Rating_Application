@@ -1,9 +1,9 @@
 import { addClassTo } from "./util.js";
 
 // Create the items and append the items to the container
-export function renderContainer(container, items) {
+export function renderContainer(container, items, addSave) {
   for (let i in items) {
-    const item = createItem(items[i]);
+    const item = createItem(items[i], addSave);
     container.appendChild(item, i);
   }
 }
@@ -16,11 +16,19 @@ function createItem(data, addSave) {
   item.data = data;
  
   // Rating input
-  let input = document.createElement("input");
-  input.type = "text";
-  addClassTo(input, "item-score-input col-2 col-lg-1");
-  input.placeholder = "/10";
-  input.value = data.score;
+  let input;
+  if (addSave) {
+    input = document.createElement("input");
+    input.type = "text";
+    addClassTo(input, "item-score-input col-2 col-lg-1");
+    input.placeholder = "/10";
+    input.value = data.score;
+  }
+  else {
+    input = document.createElement("div");
+    addClassTo(input, "item-score col-2 col-lg-1");
+    input.innerText= data.score;
+  }
   item.appendChild(input);
 
   // Img
@@ -48,13 +56,21 @@ function createItem(data, addSave) {
   
   item.appendChild(desc);
 
-  // Save Button
+  // Save and Delete Button
   if (addSave) {
-    let button = document.createElement("button");
-    button.type = "button";
-    addClassTo(button,"item-save col-2 col-lg-1 btn btn-secondary");
-    button.innerText = "Save";
-    item.appendChild(button);
+    let save = document.createElement("button");
+    save.type = "button";
+    addClassTo(save,"item-save col-2 col-lg-1 btn btn-secondary me-2");
+    save.innerText = "Save";
+    item.appendChild(save);
+
+    let remove = document.createElement("button");
+    remove.type = "button";
+    addClassTo(remove,"item-remove btn btn-danger");
+    let remove_icon = document.createElement("i");
+    addClassTo(remove_icon, "bi bi-trash")
+    remove.appendChild(remove_icon);
+    item.appendChild(remove);
   }
   
   return item;
