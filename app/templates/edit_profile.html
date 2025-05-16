@@ -9,7 +9,7 @@
             <h3 class="text-center">My Profile</h3>
             <div class="text-center mb-3">
                 <label for="profile_picture" class="form-label"></label>
-                <img src="{{ url_for('main.static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Current Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
+                <img src="{{ url_for('static', filename=user.img_url or 'img/profile_pictures/default.png') }}" alt="Current Profile Picture" class="img-thumbnail" style="width: 150px; height: 150px;">
             </div>
             <form action="" method="POST" enctype="multipart/form-data" novalidate>
                 {{ form.hidden_tag() }}

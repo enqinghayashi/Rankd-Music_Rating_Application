@@ -7,32 +7,32 @@ from unittest.mock import patch, MagicMock
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Auth utility tests
-from app.auth import Auth
+from app.auth import Auth, AuthToken
 
 class TestAuthUtils(unittest.TestCase):
     def setUp(self):
-        self.auth = Auth()
+        self.token = AuthToken()
 
     def test_generate_random_string_length(self):
-        s = self.auth.generateRandomString(10)
+        s = self.token.generateRandomString(10)
         self.assertEqual(len(s), 10)
         self.assertTrue(all(c.isalnum() for c in s))
 
     def test_sha256(self):
-        digest = self.auth.sha256("test")
+        digest = self.token.sha256("test")
         self.assertEqual(len(digest), 32)  # SHA256 digest is 32 bytes
 
     def test_base64encode(self):
         raw = b"\x00" * 32
-        encoded = self.auth.base64encode(raw)
+        encoded = self.token.base64encode(raw)
         self.assertIsInstance(encoded, str)
         self.assertNotIn("=", encoded)
         self.assertNotIn("+", encoded)
         self.assertNotIn("/", encoded)
 
     def test_generate_code_challenge(self):
-        verifier = self.auth.generateRandomString(128)
-        challenge = self.auth.generateCodeChallenge(verifier)
+        verifier = self.token.generateRandomString(128)
+        challenge = self.token.generateCodeChallenge(verifier)
         self.assertIsInstance(challenge, str)
         self.assertTrue(len(challenge) > 0)
 
