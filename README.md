@@ -1,14 +1,6 @@
-# cits3403-group-5-2025-S1
+# Music Rating App Project
 
-## Group Members
-| UWA ID | Name | Github Username |
-| ------ | ---- | --------------- |
-| 23730148 | Archer Key | Archer-Key |
-| 23744478 | Hayashi Lin | enqinghayashi |
-| 23801947 | Thisal Wickramasinghe Arachchilage | wicky-t |
-| 24275986 | William Walmsley | cal05s |
-
-## Description
+## Overviews
 Our app is a music rating application where users can rate their favourite tracks, albums, and artists and then view stats about how their ratings compare to their listening history, view their friend's ratings and their friends stats.
 
 We have designed the app to be easy to understand and easy to use. Rating music is as easy as using the search bar like Google and then entering their scores in the score box by either pressing Enter or hitting the save button, viewing your stats is as easy as navigating to the page and clicking generate, and to share with your friends all you have to do is tell them your user id and then accept their friend requeset.
